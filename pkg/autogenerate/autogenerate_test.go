@@ -10,13 +10,7 @@ import (
 	"testing"
 )
 
-func preCreateFolders(opts Options) (func(), error) {
-	toBeRemoved := make([]string, 0)
-	f := func() {
-		for _, path := range toBeRemoved {
-			_ = os.RemoveAll(path)
-		}
-	}
+func preCreateFolders(opts Options) error {
 	for _, driverVersion := range opts.DriverVersion {
 		configPath := fmt.Sprintf(root.ConfigPathFmt,
 			opts.RepoRoot,
@@ -25,11 +19,10 @@ func preCreateFolders(opts Options) (func(), error) {
 			"")
 		err := os.MkdirAll(configPath, 0700)
 		if err != nil {
-			return f, err
+			return err
 		}
-		toBeRemoved = append(toBeRemoved, configPath)
 	}
-	return f, nil
+	return nil
 }
 
 func TestAutogenerate(t *testing.T) {
@@ -106,8 +99,10 @@ func TestAutogenerate(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			cleanup, err := preCreateFolders(test.opts)
-			t.Cleanup(cleanup)
+			err := preCreateFolders(test.opts)
+			t.Cleanup(func() {
+				os.RemoveAll(test.opts.RepoRoot)
+			})
 			assert.NoError(t, err)
 			err = generateConfigs(test.opts, jsonData)
 			if test.expectError {

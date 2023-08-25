@@ -8,13 +8,7 @@ import (
 	"testing"
 )
 
-func preCreateFolders(opts Options, driverVersionsToBeCreated []string) (func(), error) {
-	toBeRemoved := make([]string, 0)
-	f := func() {
-		for _, path := range toBeRemoved {
-			_ = os.RemoveAll(path)
-		}
-	}
+func preCreateFolders(opts Options, driverVersionsToBeCreated []string) error {
 	for _, driverVersion := range driverVersionsToBeCreated {
 		configPath := fmt.Sprintf(root.ConfigPathFmt,
 			opts.RepoRoot,
@@ -23,11 +17,10 @@ func preCreateFolders(opts Options, driverVersionsToBeCreated []string) (func(),
 			"")
 		err := os.MkdirAll(configPath, 0700)
 		if err != nil {
-			return f, err
+			return err
 		}
-		toBeRemoved = append(toBeRemoved, configPath)
 	}
-	return f, nil
+	return nil
 }
 
 // difference returns the elements in `a` that aren't in `b`.
@@ -76,8 +69,10 @@ func TestCleanup(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			cleanup, err := preCreateFolders(test.opts, test.driverVersionsToBeCreated)
-			t.Cleanup(cleanup)
+			err := preCreateFolders(test.opts, test.driverVersionsToBeCreated)
+			t.Cleanup(func() {
+				os.RemoveAll(test.opts.RepoRoot)
+			})
 			assert.NoError(t, err)
 			err = Run(test.opts)
 			if test.errorExpected {
