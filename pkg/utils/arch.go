@@ -24,3 +24,13 @@ func FromDebArch(debArch string) string {
 	}
 	return ""
 }
+
+func SupportedArchList() []string {
+	i := 0
+	supportedArchsSlice := make([]string, len(supportedArchs))
+	for k := range supportedArchs {
+		supportedArchsSlice[i] = k
+		i++
+	}
+	return supportedArchsSlice
+}

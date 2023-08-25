@@ -74,6 +74,11 @@ func init() {
 	flags.StringP("architecture", "a", utils.FromDebArch(runtime.GOARCH), "architecture to run against.")
 	flags.StringSlice("driver-version", nil, "driver versions to generate configs against.")
 
+	// Custom completions
+	rootCmd.RegisterFlagCompletionFunc("architecture", func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return utils.SupportedArchList(), cobra.ShellCompDirectiveDefault
+	})
+
 	// Subcommands
 	rootCmd.AddCommand(autogenerate.Cmd)
 	rootCmd.AddCommand(cleanup.Cmd)

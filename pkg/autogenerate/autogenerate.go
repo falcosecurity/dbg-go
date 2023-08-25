@@ -1,47 +1,32 @@
 package autogenerate
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/fededp/dbg-go/pkg/utils"
+	"github.com/fededp/dbg-go/pkg/validate"
 	"github.com/ompluscator/dynamic-struct"
 	logger "github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
-	"text/template"
 )
 
-func initTemplate(opts Options) (string, error) {
-	t := template.New("autogenerate")
-	parsed, err := t.Parse(urlArchTemplate)
+func loadLastRunDistro() (string, error) {
+	lastDistroBytes, err := utils.GetURL(urlLastDistro)
 	if err != nil {
 		return "", err
 	}
-
-	buf := bytes.NewBuffer(nil)
-	err = parsed.Execute(buf, &opts)
-	return buf.String(), err
+	return strings.TrimSuffix(string(lastDistroBytes), "\n"), nil
 }
 
 func Run(opts Options) error {
-	url, err := initTemplate(opts)
-	if err != nil {
-		return err
-	}
-	logger.Debug("templated json url: ", url)
-
-	// Fetch last distro kernel-crawler was last ran against
-	lastDistroBytes, err := utils.GetURL(urlLastDistro)
-	if err != nil {
-		return err
-	}
-	lastDistro := strings.TrimSuffix(string(lastDistroBytes), "\n")
-	logger.Debug("loaded last-distro: ", lastDistro)
+	url := fmt.Sprintf(urlArchFmt, opts.Architecture)
+	logger.Debug("downloading json data from: ", url)
 
 	// Fetch kernel list json
 	jsonData, err := utils.GetURL(url)
@@ -50,14 +35,31 @@ func Run(opts Options) error {
 	}
 	logger.Debug("fetched json")
 
+	return generateConfigs(opts, jsonData)
+}
+
+func generateConfigs(opts Options, jsonData []byte) error {
+	var err error
+	if opts.Target == "" {
+		// Fetch last distro kernel-crawler ran against
+		opts.Target, err = loadLastRunDistro()
+		if err != nil {
+			return err
+		}
+		logger.Debug("loaded last-distro: ", opts.Target)
+	}
+	if opts.Target != "*" && !slices.Contains(SupportedDistros, opts.Target) {
+		return fmt.Errorf("unsupported target distro: %s. Must be one of: %v", opts.Target, SupportedDistros)
+	}
+
 	// Generate a dynamic struct with all needed distros
 	// NOTE: we might need a single distro when `lastDistro` is != "*";
-	// else, we will add all supportedDistros found in constants.go
+	// else, we will add all SupportedDistros found in constants.go
 	instanceBuilder := dynamicstruct.NewStruct()
-	for _, distro := range supportedDistros {
-		if lastDistro == "*" || distro == lastDistro {
+	for _, distro := range SupportedDistros {
+		if opts.Target == "*" || distro == opts.Target {
 			tag := fmt.Sprintf(`json:"%s"`, distro)
-			instanceBuilder.AddField(distro, []KernelEntry{}, tag)
+			instanceBuilder.AddField(distro, []validate.KernelEntry{}, tag)
 		}
 	}
 	dynamicInstance := instanceBuilder.Build().New()
@@ -68,7 +70,6 @@ func Run(opts Options) error {
 		return err
 	}
 	logger.Debug("unmarshaled json")
-
 	var errGrp errgroup.Group
 
 	reader := dynamicstruct.NewReader(dynamicInstance)
@@ -78,11 +79,11 @@ func Run(opts Options) error {
 			logger.Info("skipping because of dry-run.")
 			continue
 		}
-		kernelEntries := f.Interface().([]KernelEntry)
+		kernelEntries := f.Interface().([]validate.KernelEntry)
 		// A goroutine for each distro
 		errGrp.Go(func() error {
 			for _, kernelEntry := range kernelEntries {
-				driverkitYaml := DriverkitYaml{
+				driverkitYaml := validate.DriverkitYaml{
 					KernelVersion:    kernelEntry.KernelVersion,
 					KernelRelease:    kernelEntry.KernelRelease,
 					Target:           kernelEntry.Target,
@@ -94,14 +95,14 @@ func Run(opts Options) error {
 				kernelEntryConfName := kernelEntry.ToConfigName()
 
 				for _, driverVersion := range opts.DriverVersion {
-					outputPath := fmt.Sprintf(OutputPathFmt,
+					outputPath := fmt.Sprintf(validate.OutputPathFmt,
 						driverVersion,
 						opts.Architecture,
 						opts.DriverName,
 						kernelEntry.Target,
 						kernelEntry.KernelRelease,
 						kernelEntry.KernelVersion)
-					driverkitYaml.Output = DriverkitYamlOutputs{
+					driverkitYaml.Output = validate.DriverkitYamlOutputs{
 						Module: outputPath + ".ko",
 						Probe:  outputPath + ".o",
 					}

@@ -2,7 +2,6 @@ package validate
 
 import (
 	"fmt"
-	"github.com/fededp/dbg-go/pkg/autogenerate"
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
@@ -10,7 +9,7 @@ import (
 	"testing"
 )
 
-func generateConfigFile(dkConf autogenerate.DriverkitYaml, confName string) (func(), error) {
+func generateConfigFile(dkConf DriverkitYaml, confName string) (func(), error) {
 	data, err := yaml.Marshal(dkConf)
 	if err != nil {
 		return nil, err
@@ -25,202 +24,279 @@ func generateConfigFile(dkConf autogenerate.DriverkitYaml, confName string) (fun
 }
 
 func TestValidateConfig(t *testing.T) {
-	opts := Options{Options: root.Options{
-		Architecture:  "x86_64",
-		DriverVersion: []string{"1.0.0+driver"},
-	}}
+	// Normal options
+	opts := Options{
+		Options: root.Options{
+			Architecture:  "x86_64",
+			DriverVersion: []string{"1.0.0+driver"},
+		},
+		DriverName: "falco",
+	}
+	namedDriverOpts := Options{
+		Options: root.Options{
+			Architecture:  "x86_64",
+			DriverVersion: []string{"2.0.0+driver"},
+		},
+		DriverName: "TEST",
+	}
 
 	tests := map[string]struct {
-		dkConf        autogenerate.DriverkitYaml
+		opts          Options
+		dkConf        DriverkitYaml
 		confName      string
 		errorExpected bool
 	}{
 		"correct config": {
-			dkConf: autogenerate.DriverkitYaml{
+			opts: opts,
+			dkConf: DriverkitYaml{
 				KernelVersion: "1",
 				KernelRelease: "5.10.0",
 				Target:        "centos",
 				Architecture:  "amd64",
-				Output: autogenerate.DriverkitYamlOutputs{
-					Module: fmt.Sprintf(autogenerate.OutputPathFmt+".ko",
-						opts.DriverVersion,
+				Output: DriverkitYamlOutputs{
+					Module: fmt.Sprintf(OutputPathFmt+".ko",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(autogenerate.OutputPathFmt+".o",
-						opts.DriverVersion,
+					Probe: fmt.Sprintf(OutputPathFmt+".o",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
 				},
 				KernelUrls:       nil,
-				KernelConfigData: "",
+				KernelConfigData: "test",
+			},
+			confName:      "centos_5.10.0_1.yaml",
+			errorExpected: false,
+		},
+		"correct config with custom driver name": {
+			opts: namedDriverOpts,
+			dkConf: DriverkitYaml{
+				KernelVersion: "1",
+				KernelRelease: "5.10.0",
+				Target:        "centos",
+				Architecture:  "amd64",
+				Output: DriverkitYamlOutputs{
+					Module: fmt.Sprintf(OutputPathFmt+".ko",
+						namedDriverOpts.DriverVersion[0],
+						namedDriverOpts.Architecture,
+						namedDriverOpts.DriverName,
+						"centos",
+						"5.10.0",
+						"1"),
+					Probe: fmt.Sprintf(OutputPathFmt+".o",
+						namedDriverOpts.DriverVersion[0],
+						namedDriverOpts.Architecture,
+						namedDriverOpts.DriverName,
+						"centos",
+						"5.10.0",
+						"1"),
+				},
+				KernelUrls:       nil,
+				KernelConfigData: "test",
 			},
 			confName:      "centos_5.10.0_1.yaml",
 			errorExpected: false,
 		},
 		"wrong arch config": {
-			dkConf: autogenerate.DriverkitYaml{
+			opts: opts,
+			dkConf: DriverkitYaml{
 				KernelVersion: "1",
 				KernelRelease: "5.10.0",
 				Target:        "centos",
 				Architecture:  "arm64", // arm64 config running in x86_64 mode
-				Output: autogenerate.DriverkitYamlOutputs{
-					Module: fmt.Sprintf(autogenerate.OutputPathFmt+".ko",
-						opts.DriverVersion,
+				Output: DriverkitYamlOutputs{
+					Module: fmt.Sprintf(OutputPathFmt+".ko",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(autogenerate.OutputPathFmt+".o",
-						opts.DriverVersion,
+					Probe: fmt.Sprintf(OutputPathFmt+".o",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
 				},
 				KernelUrls:       nil,
-				KernelConfigData: "",
+				KernelConfigData: "test",
 			},
 			confName:      "centos_5.10.0_1.yaml",
 			errorExpected: true,
 		},
 		"wrong name config": {
-			dkConf: autogenerate.DriverkitYaml{
+			opts: opts,
+			dkConf: DriverkitYaml{
 				KernelVersion: "1",
 				KernelRelease: "5.10.0",
 				Target:        "centos",
 				Architecture:  "amd64",
-				Output: autogenerate.DriverkitYamlOutputs{
-					Module: fmt.Sprintf(autogenerate.OutputPathFmt+".ko",
-						opts.DriverVersion,
+				Output: DriverkitYamlOutputs{
+					Module: fmt.Sprintf(OutputPathFmt+".ko",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(autogenerate.OutputPathFmt+".o",
-						opts.DriverVersion,
+					Probe: fmt.Sprintf(OutputPathFmt+".o",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
 				},
 				KernelUrls:       nil,
-				KernelConfigData: "",
+				KernelConfigData: "test",
 			},
 			confName:      "centos_WRONG_5.10.0_1.yaml",
 			errorExpected: true,
 		},
 		"wrong arch in config outputs": {
-			dkConf: autogenerate.DriverkitYaml{
+			opts: opts,
+			dkConf: DriverkitYaml{
 				KernelVersion: "1",
 				KernelRelease: "5.10.0",
 				Target:        "centos",
 				Architecture:  "amd64",
-				Output: autogenerate.DriverkitYamlOutputs{
-					Module: fmt.Sprintf(autogenerate.OutputPathFmt+".ko",
-						opts.DriverVersion,
+				Output: DriverkitYamlOutputs{
+					Module: fmt.Sprintf(OutputPathFmt+".ko",
+						opts.DriverVersion[0],
 						"WRONGARCH",
-						"falco",
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(autogenerate.OutputPathFmt+".o",
-						opts.DriverVersion,
+					Probe: fmt.Sprintf(OutputPathFmt+".o",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
 				},
 				KernelUrls:       nil,
-				KernelConfigData: "",
+				KernelConfigData: "test",
 			},
 			confName:      "centos_5.10.0_1.yaml",
 			errorExpected: true,
 		},
 		"wrong path in config outputs": {
-			dkConf: autogenerate.DriverkitYaml{
+			opts: opts,
+			dkConf: DriverkitYaml{
 				KernelVersion: "1",
 				KernelRelease: "5.10.0",
 				Target:        "centos",
 				Architecture:  "amd64",
-				Output: autogenerate.DriverkitYamlOutputs{
-					Module: fmt.Sprintf(autogenerate.OutputPathFmt+".ko",
-						opts.DriverVersion,
+				Output: DriverkitYamlOutputs{
+					Module: fmt.Sprintf(OutputPathFmt+".ko",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
 						"WRONGTARGET",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(autogenerate.OutputPathFmt+".o",
-						opts.DriverVersion,
+					Probe: fmt.Sprintf(OutputPathFmt+".o",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
 				},
 				KernelUrls:       nil,
-				KernelConfigData: "",
+				KernelConfigData: "test",
 			},
 			confName:      "centos_5.10.0_1.yaml",
 			errorExpected: true,
 		},
 		"wrong suffix in config output module": {
-			dkConf: autogenerate.DriverkitYaml{
+			opts: opts,
+			dkConf: DriverkitYaml{
 				KernelVersion: "1",
 				KernelRelease: "5.10.0",
 				Target:        "centos",
 				Architecture:  "amd64",
-				Output: autogenerate.DriverkitYamlOutputs{
-					Module: fmt.Sprintf(autogenerate.OutputPathFmt+".kooo",
-						opts.DriverVersion,
+				Output: DriverkitYamlOutputs{
+					Module: fmt.Sprintf(OutputPathFmt+".kooo",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(autogenerate.OutputPathFmt+".o",
-						opts.DriverVersion,
+					Probe: fmt.Sprintf(OutputPathFmt+".o",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
 				},
 				KernelUrls:       nil,
-				KernelConfigData: "",
+				KernelConfigData: "test",
 			},
 			confName:      "centos_5.10.0_1.yaml",
 			errorExpected: true,
 		},
 		"wrong suffix in config output probe": {
-			dkConf: autogenerate.DriverkitYaml{
+			opts: opts,
+			dkConf: DriverkitYaml{
 				KernelVersion: "1",
 				KernelRelease: "5.10.0",
 				Target:        "centos",
 				Architecture:  "amd64",
-				Output: autogenerate.DriverkitYamlOutputs{
-					Module: fmt.Sprintf(autogenerate.OutputPathFmt+".ooo",
-						opts.DriverVersion,
+				Output: DriverkitYamlOutputs{
+					Module: fmt.Sprintf(OutputPathFmt+".ooo",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(autogenerate.OutputPathFmt+".o",
-						opts.DriverVersion,
+					Probe: fmt.Sprintf(OutputPathFmt+".o",
+						opts.DriverVersion[0],
 						opts.Architecture,
-						"falco",
+						opts.DriverName,
+						"centos",
+						"5.10.0",
+						"1"),
+				},
+				KernelUrls:       nil,
+				KernelConfigData: "test",
+			},
+			confName:      "centos_5.10.0_1.yaml",
+			errorExpected: true,
+		},
+		"no kernelurls nor kernelconfigdata set in config": {
+			opts: opts,
+			dkConf: DriverkitYaml{
+				KernelVersion: "1",
+				KernelRelease: "5.10.0",
+				Target:        "centos",
+				Architecture:  "amd64",
+				Output: DriverkitYamlOutputs{
+					Module: fmt.Sprintf(OutputPathFmt+".ooo",
+						opts.DriverVersion[0],
+						opts.Architecture,
+						opts.DriverName,
+						"centos",
+						"5.10.0",
+						"1"),
+					Probe: fmt.Sprintf(OutputPathFmt+".o",
+						opts.DriverVersion[0],
+						opts.Architecture,
+						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
@@ -238,9 +314,9 @@ func TestValidateConfig(t *testing.T) {
 			cleanup, err := generateConfigFile(test.dkConf, test.confName)
 			assert.NoError(t, err)
 			t.Cleanup(cleanup)
-			err = validateConfig(opts, "1.0.0+driver", test.confName)
+			err = validateConfig(test.opts, test.opts.DriverVersion[0], test.confName)
 			if test.errorExpected {
-				assert.NotNil(t, err)
+				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
