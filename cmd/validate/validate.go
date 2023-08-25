@@ -1,8 +1,8 @@
 package validate
 
 import (
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/pkg/root"
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/pkg/validate"
+	"github.com/fededp/dbg-go/pkg/root"
+	"github.com/fededp/dbg-go/pkg/validate"
 	"github.com/spf13/cobra"
 )
 

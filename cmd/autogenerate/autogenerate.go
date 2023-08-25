@@ -1,8 +1,8 @@
 package autogenerate
 
 import (
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/pkg/autogenerate"
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/pkg/root"
+	"github.com/fededp/dbg-go/pkg/autogenerate"
+	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

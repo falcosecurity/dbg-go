@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/cmd"
+	"github.com/fededp/dbg-go/cmd"
 	logger "github.com/sirupsen/logrus"
 )
 

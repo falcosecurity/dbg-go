@@ -2,7 +2,7 @@ package autogenerate
 
 import (
 	"fmt"
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/pkg/root"
+	"github.com/fededp/dbg-go/pkg/root"
 )
 
 type Options struct {

@@ -49,7 +49,7 @@ signs:
 
 kos:
 - base_image: cgr.dev/chainguard/static
-  repository: ghcr.io/falcosecurity/dbg-go
+  repository: ghcr.io/fededp/dbg-go
   bare: true
   tags:
   - '{{ .Version }}'

@@ -2,9 +2,9 @@ package validate
 
 import (
 	"fmt"
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/pkg/autogenerate"
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/pkg/root"
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/pkg/utils"
+	"github.com/fededp/dbg-go/pkg/autogenerate"
+	"github.com/fededp/dbg-go/pkg/root"
+	"github.com/fededp/dbg-go/pkg/utils"
 	logger "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 	"os"

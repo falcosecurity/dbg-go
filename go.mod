@@ -1,4 +1,4 @@
-module github.com/falcosecurity/test-infra/images/update-dbg/dbg-go
+module github.com/fededp/dbg-go
 
 go 1.20
 

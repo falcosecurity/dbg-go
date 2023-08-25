@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/cmd/autogenerate"
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/cmd/cleanup"
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/cmd/validate"
-	"github.com/falcosecurity/test-infra/images/update-dbg/dbg-go/pkg/utils"
+	"github.com/fededp/dbg-go/cmd/autogenerate"
+	"github.com/fededp/dbg-go/cmd/cleanup"
+	"github.com/fededp/dbg-go/cmd/validate"
+	"github.com/fededp/dbg-go/pkg/utils"
 	logger "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
