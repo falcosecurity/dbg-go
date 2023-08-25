@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/fededp/dbg-go/pkg/utils"
-	logger "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
+	logger "log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,7 +22,7 @@ func Run(opts Options) error {
 		configs, _ := os.ReadDir(configPath)
 		for _, config := range configs {
 			configFilepath := filepath.Join(configPath, config.Name())
-			logger.Infof("validating config: %s", configFilepath)
+			logger.Info("validating", "config", configFilepath)
 			if opts.DryRun {
 				logger.Info("skipping because of dry-run.")
 				continue

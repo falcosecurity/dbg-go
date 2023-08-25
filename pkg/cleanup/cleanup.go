@@ -3,7 +3,7 @@ package cleanup
 import (
 	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
-	logger "github.com/sirupsen/logrus"
+	logger "log/slog"
 	"os"
 )
 
@@ -15,7 +15,7 @@ func Run(opts Options) error {
 			driverVersion,
 			opts.Architecture,
 			"")
-		logger.Infof("removing folder: %s", configPath)
+		logger.Info("removing folder", "path", configPath)
 		if opts.DryRun {
 			logger.Info("skipping because of dry-run.")
 			continue
