@@ -6,10 +6,10 @@ import (
 	"github.com/fededp/dbg-go/cmd/cleanup"
 	"github.com/fededp/dbg-go/cmd/validate"
 	"github.com/fededp/dbg-go/pkg/utils"
-	logger "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
+	logger "log/slog"
 	"os"
 	"runtime"
 )
@@ -69,7 +69,7 @@ func init() {
 	}
 	flags := rootCmd.PersistentFlags()
 	flags.Bool("dry-run", false, "enable dry-run mode.")
-	flags.StringP("log-level", "l", logger.InfoLevel.String(), "set log verbosity.")
+	flags.StringP("log-level", "l", logger.LevelInfo.String(), "set log verbosity.")
 	flags.String("repo-root", cwd, "test-infra repository root path.")
 	flags.StringP("architecture", "a", utils.FromDebArch(runtime.GOARCH), "architecture to run against.")
 	flags.StringSlice("driver-version", nil, "driver versions to generate configs against.")
@@ -85,31 +85,13 @@ func init() {
 	rootCmd.AddCommand(validate.Cmd)
 }
 
-type customLogger struct {
-	cmdField  string
-	formatter logger.Formatter
-}
-
-func (l customLogger) Format(entry *logger.Entry) ([]byte, error) {
-	entry.Data["cmd"] = l.cmdField
-	return l.formatter.Format(entry)
-}
-
 func initLogger(subcmd string) error {
+	var programLevel = new(logger.LevelVar) // Info by default
+	h := logger.NewJSONHandler(os.Stderr, &logger.HandlerOptions{Level: programLevel})
+	logger.SetDefault(logger.New(h).With("cmd", subcmd))
+
 	logLevel := viper.GetString("log-level")
-	lvl, err := logger.ParseLevel(logLevel)
-	if err != nil {
-		return err
-	}
-	logger.SetLevel(lvl)
-
-	// Set our custom formatter that adds the field [ "cmd": $currentCmd ]
-	logger.SetFormatter(customLogger{
-		cmdField:  subcmd,
-		formatter: logger.StandardLogger().Formatter,
-	})
-
-	return nil
+	return programLevel.UnmarshalText([]byte(logLevel))
 }
 
 func Execute() error {

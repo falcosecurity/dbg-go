@@ -7,9 +7,9 @@ import (
 	"github.com/fededp/dbg-go/pkg/utils"
 	"github.com/fededp/dbg-go/pkg/validate"
 	"github.com/ompluscator/dynamic-struct"
-	logger "github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
+	logger "log/slog"
 	"os"
 	"path/filepath"
 	"slices"
@@ -26,7 +26,7 @@ func loadLastRunDistro() (string, error) {
 
 func Run(opts Options) error {
 	url := fmt.Sprintf(urlArchFmt, opts.Architecture)
-	logger.Debug("downloading json data from: ", url)
+	logger.Debug("downloading json data", "url", url)
 
 	// Fetch kernel list json
 	jsonData, err := utils.GetURL(url)
@@ -34,7 +34,6 @@ func Run(opts Options) error {
 		return err
 	}
 	logger.Debug("fetched json")
-
 	return generateConfigs(opts, jsonData)
 }
 
@@ -46,11 +45,13 @@ func generateConfigs(opts Options, jsonData []byte) error {
 		if err != nil {
 			return err
 		}
-		logger.Debug("loaded last-distro: ", opts.Target)
+		logger.Debug("loaded last-distro")
 	}
 	if opts.Target != "*" && !slices.Contains(SupportedDistros, opts.Target) {
 		return fmt.Errorf("unsupported target distro: %s. Must be one of: %v", opts.Target, SupportedDistros)
 	}
+
+	logger.SetDefault(logger.With("target", opts.Target))
 
 	// Generate a dynamic struct with all needed distros
 	// NOTE: we might need a single distro when `lastDistro` is != "*";
@@ -74,7 +75,7 @@ func generateConfigs(opts Options, jsonData []byte) error {
 
 	reader := dynamicstruct.NewReader(dynamicInstance)
 	for _, f := range reader.GetAllFields() {
-		logger.Infof("generating configs for %s\n", f.Name())
+		logger.Info("generating configs", "distro", f.Name())
 		if opts.DryRun {
 			logger.Info("skipping because of dry-run.")
 			continue

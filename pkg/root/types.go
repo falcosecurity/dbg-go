@@ -1,8 +1,8 @@
 package root
 
 import (
-	logger "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	logger "log/slog"
 )
 
 type Options struct {
@@ -19,6 +19,6 @@ func LoadRootOptions() Options {
 		Architecture:  viper.GetString("architecture"),
 		DriverVersion: viper.GetStringSlice("driver-version"),
 	}
-	logger.WithField("cmd", "root").Debugf("root options: %+v", opts)
+	logger.Debug("loaded root options", "opts", opts)
 	return opts
 }

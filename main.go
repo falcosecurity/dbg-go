@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/fededp/dbg-go/cmd"
-	logger "github.com/sirupsen/logrus"
+	logger "log/slog"
 )
 
 func main() {
 	if err := cmd.Execute(); err != nil {
-		logger.WithError(err).Fatal("error executing dbg-go")
+		logger.With("err", err).Error("error executing dbg-go")
 	}
 }
