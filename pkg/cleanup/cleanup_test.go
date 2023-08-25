@@ -81,7 +81,7 @@ func TestCleanup(t *testing.T) {
 			assert.NoError(t, err)
 			err = Run(test.opts)
 			if test.errorExpected {
-				assert.NotNil(t, err)
+				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}

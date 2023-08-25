@@ -1,6 +1,6 @@
 module github.com/fededp/dbg-go
 
-go 1.20
+go 1.21
 
 require (
 	github.com/ompluscator/dynamic-struct v1.4.0

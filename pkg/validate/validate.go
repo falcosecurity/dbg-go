@@ -2,7 +2,6 @@ package validate
 
 import (
 	"fmt"
-	"github.com/fededp/dbg-go/pkg/autogenerate"
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/fededp/dbg-go/pkg/utils"
 	logger "github.com/sirupsen/logrus"
@@ -41,14 +40,14 @@ func validateConfig(opts Options, driverVersion, configPath string) error {
 	if err != nil {
 		return err
 	}
-	var driverkitYaml autogenerate.DriverkitYaml
+	var driverkitYaml DriverkitYaml
 	err = yaml.Unmarshal(configData, &driverkitYaml)
 	if err != nil {
 		return err
 	}
 
 	// Check that filename is ok
-	kernelEntry := autogenerate.KernelEntry{
+	kernelEntry := KernelEntry{
 		KernelVersion:    driverkitYaml.KernelVersion,
 		KernelRelease:    driverkitYaml.KernelRelease,
 		Target:           driverkitYaml.Target,
@@ -67,10 +66,15 @@ func validateConfig(opts Options, driverVersion, configPath string) error {
 		return fmt.Errorf("wrong architecture in config file: %s", configPath)
 	}
 
-	outputPath := fmt.Sprintf(autogenerate.OutputPathFmt,
+	// Either kernelconfigdata or kernelurls must be set
+	if driverkitYaml.KernelConfigData == "" && len(driverkitYaml.KernelUrls) == 0 {
+		return fmt.Errorf("at least one between `kernelurls` and `kernelconfigdata` must be set: %s", configPath)
+	}
+
+	outputPath := fmt.Sprintf(OutputPathFmt,
 		driverVersion,
 		opts.Architecture,
-		"falco",
+		opts.DriverName,
 		kernelEntry.Target,
 		kernelEntry.KernelRelease,
 		kernelEntry.KernelVersion)
