@@ -75,11 +75,11 @@ func init() {
 	flags.StringP("architecture", "a", utils.FromDebArch(runtime.GOARCH), "architecture to run against.")
 	flags.StringSlice("driver-version", nil, "driver versions to generate configs against.")
 	flags.String("target-kernelrelease", "",
-		`target kernel release to work against. By default tool will work on any kernel release.`)
+		`target kernel release to work against. By default tool will work on any kernel release. Can be a regex.`)
 	flags.String("target-kernelversion", "",
-		`target kernel version to work against. By default tool will work on any kernel version.`)
+		`target kernel version to work against. By default tool will work on any kernel version. Can be a regex.`)
 	flags.String("target-distro", "",
-		`target distro to work against. By default tool will work on any supported distro.`)
+		`target distro to work against. By default tool will work on any supported distro. Can be a regex.`)
 
 	rootCmd.RegisterFlagCompletionFunc("target-distro", func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		supportedDistrosSlice := make([]string, 0)
