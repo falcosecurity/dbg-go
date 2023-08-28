@@ -62,8 +62,8 @@ github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1m
 github.com/envoyproxy/go-control-plane v0.9.7/go.mod h1:cwu0lG7PUMfa9snN8LXBig5ynNVH9qI8YYLbd1fK2po=
 github.com/envoyproxy/go-control-plane v0.9.9-0.20201210154907-fd9021fe5dad/go.mod h1:cXg6YxExXjJnVBQHBLXeUAgxn2UodCpnH306RInaBQk=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
-github.com/falcosecurity/driverkit v0.14.1-0.20230828101058-5ffeb5179373 h1:BxTb+duod2UOjh+E7fVEuFyhzW3XM7WGCFz1Sc+IQ4w=
-github.com/falcosecurity/driverkit v0.14.1-0.20230828101058-5ffeb5179373/go.mod h1:aFrpeGDwffBVZ4Hc313Q2on2eTyH0R6zlxX+/OhF0NE=
+github.com/falcosecurity/driverkit v0.14.1-0.20230828134718-835307efe091 h1:V54wBZvxrN6di67gVCLWO8RBkiVqP7a6RmJvPG18bM8=
+github.com/falcosecurity/driverkit v0.14.1-0.20230828134718-835307efe091/go.mod h1:aFrpeGDwffBVZ4Hc313Q2on2eTyH0R6zlxX+/OhF0NE=
 github.com/falcosecurity/falcoctl v0.4.1-0.20230405064055-46a189994d2e h1:3FzdkawQZh6hh5X+VHgSbQduwnUpf2mSaHZcIe59860=
 github.com/falcosecurity/falcoctl v0.4.1-0.20230405064055-46a189994d2e/go.mod h1:j9tC1gjAvRHUQG2sAmvQjuRCen2fTFocBnjsojFMadA=
 github.com/frankban/quicktest v1.14.4 h1:g2rn0vABPOOXmZUj+vbmUp0lPoXEMuhTpIluN0XL9UY=

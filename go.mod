@@ -3,7 +3,7 @@ module github.com/fededp/dbg-go
 go 1.21
 
 require (
-	github.com/falcosecurity/driverkit v0.14.1-0.20230828101058-5ffeb5179373
+	github.com/falcosecurity/driverkit v0.14.1-0.20230828134718-835307efe091
 	github.com/ompluscator/dynamic-struct v1.4.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
