@@ -1,4 +1,4 @@
-package autogenerate
+package generate
 
 import (
 	"github.com/fededp/dbg-go/pkg/root"
@@ -6,6 +6,6 @@ import (
 
 type Options struct {
 	root.Options
+	Auto       bool
 	DriverName string
-	Target     string
 }

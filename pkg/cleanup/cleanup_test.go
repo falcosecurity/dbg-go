@@ -105,7 +105,6 @@ func TestCleanup(t *testing.T) {
 				_, err = os.Stat(configPath)
 				assert.NoError(t, err)
 			}
-
 		})
 	}
 }

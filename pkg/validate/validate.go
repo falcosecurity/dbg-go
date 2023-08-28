@@ -13,21 +13,26 @@ import (
 
 func Run(opts Options) error {
 	logger.Info("validate config files")
+
+	configNameGlob := ConfGlobFromDistro(opts.Target)
+
 	for _, driverVersion := range opts.DriverVersion {
 		configPath := fmt.Sprintf(root.ConfigPathFmt,
 			opts.RepoRoot,
 			driverVersion,
 			opts.Architecture,
-			"")
-		configs, _ := os.ReadDir(configPath)
+			configNameGlob)
+		configs, err := filepath.Glob(configPath)
+		if err != nil {
+			return err
+		}
 		for _, config := range configs {
-			configFilepath := filepath.Join(configPath, config.Name())
-			logger.Info("validating", "config", configFilepath)
+			logger.Info("validating", "config", config)
 			if opts.DryRun {
 				logger.Info("skipping because of dry-run.")
 				continue
 			}
-			if err := validateConfig(opts, driverVersion, configFilepath); err != nil {
+			if err = validateConfig(config, opts.Architecture, opts.DriverName, driverVersion); err != nil {
 				return err
 			}
 		}
@@ -35,7 +40,7 @@ func Run(opts Options) error {
 	return nil
 }
 
-func validateConfig(opts Options, driverVersion, configPath string) error {
+func validateConfig(configPath, architecture, driverName, driverVersion string) error {
 	configData, err := os.ReadFile(configPath)
 	if err != nil {
 		return err
@@ -45,6 +50,8 @@ func validateConfig(opts Options, driverVersion, configPath string) error {
 	if err != nil {
 		return err
 	}
+
+	logger.Debug("validating", "parsedConfig", driverkitYaml)
 
 	// Check that filename is ok
 	kernelEntry := KernelEntry{
@@ -61,7 +68,7 @@ func validateConfig(opts Options, driverVersion, configPath string) error {
 	}
 
 	// Check that arch is ok
-	goArch := utils.ToDebArch(opts.Architecture)
+	goArch := utils.ToDebArch(architecture)
 	if driverkitYaml.Architecture != goArch {
 		return fmt.Errorf("wrong architecture in config file: %s", configPath)
 	}
@@ -73,8 +80,8 @@ func validateConfig(opts Options, driverVersion, configPath string) error {
 
 	outputPath := fmt.Sprintf(OutputPathFmt,
 		driverVersion,
-		opts.Architecture,
-		opts.DriverName,
+		architecture,
+		driverName,
 		kernelEntry.Target,
 		kernelEntry.KernelRelease,
 		kernelEntry.KernelVersion)
@@ -88,9 +95,9 @@ func validateConfig(opts Options, driverVersion, configPath string) error {
 			return fmt.Errorf("output probe filename is wrong (%s); expected: %s.o", outputProbeFilename, outputPathFilename)
 		}
 
-		if !strings.Contains(driverkitYaml.Output.Probe, opts.Architecture) {
+		if !strings.Contains(driverkitYaml.Output.Probe, architecture) {
 			return fmt.Errorf("output probe filename has wrong architecture in its path (%s); expected %s",
-				driverkitYaml.Output.Probe, opts.Architecture)
+				driverkitYaml.Output.Probe, architecture)
 		}
 	}
 
@@ -101,9 +108,9 @@ func validateConfig(opts Options, driverVersion, configPath string) error {
 			return fmt.Errorf("output module filename is wrong (%s); expected: %s.ko", outputModuleFilename, outputPathFilename)
 		}
 
-		if !strings.Contains(driverkitYaml.Output.Module, opts.Architecture) {
+		if !strings.Contains(driverkitYaml.Output.Module, architecture) {
 			return fmt.Errorf("output module filename has wrong architecture in its path (%s); expected %s",
-				driverkitYaml.Output.Module, opts.Architecture)
+				driverkitYaml.Output.Module, architecture)
 		}
 	}
 
