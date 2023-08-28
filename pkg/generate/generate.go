@@ -2,6 +2,7 @@ package generate
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
 	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
@@ -148,20 +149,60 @@ func autogenerateConfigs(opts Options, jsonData []byte) error {
 	return errGrp.Wait()
 }
 
-func generateSingleConfig(opts Options) error {
-	// Try to load kernel headers from driverkit
-	var kernelheaders []string
+type unsupportedTargetErr struct {
+	target string
+}
+
+func (err *unsupportedTargetErr) Error() string {
+	return fmt.Sprintf("target %s is unsupported by driverkit", err.target)
+}
+
+func loadKernelHeadersFromDk(opts Options) ([]string, error) {
+	// Try to load kernel headers from driverkit. Don't error out if unable.
+	// Just write a config with empty headers.
 	targetType := builder.Type(root.SupportedDistros[opts.Distro])
 	b, err := builder.Factory(targetType)
 	if err != nil {
-		return err
+		return nil, &unsupportedTargetErr{target: root.SupportedDistros[opts.Distro]}
 	}
+
+	// Load minimum urls for the builder
+	minimumURLs := 1
+	if bb, ok := b.(builder.MinimumURLsBuilder); ok {
+		minimumURLs = bb.MinimumURLs()
+	}
+
+	// Load kernelrelease
 	kr := kernelrelease.FromString(opts.KernelRelease)
 	kr.Architecture = kernelrelease.Architecture(utils.ToDebArch(opts.Architecture))
-	kernelheaders, err = b.URLs(kr)
+
+	// Fetch URLs
+	kernelheaders, err := b.URLs(kr)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	// Check actually resolving URLs
+	kernelheaders, err = builder.GetResolvingURLs(kernelheaders)
+	if err != nil {
+		return nil, err
+	}
+	if len(kernelheaders) < minimumURLs {
+		return nil, fmt.Errorf("not enough headers packages found; expected %d, found %d", minimumURLs, len(kernelheaders))
+	}
+	return kernelheaders, nil
+}
+
+func generateSingleConfig(opts Options) error {
+	kernelheaders, err := loadKernelHeadersFromDk(opts)
+	if err != nil {
+		var unsupportedTargetError *unsupportedTargetErr
+		if errors.As(err, &unsupportedTargetError) {
+			return unsupportedTargetError
+		}
+		logger.Warn(err.Error())
+	}
+
 	kernelEntry := validate.KernelEntry{
 		KernelVersion: opts.KernelVersion,
 		KernelRelease: opts.KernelRelease,
