@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	Cmd = &cobra.Command{
+func NewGenerateCmd() *cobra.Command {
+	cmd := &cobra.Command{
 		Use:   "generate",
 		Short: "Generate new dbg configs",
 		Long: `
@@ -20,7 +20,11 @@ Also, in non-automatic mode, kernelurls driverkit config key will be constructed
 `,
 		RunE: execute,
 	}
-)
+	flags := cmd.Flags()
+	flags.Bool("auto", false, "automatically generate configs from kernel-crawler output")
+	flags.String("driver-name", "falco", "driver name to be used")
+	return cmd
+}
 
 func execute(c *cobra.Command, args []string) error {
 	options := generate.Options{
@@ -29,10 +33,4 @@ func execute(c *cobra.Command, args []string) error {
 		DriverName: viper.GetString("driver-name"),
 	}
 	return generate.Run(options)
-}
-
-func init() {
-	flags := Cmd.Flags()
-	flags.Bool("auto", false, "automatically generate configs from kernel-crawler output")
-	flags.String("driver-name", "falco", "driver name to be used")
 }

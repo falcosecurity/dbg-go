@@ -3,7 +3,7 @@ package root
 import (
 	"fmt"
 	"github.com/spf13/viper"
-	logger "log/slog"
+	"log/slog"
 	"strings"
 )
 
@@ -17,7 +17,7 @@ func (t Target) IsSet() bool {
 	return t.Distro != "" && t.KernelRelease != "" && t.KernelVersion != ""
 }
 
-func (t Target) toGlob() string {
+func (t Target) ToGlob() string {
 	// Empty filters fallback at ".*" since we are using a regex match below
 	if t.Distro == "" {
 		t.Distro = "*"
@@ -60,6 +60,6 @@ func LoadRootOptions() Options {
 			KernelVersion: viper.GetString("target-kernelversion"),
 		},
 	}
-	logger.Debug("loaded root options", "opts", opts)
+	slog.Debug("loaded root options", "opts", opts)
 	return opts
 }

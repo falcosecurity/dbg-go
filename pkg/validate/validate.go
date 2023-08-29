@@ -5,14 +5,14 @@ import (
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/fededp/dbg-go/pkg/utils"
 	"gopkg.in/yaml.v3"
-	logger "log/slog"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
 func Run(opts Options) error {
-	logger.Info("validate config files")
+	slog.Info("validate config files")
 	return root.LoopConfigsFiltered(opts.Options, "validating", func(driverVersion, configPath string) error {
 		return validateConfig(configPath, opts.Architecture, opts.DriverName, driverVersion)
 	})
@@ -29,7 +29,7 @@ func validateConfig(configPath, architecture, driverName, driverVersion string) 
 		return err
 	}
 
-	logger.Debug("validating", "parsedConfig", driverkitYaml)
+	slog.Debug("validating", "parsedConfig", driverkitYaml)
 
 	// Check that filename is ok
 	kernelEntry := KernelEntry{

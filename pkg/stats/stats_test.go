@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 	"io"
+	"log"
 	"log/slog"
 	"os"
 	"strconv"
@@ -123,7 +124,7 @@ func TestStats(t *testing.T) {
 						"5.15.25",
 						"1"),
 				},
-				KernelUrls: []string{"aaaa"}, // just to avoid failing validation
+				KernelConfigData: "aaaa", // just to avoid failing validation
 			},
 			confPath: configPath + "bottlerocket_5.15.25_1.yaml",
 		},
@@ -156,10 +157,8 @@ func TestStats(t *testing.T) {
 				DriverVersion: []string{"1.0.0+driver"},
 			}},
 			expectedStats: driverStats{
-				NumProbes:            3,
-				NumModules:           4,
-				NumHeaders:           1,
-				NumKernelConfigDatas: 3,
+				NumProbes:  3,
+				NumModules: 4,
 			},
 		},
 		"stats 2.0.0+driver x86_64": {
@@ -169,10 +168,8 @@ func TestStats(t *testing.T) {
 				DriverVersion: []string{"2.0.0+driver"}, // not present
 			}},
 			expectedStats: driverStats{
-				NumProbes:            0,
-				NumModules:           0,
-				NumHeaders:           0,
-				NumKernelConfigDatas: 0,
+				NumProbes:  0,
+				NumModules: 0,
 			},
 		},
 		"stats 1.0.0+driver aarch64": {
@@ -182,10 +179,8 @@ func TestStats(t *testing.T) {
 				DriverVersion: []string{"1.0.0+driver"},
 			}},
 			expectedStats: driverStats{
-				NumProbes:            0,
-				NumModules:           0,
-				NumHeaders:           0,
-				NumKernelConfigDatas: 0,
+				NumProbes:  0,
+				NumModules: 0,
 			},
 		},
 		"stats 1.0.0+driver x86_64 filtered by distro": {
@@ -200,10 +195,8 @@ func TestStats(t *testing.T) {
 				},
 			}},
 			expectedStats: driverStats{
-				NumProbes:            2,
-				NumModules:           2,
-				NumHeaders:           0,
-				NumKernelConfigDatas: 2,
+				NumProbes:  2,
+				NumModules: 2,
 			},
 		},
 		"stats 1.0.0+driver x86_64 filtered by distro regex": {
@@ -218,10 +211,8 @@ func TestStats(t *testing.T) {
 				},
 			}},
 			expectedStats: driverStats{
-				NumProbes:            2,
-				NumModules:           2,
-				NumHeaders:           0,
-				NumKernelConfigDatas: 2,
+				NumProbes:  2,
+				NumModules: 2,
 			},
 		},
 		"stats 1.0.0+driver x86_64 filtered by kernel release": {
@@ -236,10 +227,8 @@ func TestStats(t *testing.T) {
 				},
 			}},
 			expectedStats: driverStats{
-				NumProbes:            1,
-				NumModules:           1,
-				NumHeaders:           0,
-				NumKernelConfigDatas: 1,
+				NumProbes:  1,
+				NumModules: 1,
 			},
 		},
 		"stats 1.0.0+driver x86_64 filtered by kernel version": {
@@ -254,10 +243,8 @@ func TestStats(t *testing.T) {
 				},
 			}},
 			expectedStats: driverStats{
-				NumProbes:            3,
-				NumModules:           3,
-				NumHeaders:           1,
-				NumKernelConfigDatas: 2,
+				NumProbes:  3,
+				NumModules: 3,
 			},
 		},
 	}
@@ -267,9 +254,12 @@ func TestStats(t *testing.T) {
 	logger := slog.New(slog.NewJSONHandler(io.Writer(&buf), nil))
 	slog.SetDefault(logger)
 
+	// capture output!
+	testOutputWriter = log.Default().Writer()
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err = Run(test.opts)
+			err = Run(test.opts, NewFileStatter())
 			assert.NoError(t, err)
 
 			// Use logged output to ensure we fetched correct stats
@@ -295,10 +285,6 @@ func TestStats(t *testing.T) {
 				//{"time":"2023-08-29T11:38:35.692797001+02:00","level":"INFO","msg":"|"}
 				//{"time":"2023-08-29T11:38:35.692797848+02:00","level":"INFO","msg":""}
 				//{"time":"2023-08-29T11:38:35.69280042+02:00","level":"INFO","msg":"3"}
-				//{"time":"2023-08-29T11:38:35.692801632+02:00","level":"INFO","msg":""}
-				//{"time":"2023-08-29T11:38:35.692802649+02:00","level":"INFO","msg":"|"}
-				//{"time":"2023-08-29T11:38:35.692803471+02:00","level":"INFO","msg":""}
-				//{"time":"2023-08-29T11:38:35.692805801+02:00","level":"INFO","msg":"1"}
 				if startParsing {
 					parsingIdx++
 					if parsingIdx%4 == 0 {
@@ -309,17 +295,13 @@ func TestStats(t *testing.T) {
 							outputStats.NumModules = n
 						case 2:
 							outputStats.NumProbes = n
-						case 3:
-							outputStats.NumHeaders = n
-						case 4:
-							outputStats.NumKernelConfigDatas = n
 						}
 					}
 				}
 				if messageJSON.Message == "1.0.0+driver" {
 					startParsing = true
-				} else if parsingIdx == 16 {
-					// parsed all 4 numbers
+				} else if parsingIdx == 8 {
+					// parsed both numbers
 					break
 				}
 			}

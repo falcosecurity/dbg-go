@@ -12,7 +12,7 @@ import (
 	dynamicstruct "github.com/ompluscator/dynamic-struct"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
-	logger "log/slog"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -40,7 +40,7 @@ func loadLastRunDistro() (string, error) {
 func Run(opts Options) error {
 	if opts.Auto {
 		url := fmt.Sprintf(urlArchFmt, opts.Architecture)
-		logger.Debug("downloading json data", "url", url)
+		slog.Debug("downloading json data", "url", url)
 
 		// Fetch kernel list json
 		var (
@@ -57,7 +57,7 @@ func Run(opts Options) error {
 		if err != nil {
 			return err
 		}
-		logger.Debug("fetched json")
+		slog.Debug("fetched json")
 		if testCacheData {
 			testJsonData = jsonData
 		}
@@ -68,7 +68,7 @@ func Run(opts Options) error {
 			if err != nil {
 				return err
 			}
-			logger.Debug("loaded last-distro")
+			slog.Debug("loaded last-distro")
 		}
 		return autogenerateConfigs(opts, jsonData)
 	} else if opts.IsSet() {
@@ -78,7 +78,7 @@ func Run(opts Options) error {
 }
 
 func autogenerateConfigs(opts Options, jsonData []byte) error {
-	logger.SetDefault(logger.With("target-distro", opts.Distro))
+	slog.SetDefault(slog.With("target-distro", opts.Distro))
 
 	distroFilter := func(distro string) bool {
 		matched, _ := regexp.MatchString(opts.Distro, distro)
@@ -117,14 +117,14 @@ func autogenerateConfigs(opts Options, jsonData []byte) error {
 	if err != nil {
 		return err
 	}
-	logger.Debug("unmarshaled json")
+	slog.Debug("unmarshaled json")
 	var errGrp errgroup.Group
 
 	reader := dynamicstruct.NewReader(dynamicInstance)
 	for _, f := range reader.GetAllFields() {
-		logger.Info("generating configs", "distro", f.Name())
+		slog.Info("generating configs", "distro", f.Name())
 		if opts.DryRun {
-			logger.Info("skipping because of dry-run.")
+			slog.Info("skipping because of dry-run.")
 			continue
 		}
 		kernelEntries := f.Interface().([]validate.KernelEntry)
@@ -200,7 +200,7 @@ func generateSingleConfig(opts Options) error {
 		if errors.As(err, &unsupportedTargetError) {
 			return unsupportedTargetError
 		}
-		logger.Warn(err.Error())
+		slog.Warn(err.Error())
 	}
 
 	kernelEntry := validate.KernelEntry{
