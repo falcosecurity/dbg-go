@@ -6,14 +6,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	Cmd = &cobra.Command{
+func NewStatsCmd() *cobra.Command {
+	cmd := &cobra.Command{
 		Use:   "stats",
 		Short: "Fetch stats about configs",
 		RunE:  execute,
 	}
-)
+	return cmd
+}
 
 func execute(c *cobra.Command, args []string) error {
-	return stats.Run(stats.Options{Options: root.LoadRootOptions()})
+	switch c.Parent().Name() {
+	case "configs":
+		return stats.Run(stats.Options{Options: root.LoadRootOptions()}, stats.NewFileStatter())
+	case "s3":
+		return stats.Run(stats.Options{Options: root.LoadRootOptions()}, stats.NewS3Statter())
+	}
+	panic("unreachable code.")
 }

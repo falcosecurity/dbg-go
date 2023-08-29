@@ -2,14 +2,14 @@ package root
 
 import (
 	"fmt"
-	logger "log/slog"
+	"log/slog"
 	"path/filepath"
 )
 
 type ConfigLooper func(driverVersion, configPath string) error
 
 func LoopConfigsFiltered(opts Options, message string, worker ConfigLooper) error {
-	configNameGlob := opts.Target.toGlob()
+	configNameGlob := opts.Target.ToGlob()
 	for _, driverVersion := range opts.DriverVersion {
 		configPath := fmt.Sprintf(ConfigPathFmt,
 			opts.RepoRoot,
@@ -21,9 +21,9 @@ func LoopConfigsFiltered(opts Options, message string, worker ConfigLooper) erro
 			return err
 		}
 		for _, config := range configs {
-			logger.Info(message, "config", config)
+			slog.Info(message, "config", config)
 			if opts.DryRun {
-				logger.Info("skipping because of dry-run.")
+				slog.Info("skipping because of dry-run.")
 				return nil
 			}
 			err = worker(driverVersion, config)

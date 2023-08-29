@@ -3,11 +3,15 @@
 A go tool to work with falcosecurity [drivers build grid](https://github.com/falcosecurity/test-infra/tree/master/driverkit).  
 Long term aim is to completely reimplement dbg Makefile and bash scripts in a much more maintenable and testable language.  
 
-Right now, the tool implements:
+Right now, the tool implements, under the `configs` subcmd:
 * configs generation (comprehensive of automatic generation from kernel-crawler output)
 * configs cleanup
 * configs validation
 * configs stats
+
+Moreover, under the `s3` subcmd:
+* s3 driver stats
+* s3 driver cleanup
 
 This is enough to port [`update-dbg` image](https://github.com/falcosecurity/test-infra/tree/master/images/update-dbg) to make use of this tool instead of the currently used bash scripts.  
 First benchmarks showed a tremendous perf improvement: old update-dbg scripts took around 50m on my laptop for a single driverversion. The new tool takes ~10s.  
@@ -26,12 +30,10 @@ Usage:
   dbg-go [command]
 
 Available Commands:
-  cleanup     Cleanup outdated dbg configs
   completion  Generate the autocompletion script for the specified shell
-  generate    Generate new dbg configs
+  configs     Work with local dbg configs
   help        Help about any command
-  stats       Fetch stats about configs
-  validate    Validate dbg configs
+  s3          Work with remote s3 bucket
 
 Flags:
   -a, --architecture string           architecture to run against. (default "x86_64")
@@ -47,7 +49,7 @@ Flags:
 Use "dbg-go [command] --help" for more information about a command.
 ```
 
-As you can see, global options basically reimplement all [dbg Makefile filters](https://github.com/falcosecurity/test-infra/blob/master/driverkit/Makefile).  
+As you can see, global options basically reimplement all [dbg Makefile filters](https://github.com/falcosecurity/test-infra/blob/master/driverkit/Makefile).
 
 ## Build
 

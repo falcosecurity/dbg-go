@@ -7,13 +7,16 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	Cmd = &cobra.Command{
+func NewValidateCmd() *cobra.Command {
+	cmd := &cobra.Command{
 		Use:   "validate",
 		Short: "Validate dbg configs",
 		RunE:  execute,
 	}
-)
+	flags := cmd.Flags()
+	flags.String("driver-name", "falco", "driver name to be used")
+	return cmd
+}
 
 func execute(c *cobra.Command, args []string) error {
 	options := validate.Options{
@@ -21,9 +24,4 @@ func execute(c *cobra.Command, args []string) error {
 		DriverName: viper.GetString("driver-name"),
 	}
 	return validate.Run(options)
-}
-
-func init() {
-	flags := Cmd.Flags()
-	flags.String("driver-name", "falco", "driver name to be used")
 }

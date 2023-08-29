@@ -80,7 +80,7 @@ func TestCleanup(t *testing.T) {
 				os.RemoveAll(test.opts.RepoRoot)
 			})
 			assert.NoError(t, err)
-			err = Run(test.opts)
+			err = Run(test.opts, NewFileCleaner())
 			if test.errorExpected {
 				assert.Error(t, err)
 			} else {
@@ -189,7 +189,7 @@ func TestCleanupFiltered(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err = Run(test.opts)
+			err = Run(test.opts, NewFileCleaner())
 			assert.NoError(t, err)
 			// Use logged output to ensure we really cleanup only correct configs:
 			// parse every logged line to a structured json (we print "path:" for each config path being cleaned up)

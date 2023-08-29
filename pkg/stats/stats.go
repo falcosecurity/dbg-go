@@ -1,84 +1,53 @@
 package stats
 
 import (
-	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/validate"
 	"github.com/olekukonko/tablewriter"
-	"gopkg.in/yaml.v3"
-	"log"
-	logger "log/slog"
+	"io"
 	"os"
 	"strconv"
 )
 
-func Run(opts Options) error {
-	logger.Info("fetching stats from existing config files")
-	driverStatsByVersion := make(map[string]driverStats)
-	totalDriverStats := driverStats{}
-	err := root.LoopConfigsFiltered(opts.Options, "computing stats", func(driverVersion, configPath string) error {
-		dStats := driverStatsByVersion[driverVersion]
-		err := getConfigStats(&dStats, configPath)
-		driverStatsByVersion[driverVersion] = dStats
-		return err
-	})
+// Used by tests!
+// We cannot simply use table = tablewriter.NewWriter(log.Default().Writer())
+// as that would completely break tablewriter output.
+var testOutputWriter io.Writer
+
+func Run(opts Options, statter Statter) error {
+	driverStatsByVersion, err := statter.GetDriverStats(opts.Options)
 	if err != nil {
 		return err
 	}
 
-	table := tablewriter.NewWriter(log.Default().Writer())
-	table.SetHeader([]string{"Version", "Modules", "Probes", "Headers", "KernelConfigData"})
+	var table *tablewriter.Table
+	if testOutputWriter != nil {
+		table = tablewriter.NewWriter(testOutputWriter)
+	} else {
+		table = tablewriter.NewWriter(os.Stdout)
+	}
+	table.SetHeader([]string{"Version", "Modules", "Probes"})
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 
-	data := make([]string, 5)
-	for key, stat := range driverStatsByVersion {
+	totalDriverStats := driverStats{}
+
+	data := make([]string, 3)
+	// Keep keys sorted
+	// (looping directly on the map {key,value} tuples gives wrong sorting sometimes).
+	for _, key := range opts.DriverVersion {
+		stat := driverStatsByVersion[key]
 		data[0] = key
 		data[1] = strconv.FormatInt(stat.NumModules, 10)
 		data[2] = strconv.FormatInt(stat.NumProbes, 10)
-		data[3] = strconv.FormatInt(stat.NumHeaders, 10)
-		data[4] = strconv.FormatInt(stat.NumKernelConfigDatas, 10)
 		table.Append(data)
 
 		totalDriverStats.NumModules += stat.NumModules
 		totalDriverStats.NumProbes += stat.NumProbes
-		totalDriverStats.NumHeaders += stat.NumHeaders
-		totalDriverStats.NumKernelConfigDatas += stat.NumKernelConfigDatas
 	}
 	data[0] = "TOTALS"
 	data[1] = strconv.FormatInt(totalDriverStats.NumModules, 10)
 	data[2] = strconv.FormatInt(totalDriverStats.NumProbes, 10)
-	data[3] = strconv.FormatInt(totalDriverStats.NumHeaders, 10)
-	data[4] = strconv.FormatInt(totalDriverStats.NumKernelConfigDatas, 10)
 	table.Append(data)
 	table.Render() // Send output
 
-	return nil
-}
-
-func getConfigStats(dStats *driverStats, configPath string) error {
-	configData, err := os.ReadFile(configPath)
-	if err != nil {
-		return err
-	}
-	var driverkitYaml validate.DriverkitYaml
-	err = yaml.Unmarshal(configData, &driverkitYaml)
-	if err != nil {
-		return err
-	}
-
-	logger.Debug("fetching stats", "parsedConfig", driverkitYaml)
-
-	if driverkitYaml.Output.Probe != "" {
-		dStats.NumProbes++
-	}
-	if driverkitYaml.Output.Module != "" {
-		dStats.NumModules++
-	}
-	if len(driverkitYaml.KernelUrls) > 0 {
-		dStats.NumHeaders++
-	}
-	if driverkitYaml.KernelConfigData != "" {
-		dStats.NumKernelConfigDatas++
-	}
 	return nil
 }

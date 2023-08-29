@@ -2,16 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/fededp/dbg-go/cmd/cleanup"
-	"github.com/fededp/dbg-go/cmd/generate"
-	"github.com/fededp/dbg-go/cmd/stats"
-	"github.com/fededp/dbg-go/cmd/validate"
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/fededp/dbg-go/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
-	logger "log/slog"
+	"log/slog"
 	"os"
 	"runtime"
 )
@@ -63,7 +59,6 @@ func loadDriverVersions() error {
 	return fmt.Errorf("no driver versions found")
 }
 
-// NewRootCmd instantiates the root command.
 func init() {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -71,7 +66,7 @@ func init() {
 	}
 	flags := rootCmd.PersistentFlags()
 	flags.Bool("dry-run", false, "enable dry-run mode.")
-	flags.StringP("log-level", "l", logger.LevelInfo.String(), "set log verbosity.")
+	flags.StringP("log-level", "l", slog.LevelInfo.String(), "set log verbosity.")
 	flags.String("repo-root", cwd, "test-infra repository root path.")
 	flags.StringP("architecture", "a", utils.FromDebArch(runtime.GOARCH), "architecture to run against.")
 	flags.StringSlice("driver-version", nil, "driver versions to run against.")
@@ -95,18 +90,16 @@ func init() {
 	})
 
 	// Subcommands
-	rootCmd.AddCommand(generate.Cmd)
-	rootCmd.AddCommand(cleanup.Cmd)
-	rootCmd.AddCommand(validate.Cmd)
-	rootCmd.AddCommand(stats.Cmd)
+	rootCmd.AddCommand(configsCmd)
+	rootCmd.AddCommand(s3Cmd)
 }
 
 func initLogger(subcmd string) error {
-	var programLevel = new(logger.LevelVar) // Info by default
-	h := logger.NewJSONHandler(os.Stdout, &logger.HandlerOptions{Level: programLevel})
+	var programLevel = new(slog.LevelVar) // Info by default
+	h := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: programLevel})
 
 	// Set as default a logger with "cmd" attribute
-	logger.SetDefault(logger.New(h).With("cmd", subcmd))
+	slog.SetDefault(slog.New(h).With("cmd", subcmd))
 
 	// Set log level
 	logLevel := viper.GetString("log-level")
