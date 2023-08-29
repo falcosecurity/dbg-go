@@ -3,10 +3,8 @@ package cleanup
 import (
 	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/validate"
 	logger "log/slog"
 	"os"
-	"path/filepath"
 )
 
 func Run(opts Options) error {
@@ -41,27 +39,8 @@ func cleanupFolder(opts Options, driverVersion string) error {
 }
 
 func cleanupMatchingConfigs(opts Options, driverVersion string) error {
-	configNameGlob := validate.ConfGlobFromDistro(opts.Target)
-
-	configPath := fmt.Sprintf(root.ConfigPathFmt,
-		opts.RepoRoot,
-		driverVersion,
-		opts.Architecture,
-		configNameGlob)
-
-	files, err := filepath.Glob(configPath)
-	if err != nil {
-		return err
-	}
-	for _, f := range files {
-		logger.Info("removing file", "path", f)
-		if opts.DryRun {
-			logger.Info("skipping because of dry-run.")
-			continue
-		}
-		if err = os.Remove(f); err != nil {
-			return err
-		}
-	}
-	return nil
+	opts.DriverVersion = []string{driverVersion} // locally overwrite driverVersions to only match current driverVersion
+	return root.LoopConfigsFiltered(opts.Options, "removing file", func(driverVersion, configPath string) error {
+		return os.Remove(configPath)
+	})
 }

@@ -1,8 +1,10 @@
 package root
 
 import (
+	"fmt"
 	"github.com/spf13/viper"
 	logger "log/slog"
+	"strings"
 )
 
 type Target struct {
@@ -13,6 +15,29 @@ type Target struct {
 
 func (t Target) IsSet() bool {
 	return t.Distro != "" && t.KernelRelease != "" && t.KernelVersion != ""
+}
+
+func (t Target) toGlob() string {
+	// Empty filters fallback at ".*" since we are using a regex match below
+	if t.Distro == "" {
+		t.Distro = "*"
+	} else {
+		dkDistro, found := SupportedDistros[t.Distro]
+		if found {
+			// Filenames use driverkit lowercase target, instead of the kernel-crawler naming.
+			t.Distro = dkDistro
+		} else {
+			// Perhaps a regex? ToLower and pray
+			t.Distro = strings.ToLower(t.Distro)
+		}
+	}
+	if t.KernelRelease == "" {
+		t.KernelRelease = "*"
+	}
+	if t.KernelVersion == "" {
+		t.KernelVersion = "*"
+	}
+	return fmt.Sprintf("%s_%s_%s.yaml", t.Distro, t.KernelRelease, t.KernelVersion)
 }
 
 type Options struct {

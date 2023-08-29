@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/fededp/dbg-go/cmd/cleanup"
 	"github.com/fededp/dbg-go/cmd/generate"
+	"github.com/fededp/dbg-go/cmd/stats"
 	"github.com/fededp/dbg-go/cmd/validate"
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/fededp/dbg-go/pkg/utils"
@@ -73,7 +74,7 @@ func init() {
 	flags.StringP("log-level", "l", logger.LevelInfo.String(), "set log verbosity.")
 	flags.String("repo-root", cwd, "test-infra repository root path.")
 	flags.StringP("architecture", "a", utils.FromDebArch(runtime.GOARCH), "architecture to run against.")
-	flags.StringSlice("driver-version", nil, "driver versions to generate configs against.")
+	flags.StringSlice("driver-version", nil, "driver versions to run against.")
 	flags.String("target-kernelrelease", "",
 		`target kernel release to work against. By default tool will work on any kernel release. Can be a regex.`)
 	flags.String("target-kernelversion", "",
@@ -97,6 +98,7 @@ func init() {
 	rootCmd.AddCommand(generate.Cmd)
 	rootCmd.AddCommand(cleanup.Cmd)
 	rootCmd.AddCommand(validate.Cmd)
+	rootCmd.AddCommand(stats.Cmd)
 }
 
 func initLogger(subcmd string) error {

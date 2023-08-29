@@ -13,31 +13,9 @@ import (
 
 func Run(opts Options) error {
 	logger.Info("validate config files")
-
-	configNameGlob := ConfGlobFromDistro(opts.Target)
-
-	for _, driverVersion := range opts.DriverVersion {
-		configPath := fmt.Sprintf(root.ConfigPathFmt,
-			opts.RepoRoot,
-			driverVersion,
-			opts.Architecture,
-			configNameGlob)
-		configs, err := filepath.Glob(configPath)
-		if err != nil {
-			return err
-		}
-		for _, config := range configs {
-			logger.Info("validating", "config", config)
-			if opts.DryRun {
-				logger.Info("skipping because of dry-run.")
-				continue
-			}
-			if err = validateConfig(config, opts.Architecture, opts.DriverName, driverVersion); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
+	return root.LoopConfigsFiltered(opts.Options, "validating", func(driverVersion, configPath string) error {
+		return validateConfig(configPath, opts.Architecture, opts.DriverName, driverVersion)
+	})
 }
 
 func validateConfig(configPath, architecture, driverName, driverVersion string) error {
