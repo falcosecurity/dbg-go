@@ -196,7 +196,7 @@ func TestCleanupFiltered(t *testing.T) {
 			// then, for each parsed logged line, check if it contains one of the requested string by the test.
 			// Count all "containing" lines; they must match total lines logged (that have a "config:" key).
 			type MessageJSON struct {
-				Path string `json:"path,omitempty"`
+				Path string `json:"config,omitempty"`
 			}
 			var messageJSON MessageJSON
 			scanner := bufio.NewScanner(&buf)
@@ -219,6 +219,7 @@ func TestCleanupFiltered(t *testing.T) {
 			if found != lines {
 				t.Errorf("wrong number of printed lines; expected %d, found %d", lines, found)
 			}
+			buf.Reset()
 		})
 	}
 
