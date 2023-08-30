@@ -181,6 +181,8 @@ func TestAutogenerate(t *testing.T) {
 			},
 			expectError: true,
 		},
+		// NOTE: the below test is flaky: if debian pulls down the headers, we will break.
+		// in case, just update to a newer version.
 		"run with target values on single driver version": {
 			opts: Options{
 				Options: root.Options{
@@ -188,8 +190,8 @@ func TestAutogenerate(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "CentOS",
-						KernelRelease: "5.10.0",
+						Distro:        "Debian",
+						KernelRelease: "6.1.38-2-amd64",
 						KernelVersion: "1",
 					},
 				},
