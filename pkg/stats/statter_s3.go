@@ -18,8 +18,12 @@ type s3Statter struct {
 	client *s3.Client
 }
 
-func NewS3Statter() Statter {
-	return &s3Statter{client: utils.NewS3Client()}
+func NewS3Statter() (Statter, error) {
+	client, err := utils.NewS3Client(true, "UNNEEDED")
+	if err != nil {
+		return nil, err
+	}
+	return &s3Statter{client: client}, nil
 }
 
 func (s *s3Statter) GetDriverStats(opts root.Options) (driverStatsByDriverVersion, error) {

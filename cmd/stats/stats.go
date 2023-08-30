@@ -15,12 +15,6 @@ func NewStatsCmd() *cobra.Command {
 	return cmd
 }
 
-func execute(c *cobra.Command, args []string) error {
-	switch c.Parent().Name() {
-	case "configs":
-		return stats.Run(stats.Options{Options: root.LoadRootOptions()}, stats.NewFileStatter())
-	case "s3":
-		return stats.Run(stats.Options{Options: root.LoadRootOptions()}, stats.NewS3Statter())
-	}
-	panic("unreachable code.")
+func execute(_ *cobra.Command, _ []string) error {
+	return stats.Run(stats.Options{Options: root.LoadRootOptions()}, stats.NewFileStatter())
 }
