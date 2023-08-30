@@ -25,8 +25,6 @@ import (
 	"testing"
 )
 
-// TODO: cleanup_s3 tests
-
 func RunTestParsingLogs(t *testing.T, runTest func() error, parsedMsg interface{}, parsingCB func() bool) {
 	var buf bytes.Buffer
 	logger := slog.New(slog.NewJSONHandler(io.Writer(&buf), nil))
@@ -75,7 +73,7 @@ func SliceDifference(a, b []string) []string {
 	return diff
 }
 
-func S3CreateTestBucket(t *testing.T) *s3.Client {
+func S3CreateTestBucket(t *testing.T, objectKeys []string) *s3.Client {
 	backend := s3mem.New()
 	faker := gofakes3.New(backend)
 	ts := httptest.NewServer(faker.Server())
@@ -88,7 +86,7 @@ func S3CreateTestBucket(t *testing.T) *s3.Client {
 	// Setup a new config
 	cfg, _ := config.LoadDefaultConfig(
 		context.Background(),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider("KEY", "SECRET", "SESSION")),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider("TESTKEY", "TESTSECRET", "TESTSESSION")),
 		config.WithHTTPClient(&http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -119,17 +117,8 @@ func S3CreateTestBucket(t *testing.T) *s3.Client {
 		})
 	})
 
-	// Create some test keys
-	keysToBeCreated := []string{
-		"driver/1.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
-		"driver/1.0.0+driver/x86_64/falco_amazonlinux2022_5.10.96-90.460.amzn2022.x86_64_1.o",
-		"driver/1.0.0+driver/x86_64/falco_debian_6.3.11-1-amd64_1.o",
-		"driver/1.0.0+driver/x86_64/falco_debian_6.3.11-1-amd64_1.ko",
-		"driver/2.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
-		"driver/2.0.0+driver/aarch64/falco_almalinux_4.18.0-477.10.1.el8_8.aarch64_1.ko",
-		"driver/2.0.0+driver/aarch64/falco_bottlerocket_5.10.165_1_1.13.1-aws.o",
-	}
-	for _, key := range keysToBeCreated {
+	// Create requested test keys
+	for _, key := range objectKeys {
 		_, err = client.PutObject(context.Background(), &s3.PutObjectInput{
 			Bucket: aws.String(S3Bucket),
 			Key:    aws.String(key),
