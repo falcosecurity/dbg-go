@@ -151,21 +151,22 @@ func autogenerateConfigs(opts Options, jsonData []byte) error {
 }
 
 type unsupportedTargetErr struct {
-	target root.DriverkitDistro
+	target builder.Type
 }
 
 func (err *unsupportedTargetErr) Error() string {
-	return fmt.Sprintf("target %s is unsupported by driverkit", err.target)
+	return fmt.Sprintf("target %s is unsupported by driverkit", err.target.String())
 }
 
 func loadKernelHeadersFromDk(opts Options) ([]string, error) {
 	// Try to load kernel headers from driverkit. Don't error out if unable.
 	// Just write a config with empty headers.
-	kDistro := root.KernelCrawlerDistro(opts.Distro)
-	targetType := builder.Type(root.SupportedDistros[kDistro])
+
+	// We already received a driverkit target type (not a kernel crawler distro!)
+	targetType := builder.Type(opts.Distro)
 	b, err := builder.Factory(targetType)
 	if err != nil {
-		return nil, &unsupportedTargetErr{target: root.SupportedDistros[kDistro]}
+		return nil, &unsupportedTargetErr{target: targetType}
 	}
 
 	// Load minimum urls for the builder
@@ -196,6 +197,10 @@ func loadKernelHeadersFromDk(opts Options) ([]string, error) {
 }
 
 func generateSingleConfig(opts Options) error {
+	// Translate opts.Distro to a driverkit distro
+	kDistro := root.KernelCrawlerDistro(opts.Distro)
+	opts.Distro = kDistro.ToDriverkitDistro().String()
+
 	kernelheaders, err := loadKernelHeadersFromDk(opts)
 	if err != nil {
 		var unsupportedTargetError *unsupportedTargetErr

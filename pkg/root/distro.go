@@ -1,9 +1,11 @@
 package root
 
-import "strings"
+import (
+	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
+	"strings"
+)
 
 type KernelCrawlerDistro string
-type DriverkitDistro string
 
 var (
 	// SupportedDistros keeps the list of distros supported by test-infra.
@@ -12,7 +14,7 @@ var (
 	// so that the utility starts building configs for them.
 	// Keys must have the same name used in kernel-crawler json keys.
 	// Values must have the same name used by driverkit targets.
-	SupportedDistros = map[KernelCrawlerDistro]DriverkitDistro{
+	SupportedDistros = map[KernelCrawlerDistro]builder.Type{
 		"AlmaLinux":       "almalinux",
 		"AmazonLinux":     "amazonlinux",
 		"AmazonLinux2":    "amazonlinux2",
@@ -28,12 +30,12 @@ var (
 	}
 )
 
-func (kDistro KernelCrawlerDistro) ToDriverkitDistro() DriverkitDistro {
+func (kDistro KernelCrawlerDistro) ToDriverkitDistro() builder.Type {
 	dkDistro, found := SupportedDistros[kDistro]
 	if found {
 		return dkDistro
 	} else {
 		// Perhaps a regex? ToLower and pray
-		return DriverkitDistro(strings.ToLower(string(kDistro)))
+		return builder.Type(strings.ToLower(string(kDistro)))
 	}
 }
