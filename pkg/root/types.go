@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"log/slog"
-	"strings"
 )
 
 type Target struct {
@@ -22,14 +21,9 @@ func (t Target) ToGlob() string {
 	if t.Distro == "" {
 		t.Distro = "*"
 	} else {
-		dkDistro, found := SupportedDistros[t.Distro]
-		if found {
-			// Filenames use driverkit lowercase target, instead of the kernel-crawler naming.
-			t.Distro = dkDistro
-		} else {
-			// Perhaps a regex? ToLower and pray
-			t.Distro = strings.ToLower(t.Distro)
-		}
+		kDistro := KernelCrawlerDistro(t.Distro)
+		dkDistro := kDistro.ToDriverkitDistro()
+		t.Distro = string(dkDistro)
 	}
 	if t.KernelRelease == "" {
 		t.KernelRelease = "*"

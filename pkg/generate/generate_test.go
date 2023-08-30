@@ -1,28 +1,13 @@
 package generate
 
 import (
-	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
+	"github.com/fededp/dbg-go/pkg/utils"
 	"github.com/fededp/dbg-go/pkg/validate"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 )
-
-func preCreateFolders(opts Options) error {
-	for _, driverVersion := range opts.DriverVersion {
-		configPath := fmt.Sprintf(root.ConfigPathFmt,
-			opts.RepoRoot,
-			driverVersion,
-			opts.Architecture,
-			"")
-		err := os.MkdirAll(configPath, 0700)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
 
 func TestAutogenerate(t *testing.T) {
 	testCacheData = true // enable json data caching for subsequent tests
@@ -216,9 +201,9 @@ func TestAutogenerate(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := preCreateFolders(test.opts)
+			err := utils.PreCreateFolders(test.opts.RepoRoot, test.opts.Architecture, test.opts.DriverVersion)
 			t.Cleanup(func() {
-				os.RemoveAll(test.opts.RepoRoot)
+				_ = os.RemoveAll(test.opts.RepoRoot)
 			})
 			assert.NoError(t, err)
 			err = Run(test.opts)

@@ -1,17 +1,13 @@
 package stats
 
 import (
-	"bufio"
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
+	"github.com/fededp/dbg-go/pkg/utils"
 	"github.com/fededp/dbg-go/pkg/validate"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
-	"io"
 	"log"
-	"log/slog"
 	"os"
 	"strconv"
 	"strings"
@@ -132,7 +128,7 @@ func TestStats(t *testing.T) {
 
 	err := os.MkdirAll(configPath, 0700)
 	t.Cleanup(func() {
-		os.RemoveAll("./test")
+		_ = os.RemoveAll("./test")
 	})
 	assert.NoError(t, err)
 
@@ -249,64 +245,180 @@ func TestStats(t *testing.T) {
 		},
 	}
 
-	// Store logged data, will be used by test
-	var buf bytes.Buffer
-	logger := slog.New(slog.NewJSONHandler(io.Writer(&buf), nil))
-	slog.SetDefault(logger)
-
 	// capture output!
-	testOutputWriter = log.Default().Writer()
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err = Run(test.opts, NewFileStatter())
-			assert.NoError(t, err)
-
 			// Use logged output to ensure we fetched correct stats
 			type MessageJSON struct {
 				Message string `json:"msg"`
 			}
 			var messageJSON MessageJSON
-			scanner := bufio.NewScanner(&buf)
 			outputStats := driverStats{}
 			startParsing := false
 			parsingIdx := 0
-			for scanner.Scan() {
-				err = json.Unmarshal(scanner.Bytes(), &messageJSON)
-				assert.NoError(t, err)
-				messageJSON.Message = strings.ReplaceAll(messageJSON.Message, " ", "")
-				// Example lines:
-				//{"time":"2023-08-29T11:38:35.692782942+02:00","level":"INFO","msg":"1.0.0+driver"}
-				//{"time":"2023-08-29T11:38:35.692784013+02:00","level":"INFO","msg":""}
-				//{"time":"2023-08-29T11:38:35.692784775+02:00","level":"INFO","msg":"|"}
-				//{"time":"2023-08-29T11:38:35.692785487+02:00","level":"INFO","msg":""}
-				//{"time":"2023-08-29T11:38:35.69279484+02:00","level":"INFO","msg":"4"}
-				//{"time":"2023-08-29T11:38:35.692796064+02:00","level":"INFO","msg":""}
-				//{"time":"2023-08-29T11:38:35.692797001+02:00","level":"INFO","msg":"|"}
-				//{"time":"2023-08-29T11:38:35.692797848+02:00","level":"INFO","msg":""}
-				//{"time":"2023-08-29T11:38:35.69280042+02:00","level":"INFO","msg":"3"}
-				if startParsing {
-					parsingIdx++
-					if parsingIdx%4 == 0 {
-						n, err := strconv.ParseInt(messageJSON.Message, 10, 64)
-						assert.NoError(t, err)
-						switch parsingIdx / 4 {
-						case 1:
-							outputStats.NumModules = n
-						case 2:
-							outputStats.NumProbes = n
+			utils.RunTestParsingLogs(t,
+				func() error {
+					testOutputWriter = log.Default().Writer()
+					return Run(test.opts, NewFileStatter())
+				},
+				&messageJSON,
+				func() bool {
+					messageJSON.Message = strings.ReplaceAll(messageJSON.Message, " ", "")
+					// Example lines:
+					//{"time":"2023-08-29T11:38:35.692782942+02:00","level":"INFO","msg":"1.0.0+driver"}
+					//{"time":"2023-08-29T11:38:35.692784013+02:00","level":"INFO","msg":""}
+					//{"time":"2023-08-29T11:38:35.692784775+02:00","level":"INFO","msg":"|"}
+					//{"time":"2023-08-29T11:38:35.692785487+02:00","level":"INFO","msg":""}
+					//{"time":"2023-08-29T11:38:35.69279484+02:00","level":"INFO","msg":"4"}
+					//{"time":"2023-08-29T11:38:35.692796064+02:00","level":"INFO","msg":""}
+					//{"time":"2023-08-29T11:38:35.692797001+02:00","level":"INFO","msg":"|"}
+					//{"time":"2023-08-29T11:38:35.692797848+02:00","level":"INFO","msg":""}
+					//{"time":"2023-08-29T11:38:35.69280042+02:00","level":"INFO","msg":"3"}
+					if startParsing {
+						parsingIdx++
+						if parsingIdx%4 == 0 {
+							n, err := strconv.ParseInt(messageJSON.Message, 10, 64)
+							assert.NoError(t, err)
+							switch parsingIdx / 4 {
+							case 1:
+								outputStats.NumModules = n
+							case 2:
+								outputStats.NumProbes = n
+							}
 						}
 					}
-				}
-				if messageJSON.Message == "1.0.0+driver" {
-					startParsing = true
-				} else if parsingIdx == 8 {
-					// parsed both numbers
-					break
-				}
-			}
+					if messageJSON.Message == "1.0.0+driver" {
+						startParsing = true
+					} else if parsingIdx == 8 {
+						// parsed both numbers
+						return false // break out
+					}
+					return true // continue
+				})
 			assert.Equal(t, test.expectedStats, outputStats)
-			buf.Reset()
+		})
+	}
+}
+
+func TestStatsS3(t *testing.T) {
+	client := utils.S3CreateTestBucket(t)
+	statter := s3Statter{client: client}
+
+	tests := map[string]struct {
+		opts          Options
+		expectedStats driverStatsByDriverVersion
+	}{
+		"stats 1.0.0+driver, 2.0.0+driver x86_64": {
+			opts: Options{Options: root.Options{
+				Architecture:  "x86_64",
+				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
+			}},
+			expectedStats: driverStatsByDriverVersion{
+				"1.0.0+driver": {
+					NumProbes:  2,
+					NumModules: 2,
+				},
+				"2.0.0+driver": {
+					NumProbes:  0,
+					NumModules: 1,
+				},
+			},
+		},
+		"stats 2.0.0+driver aarch64": {
+			opts: Options{Options: root.Options{
+				Architecture:  "aarch64",
+				DriverVersion: []string{"2.0.0+driver"},
+			}},
+			expectedStats: driverStatsByDriverVersion{
+				"2.0.0+driver": {
+					NumProbes:  1,
+					NumModules: 1,
+				},
+			},
+		},
+		"stats 2.0.0+driver x86_64": {
+			opts: Options{Options: root.Options{
+				Architecture:  "x86_64",
+				DriverVersion: []string{"2.0.0+driver"},
+			}},
+			expectedStats: driverStatsByDriverVersion{
+				"2.0.0+driver": {
+					NumProbes:  0,
+					NumModules: 1,
+				},
+			},
+		},
+		"stats 1.0.0+driver, 2.0.0+driver x86_64 filtered by distro": {
+			opts: Options{Options: root.Options{
+				Architecture:  "x86_64",
+				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
+				Target: root.Target{
+					Distro:        "AlmaLinux",
+					KernelRelease: "",
+					KernelVersion: "",
+				},
+			}},
+			expectedStats: driverStatsByDriverVersion{
+				"1.0.0+driver": {
+					NumProbes:  0,
+					NumModules: 1,
+				},
+				"2.0.0+driver": {
+					NumProbes:  0,
+					NumModules: 1,
+				},
+			},
+		},
+		"stats 1.0.0+driver, 2.0.0+driver x86_64 filtered by distro regex": {
+			opts: Options{Options: root.Options{
+				Architecture:  "x86_64",
+				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
+				Target: root.Target{
+					Distro:        "AlmaLi*",
+					KernelRelease: "",
+					KernelVersion: "",
+				},
+			}},
+			expectedStats: driverStatsByDriverVersion{
+				"1.0.0+driver": {
+					NumProbes:  0,
+					NumModules: 1,
+				},
+				"2.0.0+driver": {
+					NumProbes:  0,
+					NumModules: 1,
+				},
+			},
+		},
+		"stats 1.0.0+driver, 2.0.0+driver x86_64 filtered by kernelrelease": {
+			opts: Options{Options: root.Options{
+				Architecture:  "x86_64",
+				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
+				Target: root.Target{
+					Distro:        "",
+					KernelRelease: "5.*",
+					KernelVersion: "",
+				},
+			}},
+			expectedStats: driverStatsByDriverVersion{
+				"1.0.0+driver": {
+					NumProbes:  1,
+					NumModules: 1,
+				},
+				"2.0.0+driver": {
+					NumProbes:  0,
+					NumModules: 1,
+				},
+			},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			dStats, err := statter.GetDriverStats(test.opts.Options)
+			assert.NoError(t, err)
+			assert.Equal(t, test.expectedStats, dStats)
 		})
 	}
 }

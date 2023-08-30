@@ -101,9 +101,10 @@ func autogenerateConfigs(opts Options, jsonData []byte) error {
 	distroCtr := 0
 	instanceBuilder := dynamicstruct.NewStruct()
 	for distro, _ := range root.SupportedDistros {
-		if distroFilter(distro) {
-			tag := fmt.Sprintf(`json:"%s"`, distro)
-			instanceBuilder.AddField(distro, []validate.KernelEntry{}, tag)
+		distroStr := string(distro)
+		if distroFilter(distroStr) {
+			tag := fmt.Sprintf(`json:"%s"`, distroStr)
+			instanceBuilder.AddField(distroStr, []validate.KernelEntry{}, tag)
 			distroCtr++
 		}
 	}
@@ -150,7 +151,7 @@ func autogenerateConfigs(opts Options, jsonData []byte) error {
 }
 
 type unsupportedTargetErr struct {
-	target string
+	target root.DriverkitDistro
 }
 
 func (err *unsupportedTargetErr) Error() string {
@@ -160,10 +161,11 @@ func (err *unsupportedTargetErr) Error() string {
 func loadKernelHeadersFromDk(opts Options) ([]string, error) {
 	// Try to load kernel headers from driverkit. Don't error out if unable.
 	// Just write a config with empty headers.
-	targetType := builder.Type(root.SupportedDistros[opts.Distro])
+	kDistro := root.KernelCrawlerDistro(opts.Distro)
+	targetType := builder.Type(root.SupportedDistros[kDistro])
 	b, err := builder.Factory(targetType)
 	if err != nil {
-		return nil, &unsupportedTargetErr{target: root.SupportedDistros[opts.Distro]}
+		return nil, &unsupportedTargetErr{target: root.SupportedDistros[kDistro]}
 	}
 
 	// Load minimum urls for the builder
