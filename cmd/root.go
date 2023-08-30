@@ -80,7 +80,7 @@ func init() {
 	rootCmd.RegisterFlagCompletionFunc("target-distro", func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		supportedDistrosSlice := make([]string, 0)
 		for distro, _ := range root.SupportedDistros {
-			supportedDistrosSlice = append(supportedDistrosSlice, distro)
+			supportedDistrosSlice = append(supportedDistrosSlice, string(distro))
 		}
 		return supportedDistrosSlice, cobra.ShellCompDirectiveDefault
 	})

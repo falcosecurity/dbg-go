@@ -1,48 +1,14 @@
 package cleanup
 
 import (
-	"bufio"
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
+	"github.com/fededp/dbg-go/pkg/utils"
 	"github.com/stretchr/testify/assert"
-	"io"
-	"log/slog"
 	"os"
 	"strings"
 	"testing"
 )
-
-func preCreateFolders(repoRoot, architecture string, driverVersionsToBeCreated []string) error {
-	for _, driverVersion := range driverVersionsToBeCreated {
-		configPath := fmt.Sprintf(root.ConfigPathFmt,
-			repoRoot,
-			driverVersion,
-			architecture,
-			"")
-		err := os.MkdirAll(configPath, 0700)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// difference returns the elements in `a` that aren't in `b`.
-func sliceDifference(a, b []string) []string {
-	mb := make(map[string]struct{}, len(b))
-	for _, x := range b {
-		mb[x] = struct{}{}
-	}
-	var diff []string
-	for _, x := range a {
-		if _, found := mb[x]; !found {
-			diff = append(diff, x)
-		}
-	}
-	return diff
-}
 
 func TestCleanup(t *testing.T) {
 	tests := map[string]struct {
@@ -75,7 +41,7 @@ func TestCleanup(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := preCreateFolders(test.opts.RepoRoot, test.opts.Architecture, test.driverVersionsToBeCreated)
+			err := utils.PreCreateFolders(test.opts.RepoRoot, test.opts.Architecture, test.driverVersionsToBeCreated)
 			t.Cleanup(func() {
 				os.RemoveAll(test.opts.RepoRoot)
 			})
@@ -88,7 +54,7 @@ func TestCleanup(t *testing.T) {
 			}
 
 			// Check that any folder that was asked for removal, is no more present
-			for _, driverVersion := range sliceDifference(test.driverVersionsToBeCreated, test.driverFolderRemainingExpected) {
+			for _, driverVersion := range utils.SliceDifference(test.driverVersionsToBeCreated, test.driverFolderRemainingExpected) {
 				configPath := fmt.Sprintf(root.ConfigPathFmt,
 					test.opts.RepoRoot,
 					driverVersion,
@@ -124,9 +90,9 @@ func TestCleanupFiltered(t *testing.T) {
 		"./test/driverkit/config/1.0.0+driver/x86_64/amazonlinux_6.0.0_23.yaml",
 	}
 
-	err := preCreateFolders("./test", "x86_64", []string{"1.0.0+driver"})
+	err := utils.PreCreateFolders("./test", "x86_64", []string{"1.0.0+driver"})
 	t.Cleanup(func() {
-		os.RemoveAll("./test")
+		_ = os.RemoveAll("./test")
 	})
 	assert.NoError(t, err)
 
@@ -182,31 +148,19 @@ func TestCleanupFiltered(t *testing.T) {
 		},
 	}
 
-	// Store logged data, will be used by test
-	var buf bytes.Buffer
-	logger := slog.New(slog.NewJSONHandler(io.Writer(&buf), nil))
-	slog.SetDefault(logger)
-
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err = Run(test.opts, NewFileCleaner())
-			assert.NoError(t, err)
-			// Use logged output to ensure we really cleanup only correct configs:
-			// parse every logged line to a structured json (we print "path:" for each config path being cleaned up)
-			// then, for each parsed logged line, check if it contains one of the requested string by the test.
-			// Count all "containing" lines; they must match total lines logged (that have a "config:" key).
 			type MessageJSON struct {
 				Path string `json:"config,omitempty"`
 			}
 			var messageJSON MessageJSON
-			scanner := bufio.NewScanner(&buf)
 			found := 0
 			lines := 0
-			for scanner.Scan() {
-				err = json.Unmarshal(scanner.Bytes(), &messageJSON)
-				assert.NoError(t, err)
+			utils.RunTestParsingLogs(t, func() error {
+				return Run(test.opts, NewFileCleaner())
+			}, &messageJSON, func() bool {
 				if messageJSON.Path == "" {
-					continue
+					return true // skip and go on
 				}
 				lines++
 				for _, expectedOutput := range test.expectedOutputContains {
@@ -215,11 +169,11 @@ func TestCleanupFiltered(t *testing.T) {
 						break
 					}
 				}
-			}
+				return true
+			})
 			if found != lines {
 				t.Errorf("wrong number of printed lines; expected %d, found %d", lines, found)
 			}
-			buf.Reset()
 		})
 	}
 

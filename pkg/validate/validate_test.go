@@ -1,15 +1,11 @@
 package validate
 
 import (
-	"bufio"
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
+	"github.com/fededp/dbg-go/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
-	"io"
-	"log/slog"
 	"os"
 	"strings"
 	"testing"
@@ -551,15 +547,10 @@ func TestValidateConfigFiltered(t *testing.T) {
 		},
 	}
 
-	// Store logged data, will be used by test
-	var buf bytes.Buffer
-	logger := slog.New(slog.NewJSONHandler(io.Writer(&buf), nil))
-	slog.SetDefault(logger)
-
 	err := os.MkdirAll(configPath, 0700)
 	assert.NoError(t, err)
 	t.Cleanup(func() {
-		os.RemoveAll("./test/")
+		_ = os.RemoveAll("./test/")
 	})
 
 	for _, dkConfig := range dkConfigs {
@@ -570,38 +561,33 @@ func TestValidateConfigFiltered(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err = Run(test.opts)
-			assert.NoError(t, err)
-
-			// Use logged output to ensure we really validated only correct configs:
-			// parse every logged line to a structured json (we print "config:" for each config path being validated)
-			// then, for each parsed logged line, check if it contains one of the requested string by the test.
-			// Count all "containing" lines; they must match total lines logged (that have a "config:" key).
 			type MessageJSON struct {
 				Config string `json:"config,omitempty"`
 			}
 			var messageJSON MessageJSON
-			scanner := bufio.NewScanner(&buf)
 			found := 0
 			lines := 0
-			for scanner.Scan() {
-				err = json.Unmarshal(scanner.Bytes(), &messageJSON)
-				assert.NoError(t, err)
-				if messageJSON.Config == "" {
-					continue
-				}
-				lines++
-				for _, expectedOutput := range test.expectedOutputContains {
-					if strings.Contains(messageJSON.Config, expectedOutput) {
-						found++
-						break
+			utils.RunTestParsingLogs(t,
+				func() error {
+					return Run(test.opts)
+				},
+				&messageJSON,
+				func() bool {
+					if messageJSON.Config == "" {
+						return true // go on
 					}
-				}
-			}
+					lines++
+					for _, expectedOutput := range test.expectedOutputContains {
+						if strings.Contains(messageJSON.Config, expectedOutput) {
+							found++
+							break
+						}
+					}
+					return true
+				})
 			if found != lines {
 				t.Fail()
 			}
-			buf.Reset()
 		})
 	}
 }

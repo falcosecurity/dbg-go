@@ -31,6 +31,11 @@ func (s *s3Statter) GetDriverStats(opts root.Options) (driverStatsByDriverVersio
 
 	slog.Info("computing stats")
 	driverStatsByVersion := make(driverStatsByDriverVersion)
+
+	kDistro := root.KernelCrawlerDistro(opts.Distro)
+	dkDistro := kDistro.ToDriverkitDistro()
+	opts.Distro = string(dkDistro)
+
 	distroFilter := func(distro string) bool {
 		matched, _ := regexp.MatchString(opts.Distro, distro)
 		return matched
@@ -99,6 +104,10 @@ func (s *s3Statter) GetDriverStats(opts root.Options) (driverStatsByDriverVersio
 				}
 
 				slog.Info("computing stats", "key", key)
+				if opts.DryRun {
+					slog.Info("skipping because of dry-run.")
+					continue
+				}
 				if strings.HasSuffix(key, ".ko") {
 					dStats.NumModules++
 				} else if strings.HasSuffix(key, ".o") {

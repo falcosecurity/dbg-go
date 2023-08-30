@@ -21,7 +21,7 @@ func NewCleanupS3Cmd() *cobra.Command {
 	return cmd
 }
 
-func executeS3(c *cobra.Command, _ []string) error {
+func executeS3(_ *cobra.Command, _ []string) error {
 	cleaner, err := cleanup.NewS3Cleaner(viper.GetString("aws-profile"))
 	if err != nil {
 		return err
