@@ -11,8 +11,12 @@ type s3Cleaner struct {
 	client *s3.Client
 }
 
-func NewS3Cleaner() Cleaner {
-	return &s3Cleaner{client: utils.NewS3Client()}
+func NewS3Cleaner(awsProfile string) (Cleaner, error) {
+	client, err := utils.NewS3Client(false, awsProfile)
+	if err != nil {
+		return nil, err
+	}
+	return &s3Cleaner{client: client}, nil
 }
 
 func (s s3Cleaner) Remove(key string) error {

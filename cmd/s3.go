@@ -15,6 +15,6 @@ var (
 
 func init() {
 	// Subcommands
-	s3Cmd.AddCommand(cleanup.NewCleanupCmd())
-	s3Cmd.AddCommand(stats.NewStatsCmd())
+	s3Cmd.AddCommand(cleanup.NewCleanupS3Cmd())
+	s3Cmd.AddCommand(stats.NewStatsS3Cmd())
 }
