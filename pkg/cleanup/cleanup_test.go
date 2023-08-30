@@ -1,7 +1,10 @@
 package cleanup
 
 import (
+	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/fededp/dbg-go/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -103,11 +106,13 @@ func TestCleanupFiltered(t *testing.T) {
 		_ = emptyFile.Close()
 	}
 
-	tests := map[string]struct {
+	// MUST RUN IN STRICT LOGICAL ORDER; USE A SLICE.
+	tests := []struct {
 		opts                   Options
 		expectedOutputContains []string
+		name                   string
 	}{
-		"delete ubuntu configs": {
+		{
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
 				Architecture:  "x86_64",
@@ -119,8 +124,9 @@ func TestCleanupFiltered(t *testing.T) {
 				},
 			}},
 			expectedOutputContains: []string{"ubuntu_5.15", "ubuntu_5.19"},
+			name:                   "delete ubuntu configs",
 		},
-		"delete 24 kernelversion configs": {
+		{
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
 				Architecture:  "x86_64",
@@ -132,8 +138,9 @@ func TestCleanupFiltered(t *testing.T) {
 				},
 			}},
 			expectedOutputContains: []string{"fedora_5.15.0_24"},
+			name:                   "delete 24 kernelversion configs",
 		},
-		"delete 6.0.0 configs": {
+		{
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
 				Architecture:  "x86_64",
@@ -145,11 +152,12 @@ func TestCleanupFiltered(t *testing.T) {
 				},
 			}},
 			expectedOutputContains: []string{"amazonlinux_6.0", "talos_6.0"},
+			name:                   "delete 6.0.0 configs",
 		},
 	}
 
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
 			type MessageJSON struct {
 				Path string `json:"config,omitempty"`
 			}
@@ -181,4 +189,111 @@ func TestCleanupFiltered(t *testing.T) {
 	entries, err := os.ReadDir("./test/driverkit/config/1.0.0+driver/x86_64/")
 	assert.NoError(t, err)
 	assert.Len(t, entries, 0)
+}
+
+func TestCleanupS3(t *testing.T) {
+	keysToBeCreated := []string{
+		"driver/1.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
+		"driver/1.0.0+driver/x86_64/falco_amazonlinux2022_5.10.96-90.460.amzn2022.x86_64_1.o",
+		"driver/1.0.0+driver/x86_64/falco_debian_6.3.11-1-amd64_1.o",
+		"driver/1.0.0+driver/x86_64/falco_debian_6.3.11-1-amd64_1.ko",
+		"driver/2.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
+		"driver/2.0.0+driver/aarch64/falco_almalinux_4.18.0-477.10.1.el8_8.aarch64_1.ko",
+		"driver/2.0.0+driver/aarch64/falco_bottlerocket_5.10.165_1_1.13.1-aws.o",
+	}
+	client := utils.S3CreateTestBucket(t, keysToBeCreated)
+	cleaner := &s3Cleaner{client: client}
+
+	// MUST RUN IN STRICT LOGICAL ORDER; USE A SLICE.
+	tests := []struct {
+		opts             Options
+		remainingObjects []string
+		name             string
+	}{
+		{
+			opts: Options{Options: root.Options{
+				Architecture:  "x86_64",
+				DriverVersion: []string{"2.0.0+driver"},
+			}},
+			remainingObjects: []string{
+				"driver/1.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
+				"driver/1.0.0+driver/x86_64/falco_amazonlinux2022_5.10.96-90.460.amzn2022.x86_64_1.o",
+				"driver/1.0.0+driver/x86_64/falco_debian_6.3.11-1-amd64_1.o",
+				"driver/1.0.0+driver/x86_64/falco_debian_6.3.11-1-amd64_1.ko",
+				"driver/2.0.0+driver/aarch64/falco_almalinux_4.18.0-477.10.1.el8_8.aarch64_1.ko",
+				"driver/2.0.0+driver/aarch64/falco_bottlerocket_5.10.165_1_1.13.1-aws.o",
+			},
+			name: "cleanup 2.0.0+driver x86_64",
+		},
+		{
+			opts: Options{Options: root.Options{
+				Architecture:  "x86_64",
+				DriverVersion: []string{"1.0.0+driver"},
+				Target: root.Target{
+					Distro: "Debian",
+				},
+			}},
+			remainingObjects: []string{
+				"driver/1.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
+				"driver/1.0.0+driver/x86_64/falco_amazonlinux2022_5.10.96-90.460.amzn2022.x86_64_1.o",
+				"driver/2.0.0+driver/aarch64/falco_almalinux_4.18.0-477.10.1.el8_8.aarch64_1.ko",
+				"driver/2.0.0+driver/aarch64/falco_bottlerocket_5.10.165_1_1.13.1-aws.o",
+			},
+			name: "cleanup 1.0.0+driver x86_64 debian",
+		},
+		{
+			opts: Options{Options: root.Options{
+				Architecture:  "x86_64",
+				DriverVersion: []string{"1.0.0+driver"},
+				Target: root.Target{
+					Distro: "AmazonLin*",
+				},
+			}},
+			remainingObjects: []string{
+				"driver/1.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
+				"driver/2.0.0+driver/aarch64/falco_almalinux_4.18.0-477.10.1.el8_8.aarch64_1.ko",
+				"driver/2.0.0+driver/aarch64/falco_bottlerocket_5.10.165_1_1.13.1-aws.o",
+			},
+			name: "cleanup 1.0.0+driver x86_64 amazonlinux regex",
+		},
+		{
+			opts: Options{Options: root.Options{
+				Architecture:  "x86_64",
+				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
+				Target: root.Target{
+					KernelRelease: "5.*",
+				},
+			}},
+			remainingObjects: []string{
+				"driver/2.0.0+driver/aarch64/falco_almalinux_4.18.0-477.10.1.el8_8.aarch64_1.ko",
+				"driver/2.0.0+driver/aarch64/falco_bottlerocket_5.10.165_1_1.13.1-aws.o",
+			},
+			name: "cleanup 1.0.0+driver,2.0.0+driver x86_64 kernel release regex",
+		},
+		{
+			opts: Options{Options: root.Options{
+				Architecture:  "aarch64",
+				DriverVersion: []string{"2.0.0+driver"},
+			}},
+			remainingObjects: []string{},
+			name:             "cleanup 2.0.0+driver aarch64 drivers",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := Run(test.opts, cleaner)
+			assert.NoError(t, err)
+
+			// Check the remaining objects in the bucket
+			objects, err := client.ListObjects(context.Background(), &s3.ListObjectsInput{
+				Bucket: aws.String(utils.S3Bucket),
+			})
+			assert.NoError(t, err)
+			for _, obj := range objects.Contents {
+				key := *obj.Key
+				assert.Contains(t, test.remainingObjects, key)
+			}
+		})
+	}
 }

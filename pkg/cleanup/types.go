@@ -7,6 +7,7 @@ type Options struct {
 }
 
 type Cleaner interface {
-	Remove(path string) error
-	RemoveAll(path string) error
+	Info() string
+	Cleanup(opts Options, driverVersion string) error
+	CleanupAll(opts Options, driverVersion string) error
 }

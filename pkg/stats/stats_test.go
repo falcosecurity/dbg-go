@@ -302,7 +302,16 @@ func TestStats(t *testing.T) {
 }
 
 func TestStatsS3(t *testing.T) {
-	client := utils.S3CreateTestBucket(t)
+	keysToBeCreated := []string{
+		"driver/1.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
+		"driver/1.0.0+driver/x86_64/falco_amazonlinux2022_5.10.96-90.460.amzn2022.x86_64_1.o",
+		"driver/1.0.0+driver/x86_64/falco_debian_6.3.11-1-amd64_1.o",
+		"driver/1.0.0+driver/x86_64/falco_debian_6.3.11-1-amd64_1.ko",
+		"driver/2.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
+		"driver/2.0.0+driver/aarch64/falco_almalinux_4.18.0-477.10.1.el8_8.aarch64_1.ko",
+		"driver/2.0.0+driver/aarch64/falco_bottlerocket_5.10.165_1_1.13.1-aws.o",
+	}
+	client := utils.S3CreateTestBucket(t, keysToBeCreated)
 	statter := s3Statter{client: client}
 
 	tests := map[string]struct {
