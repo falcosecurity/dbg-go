@@ -53,12 +53,12 @@ As you can see, global options basically reimplement all [dbg Makefile filters](
 
 ## Build
 
-A simple `go build` in the project root folder is enough.
+A simple `make build` in the project root folder is enough.
 
 ## Test
 
 Given the project aims at making our dbg code testable, there are already quite a few tests implemented.  
-To run them, a simple `go test ./...` issued from project root folder is enough.
+To run them, a simple `make test` issued from project root folder is enough.
 
 ## Release artifacts
 
