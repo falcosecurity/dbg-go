@@ -274,7 +274,7 @@ func TestStatsS3(t *testing.T) {
 	}{
 		"stats 1.0.0+driver, 2.0.0+driver x86_64": {
 			opts: Options{Options: root.Options{
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
 			}},
 			expectedStats: driverStatsByDriverVersion{
@@ -290,7 +290,7 @@ func TestStatsS3(t *testing.T) {
 		},
 		"stats 2.0.0+driver aarch64": {
 			opts: Options{Options: root.Options{
-				Architecture:  "aarch64",
+				Architecture:  "arm64",
 				DriverVersion: []string{"2.0.0+driver"},
 			}},
 			expectedStats: driverStatsByDriverVersion{
@@ -302,7 +302,7 @@ func TestStatsS3(t *testing.T) {
 		},
 		"stats 2.0.0+driver x86_64": {
 			opts: Options{Options: root.Options{
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"2.0.0+driver"},
 			}},
 			expectedStats: driverStatsByDriverVersion{
@@ -314,7 +314,7 @@ func TestStatsS3(t *testing.T) {
 		},
 		"stats 1.0.0+driver, 2.0.0+driver x86_64 filtered by distro": {
 			opts: Options{Options: root.Options{
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
 				Target: root.Target{
 					Distro: "almalinux",
@@ -333,7 +333,7 @@ func TestStatsS3(t *testing.T) {
 		},
 		"stats 1.0.0+driver, 2.0.0+driver x86_64 filtered by distro regex": {
 			opts: Options{Options: root.Options{
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
 				Target: root.Target{
 					Distro: "almali*",
@@ -352,7 +352,7 @@ func TestStatsS3(t *testing.T) {
 		},
 		"stats 1.0.0+driver, 2.0.0+driver x86_64 filtered by kernelrelease": {
 			opts: Options{Options: root.Options{
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
 				Target: root.Target{
 					KernelRelease: "5.*",
