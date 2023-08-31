@@ -43,14 +43,7 @@ func validateConfig(configPath, architecture, driverName, driverVersion string) 
 		"kernelversion", driverkitYaml.KernelVersion)
 
 	// Check that filename is ok
-	kernelEntry := KernelEntry{
-		KernelVersion:    driverkitYaml.KernelVersion,
-		KernelRelease:    driverkitYaml.KernelRelease,
-		Target:           driverkitYaml.Target,
-		Headers:          driverkitYaml.KernelUrls,
-		KernelConfigData: driverkitYaml.KernelConfigData,
-	}
-	expectedFilename := kernelEntry.ToConfigName()
+	expectedFilename := driverkitYaml.ToConfigName()
 	configFilename := filepath.Base(configPath)
 	if configFilename != expectedFilename {
 		return fmt.Errorf("config filename is wrong (%s); should be %s", configFilename, expectedFilename)
@@ -71,9 +64,9 @@ func validateConfig(configPath, architecture, driverName, driverVersion string) 
 		driverVersion,
 		architecture,
 		driverName,
-		kernelEntry.Target,
-		kernelEntry.KernelRelease,
-		kernelEntry.KernelVersion)
+		driverkitYaml.Target,
+		driverkitYaml.KernelRelease,
+		driverkitYaml.KernelVersion)
 
 	outputPathFilename := filepath.Base(outputPath)
 
