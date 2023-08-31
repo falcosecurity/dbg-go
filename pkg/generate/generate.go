@@ -15,7 +15,6 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 )
 
@@ -80,21 +79,6 @@ func Run(opts Options) error {
 func autogenerateConfigs(opts Options, jsonData []byte) error {
 	slog.SetDefault(slog.With("target-distro", opts.Distro))
 
-	distroFilter := func(distro string) bool {
-		matched, _ := regexp.MatchString(opts.Distro, distro)
-		return matched
-	}
-
-	kernelreleaseFilter := func(kernelrelease string) bool {
-		matched, _ := regexp.MatchString(opts.KernelRelease, kernelrelease)
-		return matched
-	}
-
-	kernelversionFilter := func(kernelversion string) bool {
-		matched, _ := regexp.MatchString(opts.KernelVersion, kernelversion)
-		return matched
-	}
-
 	// Generate a dynamic struct with all needed distros
 	// NOTE: we might need a single distro when `lastDistro` is != "*";
 	// else, we will add all SupportedDistros found in constants.go
@@ -102,7 +86,7 @@ func autogenerateConfigs(opts Options, jsonData []byte) error {
 	instanceBuilder := dynamicstruct.NewStruct()
 	for distro, _ := range root.SupportedDistros {
 		distroStr := string(distro)
-		if distroFilter(distroStr) {
+		if opts.DistroFilter(distroStr) {
 			tag := fmt.Sprintf(`json:"%s"`, distroStr)
 			instanceBuilder.AddField(distroStr, []validate.KernelEntry{}, tag)
 			distroCtr++
@@ -133,10 +117,10 @@ func autogenerateConfigs(opts Options, jsonData []byte) error {
 		errGrp.Go(func() error {
 			for _, kernelEntry := range kernelEntries {
 				// Skip unneeded kernel entries
-				if !kernelreleaseFilter(kernelEntry.KernelRelease) {
+				if !opts.KernelVersionFilter(kernelEntry.KernelRelease) {
 					continue
 				}
-				if !kernelversionFilter(kernelEntry.KernelVersion) {
+				if !opts.KernelVersionFilter(kernelEntry.KernelVersion) {
 					continue
 				}
 
