@@ -47,6 +47,7 @@ Flags:
   -l, --log-level string              set log verbosity. (default "INFO")
       --repo-root string              test-infra repository root path. (default "/home/federico/Work/dbg-go")
       --target-distro string          target distro to work against. By default tool will work on any supported distro. Can be a regex.
+                                      Supported distros: [almalinux,amazonlinux,amazonlinux2,amazonlinux2022,amazonlinux2023,bottlerocket,centos,debian,fedora,minikube,talos,ubuntu].
       --target-kernelrelease string   target kernel release to work against. By default tool will work on any kernel release. Can be a regex.
       --target-kernelversion string   target kernel version to work against. By default tool will work on any kernel version. Can be a regex.
 
@@ -67,3 +68,33 @@ To run them, a simple `make test` issued from project root folder is enough.
 ## Release artifacts
 
 Using `goreleaser`, multiple artifacts are attached to each github release; among them, you can find executables for arm64 and amd64.
+
+## Examples
+
+<details>
+  <summary>Fetch stats about local dbg configs for all supported driver versions by test-infra, for host architecture</summary>
+  ```bash
+  ./dbg-go configs stats --repo-root test-infra
+  ```
+</details>
+
+<details>
+  <summary>Fetch stats about remote drivers for 5.0.1+driver driver version, for host architecture</summary>
+  ```bash
+  ./dbg-go s3 stats --driver-version 5.0.1+driver
+  ```
+</details>
+
+<details>
+  <summary>Validate local configs for 5.0.1+driver driver version, for aarch64</summary>
+  ```bash
+  ./dbg-go configs validate --driver-version 5.0.1+driver --architecture aarch64
+  ```
+</details>
+
+<details>
+  <summary>Generate configs for all supported driver versions by test-infra from kernel-crawler output, for host architecture</summary>
+  ```bash
+  ./dbg-go configs generate --repo-root test-infra --auto
+  ```
+</details>

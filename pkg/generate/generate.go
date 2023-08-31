@@ -78,7 +78,7 @@ func autogenerateConfigs(opts Options) error {
 		if err != nil {
 			return err
 		}
-		slog.Debug("loaded last-distro", "distro", lastDistro)
+		slog.Info("loaded last-distro", "distro", lastDistro)
 
 		// If lastDistro is empty it means we need to run on all supported distros; this is done automatically.
 		if lastDistro != "" {
@@ -87,6 +87,9 @@ func autogenerateConfigs(opts Options) error {
 			if opts.Distro == "" {
 				return fmt.Errorf("kernel-crawler last run distro '%s' unsupported.\n", lastDistro)
 			}
+		} else {
+			// This will match all supported distros
+			opts.Distro = ""
 		}
 	}
 
@@ -123,7 +126,7 @@ func autogenerateConfigs(opts Options) error {
 					continue
 				}
 
-				slog.Info("generating configs",
+				slog.Info("generating",
 					"target", kernelEntry.Target,
 					"kernelrelease", kernelEntry.KernelRelease,
 					"kernelversion", kernelEntry.KernelVersion)

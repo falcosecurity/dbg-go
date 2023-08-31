@@ -1,9 +1,11 @@
 package validate
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/fededp/dbg-go/pkg/utils"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	"log/slog"
 	"os"
@@ -18,6 +20,11 @@ func Run(opts Options) error {
 	})
 }
 
+func isBase64(s string) bool {
+	_, err := base64.StdEncoding.DecodeString(s)
+	return err == nil
+}
+
 func validateConfig(configPath, architecture, driverName, driverVersion string) error {
 	configData, err := os.ReadFile(configPath)
 	if err != nil {
@@ -26,10 +33,14 @@ func validateConfig(configPath, architecture, driverName, driverVersion string) 
 	var driverkitYaml DriverkitYaml
 	err = yaml.Unmarshal(configData, &driverkitYaml)
 	if err != nil {
-		return err
+		return errors.WithMessagef(err, "config: %s", configPath)
 	}
 
-	slog.Debug("validating", "parsedConfig", driverkitYaml)
+	slog.Info("validating",
+		"config", configPath,
+		"target", driverkitYaml.Target,
+		"kernelrelease", driverkitYaml.KernelRelease,
+		"kernelversion", driverkitYaml.KernelVersion)
 
 	// Check that filename is ok
 	kernelEntry := KernelEntry{
@@ -37,7 +48,7 @@ func validateConfig(configPath, architecture, driverName, driverVersion string) 
 		KernelRelease:    driverkitYaml.KernelRelease,
 		Target:           driverkitYaml.Target,
 		Headers:          driverkitYaml.KernelUrls,
-		KernelConfigData: []byte(driverkitYaml.KernelConfigData),
+		KernelConfigData: driverkitYaml.KernelConfigData,
 	}
 	expectedFilename := kernelEntry.ToConfigName()
 	configFilename := filepath.Base(configPath)
@@ -90,6 +101,11 @@ func validateConfig(configPath, architecture, driverName, driverVersion string) 
 			return fmt.Errorf("output module filename has wrong architecture in its path (%s); expected %s",
 				driverkitYaml.Output.Module, architecture)
 		}
+	}
+
+	// Kernelconfigdata, if present, must be base64 encoded
+	if len(driverkitYaml.KernelConfigData) > 0 && !isBase64(driverkitYaml.KernelConfigData) {
+		return fmt.Errorf("kernelconfigdata must be a base64 encoded string")
 	}
 
 	return nil
