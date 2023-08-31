@@ -16,7 +16,7 @@ type KernelEntry struct {
 	KernelRelease    string   `json:"kernelrelease"`
 	Target           string   `json:"target"`
 	Headers          []string `json:"headers"`
-	KernelConfigData []byte   `json:"kernelconfigdata"`
+	KernelConfigData string   `json:"kernelconfigdata"`
 }
 
 func (ke *KernelEntry) ToConfigName() string {

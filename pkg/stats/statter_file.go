@@ -3,6 +3,7 @@ package stats
 import (
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/fededp/dbg-go/pkg/validate"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	"log/slog"
 	"os"
@@ -34,7 +35,7 @@ func getConfigStats(dStats *driverStats, configPath string) error {
 	var driverkitYaml validate.DriverkitYaml
 	err = yaml.Unmarshal(configData, &driverkitYaml)
 	if err != nil {
-		return err
+		return errors.WithMessagef(err, "config: %s", configPath)
 	}
 
 	slog.Debug("fetching stats", "parsedConfig", driverkitYaml)

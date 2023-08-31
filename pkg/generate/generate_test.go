@@ -220,6 +220,11 @@ func TestGenerate(t *testing.T) {
 				assert.NoError(t, err)
 				// Validate all generated files
 				validateOpts := validate.Options{Options: test.opts.Options, DriverName: test.opts.DriverName}
+				if validateOpts.Distro == "load" {
+					// When we load from last kernel-crawler distro,
+					// force validate all
+					validateOpts.Distro = ""
+				}
 				err = validate.Run(validateOpts)
 				assert.NoError(t, err)
 			}
