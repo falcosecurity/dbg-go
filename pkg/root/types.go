@@ -2,6 +2,7 @@ package root
 
 import (
 	"fmt"
+	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
 	"github.com/spf13/viper"
 	"log/slog"
 	"regexp"
@@ -33,6 +34,11 @@ func (t Target) ToGlob() string {
 
 func (t Target) DistroFilter(distro string) bool {
 	matched, _ := regexp.MatchString(t.Distro, distro)
+	// check if key is actually supported
+	if matched {
+		_, ok := SupportedDistros[builder.Type(distro)]
+		return ok
+	}
 	return matched
 }
 
