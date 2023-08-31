@@ -72,28 +72,32 @@ Using `goreleaser`, multiple artifacts are attached to each github release; amon
 
 <details>
   <summary>Fetch stats about local dbg configs for all supported driver versions by test-infra, for host architecture</summary>
-  ```bash
-  ./dbg-go configs stats --repo-root test-infra
-  ```
+  
+```bash
+./dbg-go configs stats --repo-root test-infra
+```
 </details>
 
 <details>
   <summary>Fetch stats about remote drivers for 5.0.1+driver driver version, for host architecture</summary>
-  ```bash
-  ./dbg-go s3 stats --driver-version 5.0.1+driver
-  ```
+  
+```bash
+./dbg-go s3 stats --driver-version 5.0.1+driver
+```
 </details>
 
 <details>
-  <summary>Validate local configs for 5.0.1+driver driver version, for aarch64</summary>
-  ```bash
-  ./dbg-go configs validate --driver-version 5.0.1+driver --architecture aarch64
-  ```
+  <summary>Validate local configs for 5.0.1+driver driver version, for arm64</summary>
+  
+```bash
+./dbg-go configs validate --driver-version 5.0.1+driver --architecture arm64
+```
 </details>
 
 <details>
   <summary>Generate configs for all supported driver versions by test-infra from kernel-crawler output, for host architecture</summary>
-  ```bash
-  ./dbg-go configs generate --repo-root test-infra --auto
-  ```
+  
+```bash
+./dbg-go configs generate --repo-root test-infra --auto
+```
 </details>
