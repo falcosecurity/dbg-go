@@ -45,9 +45,7 @@ func TestGenerate(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
 					Target: root.Target{
-						Distro:        "", // Should load it from lastDistro kernel crawler file
-						KernelRelease: "",
-						KernelVersion: "",
+						Distro: "load", // Should load it from lastDistro kernel crawler file
 					},
 				},
 				DriverName: "falco",
@@ -61,11 +59,6 @@ func TestGenerate(t *testing.T) {
 					RepoRoot:      "./test/",
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
-					Target: root.Target{
-						Distro:        "^.*$", // Avoid loading from lastDistro kernel-crawler file, instead force-set any distro
-						KernelRelease: "",
-						KernelVersion: "",
-					},
 				},
 				DriverName: "falco",
 				Auto:       true,
@@ -79,9 +72,7 @@ func TestGenerate(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "CentOS",
-						KernelRelease: "",
-						KernelVersion: "",
+						Distro: "centos",
 					},
 				},
 				DriverName: "falco",
@@ -96,9 +87,7 @@ func TestGenerate(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "WRONG_DISTRO",
-						KernelRelease: "",
-						KernelVersion: "",
+						Distro: "WRONG_DISTRO",
 					},
 				},
 				DriverName: "falco",
@@ -113,9 +102,7 @@ func TestGenerate(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "CentOS",
-						KernelRelease: "",
-						KernelVersion: "",
+						Distro: "centos",
 					},
 				},
 				DriverName: "CUSTOM",
@@ -130,9 +117,7 @@ func TestGenerate(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "^Cent.*$",
-						KernelRelease: "",
-						KernelVersion: "",
+						Distro: "^cent.*$",
 					},
 				},
 				DriverName: "CUSTOM",
@@ -147,8 +132,7 @@ func TestGenerate(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "CentOS",
-						KernelRelease: "",
+						Distro:        "centos",
 						KernelVersion: "1",
 					},
 				},
@@ -163,9 +147,8 @@ func TestGenerate(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "CentOS",
+						Distro:        "centos",
 						KernelRelease: "5.10.0",
-						KernelVersion: "",
 					},
 				},
 				DriverName: "falco",
@@ -179,7 +162,6 @@ func TestGenerate(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "",
 						KernelRelease: "5.10.0",
 						KernelVersion: "1",
 					},
@@ -213,7 +195,7 @@ func TestGenerate(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "Debian",
+						Distro:        "debian",
 						KernelRelease: "6.1.38-2-amd64",
 						KernelVersion: "1",
 					},

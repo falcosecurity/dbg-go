@@ -36,47 +36,66 @@ func loadLastRunDistro() (string, error) {
 	return lastDistro, nil
 }
 
+func toKernelCrawlerDistro(opts root.Options) (string, error) {
+	kcDistro, found := root.SupportedDistros[builder.Type(opts.Distro)]
+	if found {
+		return string(kcDistro), nil
+	}
+	// either distro is empty (all!), a non-existent distro was passed, or a regex was passed.
+	// Try to go on.
+	return opts.Distro, nil
+}
+
 func Run(opts Options) error {
 	if opts.Auto {
-		url := fmt.Sprintf(urlArchFmt, opts.Architecture)
-		slog.Debug("downloading json data", "url", url)
-
-		// Fetch kernel list json
-		var (
-			jsonData []byte
-			err      error
-		)
-
-		// In case testJsonData is set,
-		if testJsonData != nil {
-			jsonData = testJsonData
-		} else {
-			jsonData, err = utils.GetURL(url)
-		}
-		if err != nil {
-			return err
-		}
-		slog.Debug("fetched json")
-		if testCacheData {
-			testJsonData = jsonData
-		}
-
-		if opts.Distro == "" {
-			// Fetch last distro kernel-crawler ran against
-			opts.Distro, err = loadLastRunDistro()
-			if err != nil {
-				return err
-			}
-			slog.Debug("loaded last-distro")
-		}
-		return autogenerateConfigs(opts, jsonData)
+		return autogenerateConfigs(opts)
 	} else if opts.IsSet() {
 		return generateSingleConfig(opts)
 	}
 	return fmt.Errorf(`either "auto" or target-{distro,kernelrelease,kernelversion} must be passed`)
 }
 
-func autogenerateConfigs(opts Options, jsonData []byte) error {
+// This is the only function where opts.Distro gets overridden using KernelCrawler namings
+func autogenerateConfigs(opts Options) error {
+	url := fmt.Sprintf(urlArchFmt, opts.Architecture)
+	slog.Debug("downloading json data", "url", url)
+
+	// Fetch kernel list json
+	var (
+		jsonData []byte
+		err      error
+	)
+
+	// In case testJsonData is set,
+	if testJsonData != nil {
+		jsonData = testJsonData
+	} else {
+		jsonData, err = utils.GetURL(url)
+	}
+	if err != nil {
+		return err
+	}
+	slog.Debug("fetched json")
+	if testCacheData {
+		testJsonData = jsonData
+	}
+
+	// either download latest distro from kernel-crawler
+	// or translate the driverkit distro provided by the user to its kernel-crawler naming
+	if opts.Distro == "load" {
+		// Fetch last distro kernel-crawler ran against
+		opts.Distro, err = loadLastRunDistro()
+		if err != nil {
+			return err
+		}
+		slog.Debug("loaded last-distro")
+	} else {
+		opts.Distro, err = toKernelCrawlerDistro(opts.Options)
+		if err != nil {
+			return err
+		}
+	}
+
 	slog.SetDefault(slog.With("target-distro", opts.Distro))
 
 	// Generate a dynamic struct with all needed distros
@@ -84,8 +103,8 @@ func autogenerateConfigs(opts Options, jsonData []byte) error {
 	// else, we will add all SupportedDistros found in constants.go
 	distroCtr := 0
 	instanceBuilder := dynamicstruct.NewStruct()
-	for distro, _ := range root.SupportedDistros {
-		distroStr := string(distro)
+	for _, kcDistro := range root.SupportedDistros {
+		distroStr := string(kcDistro)
 		if opts.DistroFilter(distroStr) {
 			tag := fmt.Sprintf(`json:"%s"`, distroStr)
 			instanceBuilder.AddField(distroStr, []validate.KernelEntry{}, tag)
@@ -98,7 +117,7 @@ func autogenerateConfigs(opts Options, jsonData []byte) error {
 	dynamicInstance := instanceBuilder.Build().New()
 
 	// Unmarshal the big json
-	err := json.Unmarshal(jsonData, &dynamicInstance)
+	err = json.Unmarshal(jsonData, &dynamicInstance)
 	if err != nil {
 		return err
 	}
@@ -181,10 +200,6 @@ func loadKernelHeadersFromDk(opts Options) ([]string, error) {
 }
 
 func generateSingleConfig(opts Options) error {
-	// Translate opts.Distro to a driverkit distro
-	kDistro := root.KernelCrawlerDistro(opts.Distro)
-	opts.Distro = kDistro.ToDriverkitDistro().String()
-
 	kernelheaders, err := loadKernelHeadersFromDk(opts)
 	if err != nil {
 		var unsupportedTargetError *unsupportedTargetErr

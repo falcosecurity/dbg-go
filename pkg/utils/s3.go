@@ -42,10 +42,6 @@ func LoopBucketFiltered(client *s3.Client,
 	driverVersion string,
 	keyProcessor func(key string) error,
 ) error {
-	kDistro := root.KernelCrawlerDistro(opts.Distro)
-	dkDistro := kDistro.ToDriverkitDistro()
-	opts.Distro = string(dkDistro)
-
 	prefix := filepath.Join("driver", driverVersion, opts.Architecture)
 	params := &s3.ListObjectsV2Input{
 		Bucket: aws.String(S3Bucket),

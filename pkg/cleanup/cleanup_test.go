@@ -118,9 +118,7 @@ func TestCleanupFiltered(t *testing.T) {
 				Architecture:  "x86_64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
-					Distro:        "Ubun*",
-					KernelRelease: "",
-					KernelVersion: "",
+					Distro: "ubun*",
 				},
 			}},
 			expectedOutputContains: []string{"ubuntu_5.15", "ubuntu_5.19"},
@@ -132,8 +130,6 @@ func TestCleanupFiltered(t *testing.T) {
 				Architecture:  "x86_64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
-					Distro:        "",
-					KernelRelease: "",
 					KernelVersion: "24",
 				},
 			}},
@@ -146,9 +142,7 @@ func TestCleanupFiltered(t *testing.T) {
 				Architecture:  "x86_64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
-					Distro:        "",
 					KernelRelease: "6.0.0",
-					KernelVersion: "",
 				},
 			}},
 			expectedOutputContains: []string{"amazonlinux_6.0", "talos_6.0"},
@@ -230,7 +224,7 @@ func TestCleanupS3(t *testing.T) {
 				Architecture:  "x86_64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
-					Distro: "Debian",
+					Distro: "debian",
 				},
 			}},
 			remainingObjects: []string{
@@ -246,7 +240,7 @@ func TestCleanupS3(t *testing.T) {
 				Architecture:  "x86_64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
-					Distro: "AmazonLin*",
+					Distro: "amazonlin*",
 				},
 			}},
 			remainingObjects: []string{

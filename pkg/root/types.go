@@ -21,10 +21,6 @@ func (t Target) ToGlob() string {
 	// Empty filters fallback at ".*" since we are using a regex match below
 	if t.Distro == "" {
 		t.Distro = "*"
-	} else {
-		kDistro := KernelCrawlerDistro(t.Distro)
-		dkDistro := kDistro.ToDriverkitDistro()
-		t.Distro = string(dkDistro)
 	}
 	if t.KernelRelease == "" {
 		t.KernelRelease = "*"

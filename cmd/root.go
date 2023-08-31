@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"os"
 	"runtime"
+	"strings"
 )
 
 var (
@@ -64,6 +65,7 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	flags := rootCmd.PersistentFlags()
 	flags.Bool("dry-run", false, "enable dry-run mode.")
 	flags.StringP("log-level", "l", slog.LevelInfo.String(), "set log verbosity.")
@@ -75,16 +77,13 @@ func init() {
 	flags.String("target-kernelversion", "",
 		`target kernel version to work against. By default tool will work on any kernel version. Can be a regex.`)
 	flags.String("target-distro", "",
-		`target distro to work against. By default tool will work on any supported distro. Can be a regex.`)
+		`target distro to work against. By default tool will work on any supported distro. Can be a regex.
+Supported distros: [`+strings.Join(root.SupportedDistroSlice, ",")+"].")
 
-	rootCmd.RegisterFlagCompletionFunc("target-distro", func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		supportedDistrosSlice := make([]string, 0)
-		for distro, _ := range root.SupportedDistros {
-			supportedDistrosSlice = append(supportedDistrosSlice, string(distro))
-		}
-		return supportedDistrosSlice, cobra.ShellCompDirectiveDefault
-	})
 	// Custom completions
+	rootCmd.RegisterFlagCompletionFunc("target-distro", func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return root.SupportedDistroSlice, cobra.ShellCompDirectiveDefault
+	})
 	rootCmd.RegisterFlagCompletionFunc("architecture", func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return utils.SupportedArchList(), cobra.ShellCompDirectiveDefault
 	})
