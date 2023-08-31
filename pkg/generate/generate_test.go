@@ -93,7 +93,7 @@ func TestGenerate(t *testing.T) {
 				DriverName: "falco",
 				Auto:       true,
 			},
-			expectError: true,
+			expectError: false, // we do not expect any error; no configs will be generated though
 		},
 		"run in auto mode with single target distro on single driver version with custom driver name": {
 			opts: Options{
