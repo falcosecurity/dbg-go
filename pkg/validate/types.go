@@ -10,19 +10,6 @@ type Options struct {
 	DriverName string
 }
 
-// KernelEntry is the json output from kernel-crawler schema
-type KernelEntry struct {
-	KernelVersion    string   `json:"kernelversion"`
-	KernelRelease    string   `json:"kernelrelease"`
-	Target           string   `json:"target"`
-	Headers          []string `json:"headers"`
-	KernelConfigData string   `json:"kernelconfigdata"`
-}
-
-func (ke *KernelEntry) ToConfigName() string {
-	return fmt.Sprintf("%s_%s_%s.yaml", ke.Target, ke.KernelRelease, ke.KernelVersion)
-}
-
 type DriverkitYamlOutputs struct {
 	Module string `yaml:"module"`
 	Probe  string `yaml:"probe"`
@@ -30,11 +17,15 @@ type DriverkitYamlOutputs struct {
 
 // DriverkitYaml is the driverkit config schema
 type DriverkitYaml struct {
-	KernelVersion    string               `yaml:"kernelversion"`
-	KernelRelease    string               `yaml:"kernelrelease"`
-	Target           string               `yaml:"target"`
+	KernelVersion    string               `yaml:"kernelversion" json:"kernelversion"`
+	KernelRelease    string               `yaml:"kernelrelease" json:"kernelrelease"`
+	Target           string               `yaml:"target" json:"target"`
 	Architecture     string               `yaml:"architecture"`
 	Output           DriverkitYamlOutputs `yaml:"output"`
-	KernelUrls       []string             `yaml:"kernelurls,omitempty"`
-	KernelConfigData string               `yaml:"kernelconfigdata,omitempty"`
+	KernelUrls       []string             `yaml:"kernelurls,omitempty" json:"headers"`
+	KernelConfigData string               `yaml:"kernelconfigdata,omitempty" json:"kernelconfigdata"`
+}
+
+func (dy *DriverkitYaml) ToConfigName() string {
+	return fmt.Sprintf("%s_%s_%s.yaml", dy.Target, dy.KernelRelease, dy.KernelVersion)
 }

@@ -94,7 +94,7 @@ func autogenerateConfigs(opts Options) error {
 	}
 
 	slog.SetDefault(slog.With("target-distro", opts.Distro))
-	fullJson := map[string][]validate.KernelEntry{}
+	fullJson := map[string][]validate.DriverkitYaml{}
 
 	// Unmarshal the big json
 	err = json.Unmarshal(jsonData, &fullJson)
@@ -200,38 +200,31 @@ func generateSingleConfig(opts Options) error {
 		slog.Warn(err.Error())
 	}
 
-	kernelEntry := validate.KernelEntry{
+	driverkitYaml := validate.DriverkitYaml{
 		KernelVersion: opts.KernelVersion,
 		KernelRelease: opts.KernelRelease,
 		Target:        opts.Distro,
-		Headers:       kernelheaders,
+		KernelUrls:    kernelheaders,
 	}
-	return dumpConfig(opts, kernelEntry)
+	return dumpConfig(opts, driverkitYaml)
 }
 
-func dumpConfig(opts Options, kernelEntry validate.KernelEntry) error {
-	driverkitYaml := validate.DriverkitYaml{
-		KernelVersion:    kernelEntry.KernelVersion,
-		KernelRelease:    kernelEntry.KernelRelease,
-		Target:           kernelEntry.Target,
-		Architecture:     utils.ToDebArch(opts.Architecture),
-		KernelUrls:       kernelEntry.Headers,
-		KernelConfigData: string(kernelEntry.KernelConfigData),
-	}
+func dumpConfig(opts Options, dkYaml validate.DriverkitYaml) error {
+	dkYaml.Architecture = utils.ToDebArch(opts.Architecture)
 
 	for _, driverVersion := range opts.DriverVersion {
 		outputPath := fmt.Sprintf(validate.OutputPathFmt,
 			driverVersion,
 			opts.Architecture,
 			opts.DriverName,
-			kernelEntry.Target,
-			kernelEntry.KernelRelease,
-			kernelEntry.KernelVersion)
-		driverkitYaml.Output = validate.DriverkitYamlOutputs{
+			dkYaml.Target,
+			dkYaml.KernelRelease,
+			dkYaml.KernelVersion)
+		dkYaml.Output = validate.DriverkitYamlOutputs{
 			Module: outputPath + ".ko",
 			Probe:  outputPath + ".o",
 		}
-		yamlData, pvtErr := yaml.Marshal(&driverkitYaml)
+		yamlData, pvtErr := yaml.Marshal(&dkYaml)
 		if pvtErr != nil {
 			return pvtErr
 		}
@@ -240,7 +233,7 @@ func dumpConfig(opts Options, kernelEntry validate.KernelEntry) error {
 			opts.RepoRoot,
 			driverVersion,
 			opts.Architecture,
-			kernelEntry.ToConfigName())
+			dkYaml.ToConfigName())
 
 		// Make sure folder exists
 		pvtErr = os.MkdirAll(filepath.Dir(configPath), os.ModePerm)
