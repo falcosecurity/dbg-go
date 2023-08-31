@@ -46,7 +46,7 @@ func Run(opts Options) error {
 
 // This is the only function where opts.Distro gets overridden using KernelCrawler namings
 func autogenerateConfigs(opts Options) error {
-	url := fmt.Sprintf(urlArchFmt, opts.Architecture)
+	url := fmt.Sprintf(urlArchFmt, opts.Architecture.ToNonDeb())
 	slog.Debug("downloading json data", "url", url)
 
 	// Fetch kernel list json
