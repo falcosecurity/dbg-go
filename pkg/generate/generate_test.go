@@ -38,7 +38,7 @@ func TestGenerate(t *testing.T) {
 		opts        Options
 		expectError bool
 	}{
-		"run in auto mode without target distro on multiple driver versions": {
+		"run in auto mode with loaded from kernel-crawler distro on multiple driver versions": {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",

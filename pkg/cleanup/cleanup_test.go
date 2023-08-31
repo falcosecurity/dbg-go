@@ -267,7 +267,7 @@ func TestCleanupS3(t *testing.T) {
 		},
 		{
 			opts: Options{Options: root.Options{
-				Architecture:  "amd64",
+				Architecture:  "arm64",
 				DriverVersion: []string{"2.0.0+driver"},
 			}},
 			remainingObjects: []string{},
