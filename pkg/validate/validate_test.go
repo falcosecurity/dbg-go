@@ -455,11 +455,6 @@ func TestValidateConfigFiltered(t *testing.T) {
 					RepoRoot:      "./test/",
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
-					Target: root.Target{
-						Distro:        "",
-						KernelRelease: "",
-						KernelVersion: "",
-					},
 				},
 				DriverName: "falco",
 			},
@@ -472,9 +467,7 @@ func TestValidateConfigFiltered(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "CentOS",
-						KernelRelease: "",
-						KernelVersion: "",
+						Distro: "centos",
 					},
 				},
 				DriverName: "falco",
@@ -488,9 +481,7 @@ func TestValidateConfigFiltered(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "Cent*",
-						KernelRelease: "",
-						KernelVersion: "",
+						Distro: "cent*",
 					},
 				},
 				DriverName: "falco",
@@ -504,9 +495,7 @@ func TestValidateConfigFiltered(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "BottleRocket",
-						KernelRelease: "",
-						KernelVersion: "",
+						Distro: "bottlerocket",
 					},
 				},
 				DriverName: "falco",
@@ -520,9 +509,7 @@ func TestValidateConfigFiltered(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "",
 						KernelRelease: "5.15.*",
-						KernelVersion: "",
 					},
 				},
 				DriverName: "falco",
@@ -536,8 +523,6 @@ func TestValidateConfigFiltered(t *testing.T) {
 					Architecture:  "x86_64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
-						Distro:        "",
-						KernelRelease: "",
 						KernelVersion: "1",
 					},
 				},

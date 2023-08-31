@@ -185,9 +185,7 @@ func TestStats(t *testing.T) {
 				Architecture:  "x86_64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
-					Distro:        "CentOS",
-					KernelRelease: "",
-					KernelVersion: "",
+					Distro: "centos",
 				},
 			}},
 			expectedStats: driverStats{
@@ -201,9 +199,7 @@ func TestStats(t *testing.T) {
 				Architecture:  "x86_64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
-					Distro:        "Cent*",
-					KernelRelease: "",
-					KernelVersion: "",
+					Distro: "cent*",
 				},
 			}},
 			expectedStats: driverStats{
@@ -217,9 +213,7 @@ func TestStats(t *testing.T) {
 				Architecture:  "x86_64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
-					Distro:        "",
 					KernelRelease: "5.10.*",
-					KernelVersion: "",
 				},
 			}},
 			expectedStats: driverStats{
@@ -233,8 +227,6 @@ func TestStats(t *testing.T) {
 				Architecture:  "x86_64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
-					Distro:        "",
-					KernelRelease: "",
 					KernelVersion: "1",
 				},
 			}},
@@ -363,9 +355,7 @@ func TestStatsS3(t *testing.T) {
 				Architecture:  "x86_64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
 				Target: root.Target{
-					Distro:        "AlmaLinux",
-					KernelRelease: "",
-					KernelVersion: "",
+					Distro: "almalinux",
 				},
 			}},
 			expectedStats: driverStatsByDriverVersion{
@@ -384,9 +374,7 @@ func TestStatsS3(t *testing.T) {
 				Architecture:  "x86_64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
 				Target: root.Target{
-					Distro:        "AlmaLi*",
-					KernelRelease: "",
-					KernelVersion: "",
+					Distro: "almali*",
 				},
 			}},
 			expectedStats: driverStatsByDriverVersion{
@@ -405,9 +393,7 @@ func TestStatsS3(t *testing.T) {
 				Architecture:  "x86_64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
 				Target: root.Target{
-					Distro:        "",
 					KernelRelease: "5.*",
-					KernelVersion: "",
 				},
 			}},
 			expectedStats: driverStatsByDriverVersion{

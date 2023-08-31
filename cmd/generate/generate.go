@@ -14,9 +14,10 @@ func NewGenerateCmd() *cobra.Command {
 		Long: `
 In auto mode, configs will be generated starting from kernel-crawler output. 
 In this scenario, target-{distro,kernelrelease,kernelversion} are available to filter to-be-generated configs. Regexes are allowed.
-Instead, when auto mode is not enabled, the tool is able to generate a single config (for each driver version).
+Moreover, you can pass special value "load" as target-distro to make the tool automatically fetch latest distro kernel-crawler ran against.
+Instead, when auto mode is disabled, the tool is able to generate a single config (for each driver version).
 In this scenario, target-{distro,kernelrelease,kernelversion} CANNOT be regexes but must be exact values.
-Also, in non-automatic mode, kernelurls driverkit config key will be constructed using driverkit logic.
+Also, in non-automatic mode, kernelurls driverkit config key will be constructed using driverkit libraries.
 `,
 		RunE: execute,
 	}
