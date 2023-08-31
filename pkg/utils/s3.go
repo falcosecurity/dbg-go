@@ -46,21 +46,6 @@ func LoopBucketFiltered(client *s3.Client,
 	dkDistro := kDistro.ToDriverkitDistro()
 	opts.Distro = string(dkDistro)
 
-	distroFilter := func(distro string) bool {
-		matched, _ := regexp.MatchString(opts.Distro, distro)
-		return matched
-	}
-
-	kernelreleaseFilter := func(kernelrelease string) bool {
-		matched, _ := regexp.MatchString(opts.KernelRelease, kernelrelease)
-		return matched
-	}
-
-	kernelversionFilter := func(kernelversion string) bool {
-		matched, _ := regexp.MatchString(opts.KernelVersion, kernelversion)
-		return matched
-	}
-
 	prefix := filepath.Join("driver", driverVersion, opts.Architecture)
 	params := &s3.ListObjectsV2Input{
 		Bucket: aws.String(S3Bucket),
@@ -93,15 +78,15 @@ func LoopBucketFiltered(client *s3.Client,
 				if i > 0 && i <= len(matches) {
 					switch name {
 					case "Distro":
-						if !distroFilter(matches[i]) {
+						if !opts.DistroFilter(matches[i]) {
 							continue keyLoop
 						}
 					case "KernelRelease":
-						if !kernelreleaseFilter(matches[i]) {
+						if !opts.KernelReleaseFilter(matches[i]) {
 							continue keyLoop
 						}
 					case "KernelVersion":
-						if !kernelversionFilter(matches[i]) {
+						if !opts.KernelVersionFilter(matches[i]) {
 							continue keyLoop
 						}
 					}

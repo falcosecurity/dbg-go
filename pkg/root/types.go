@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"log/slog"
+	"regexp"
 )
 
 type Target struct {
@@ -32,6 +33,21 @@ func (t Target) ToGlob() string {
 		t.KernelVersion = "*"
 	}
 	return fmt.Sprintf("%s_%s_%s.yaml", t.Distro, t.KernelRelease, t.KernelVersion)
+}
+
+func (t Target) DistroFilter(distro string) bool {
+	matched, _ := regexp.MatchString(t.Distro, distro)
+	return matched
+}
+
+func (t Target) KernelReleaseFilter(kernelrelease string) bool {
+	matched, _ := regexp.MatchString(t.KernelRelease, kernelrelease)
+	return matched
+}
+
+func (t Target) KernelVersionFilter(kernelversion string) bool {
+	matched, _ := regexp.MatchString(t.KernelVersion, kernelversion)
+	return matched
 }
 
 type Options struct {

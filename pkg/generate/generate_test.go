@@ -9,7 +9,30 @@ import (
 	"testing"
 )
 
-func TestAutogenerate(t *testing.T) {
+func BenchmarkAutogenerate(b *testing.B) {
+	testCacheData = true // enable json data caching for subsequent tests
+	opts := Options{
+		Options: root.Options{
+			RepoRoot:      "./test/",
+			Architecture:  "x86_64",
+			DriverVersion: []string{"5.0.1+driver"},
+		},
+		DriverName: "falco",
+		Auto:       true,
+	}
+
+	b.StopTimer()
+
+	for n := 0; n < b.N; n++ {
+		b.StartTimer()
+		err := Run(opts)
+		assert.NoError(b, err)
+		b.StopTimer()
+		_ = os.RemoveAll("./test/")
+	}
+}
+
+func TestGenerate(t *testing.T) {
 	testCacheData = true // enable json data caching for subsequent tests
 	tests := map[string]struct {
 		opts        Options
