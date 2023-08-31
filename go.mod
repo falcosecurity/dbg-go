@@ -10,7 +10,6 @@ require (
 	github.com/falcosecurity/driverkit v0.14.1-0.20230828134718-835307efe091
 	github.com/johannesboyne/gofakes3 v0.0.0-20230506070712-04da935ef877
 	github.com/olekukonko/tablewriter v0.0.4
-	github.com/ompluscator/dynamic-struct v1.4.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.3

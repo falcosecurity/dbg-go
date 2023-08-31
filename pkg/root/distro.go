@@ -38,3 +38,12 @@ func init() {
 	}
 	sort.Strings(SupportedDistroSlice)
 }
+
+func ToDriverkitDistro(distro KernelCrawlerDistro) builder.Type {
+	for key, val := range SupportedDistros {
+		if val == distro {
+			return key
+		}
+	}
+	return builder.Type("")
+}

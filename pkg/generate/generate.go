@@ -9,7 +9,6 @@ import (
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/fededp/dbg-go/pkg/utils"
 	"github.com/fededp/dbg-go/pkg/validate"
-	dynamicstruct "github.com/ompluscator/dynamic-struct"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
 	"log/slog"
@@ -34,16 +33,6 @@ func loadLastRunDistro() (string, error) {
 		lastDistro = ""
 	}
 	return lastDistro, nil
-}
-
-func toKernelCrawlerDistro(opts root.Options) (string, error) {
-	kcDistro, found := root.SupportedDistros[builder.Type(opts.Distro)]
-	if found {
-		return string(kcDistro), nil
-	}
-	// either distro is empty (all!), a non-existent distro was passed, or a regex was passed.
-	// Try to go on.
-	return opts.Distro, nil
 }
 
 func Run(opts Options) error {
@@ -71,10 +60,11 @@ func autogenerateConfigs(opts Options) error {
 		jsonData = testJsonData
 	} else {
 		jsonData, err = utils.GetURL(url)
+		if err != nil {
+			return err
+		}
 	}
-	if err != nil {
-		return err
-	}
+
 	slog.Debug("fetched json")
 	if testCacheData {
 		testJsonData = jsonData
@@ -84,58 +74,45 @@ func autogenerateConfigs(opts Options) error {
 	// or translate the driverkit distro provided by the user to its kernel-crawler naming
 	if opts.Distro == "load" {
 		// Fetch last distro kernel-crawler ran against
-		opts.Distro, err = loadLastRunDistro()
+		lastDistro, err := loadLastRunDistro()
 		if err != nil {
 			return err
 		}
-		slog.Debug("loaded last-distro")
-	} else {
-		opts.Distro, err = toKernelCrawlerDistro(opts.Options)
-		if err != nil {
-			return err
+		slog.Debug("loaded last-distro", "distro", lastDistro)
+
+		// Map back the kernel crawler distro to our internal driverkit distro
+		opts.Distro = root.ToDriverkitDistro(root.KernelCrawlerDistro(lastDistro)).String()
+		if opts.Distro == "" {
+			return fmt.Errorf("kernel-crawler last run distro '%s' unsupported.\n", lastDistro)
 		}
 	}
 
 	slog.SetDefault(slog.With("target-distro", opts.Distro))
-
-	// Generate a dynamic struct with all needed distros
-	// NOTE: we might need a single distro when `lastDistro` is != "*";
-	// else, we will add all SupportedDistros found in constants.go
-	distroCtr := 0
-	instanceBuilder := dynamicstruct.NewStruct()
-	for _, kcDistro := range root.SupportedDistros {
-		distroStr := string(kcDistro)
-		if opts.DistroFilter(distroStr) {
-			tag := fmt.Sprintf(`json:"%s"`, distroStr)
-			instanceBuilder.AddField(distroStr, []validate.KernelEntry{}, tag)
-			distroCtr++
-		}
-	}
-	if distroCtr == 0 {
-		return fmt.Errorf("unsupported target distro: %s. Must be one of: %v", opts.Distro, root.SupportedDistros)
-	}
-	dynamicInstance := instanceBuilder.Build().New()
+	fullJson := map[string][]validate.KernelEntry{}
 
 	// Unmarshal the big json
-	err = json.Unmarshal(jsonData, &dynamicInstance)
+	err = json.Unmarshal(jsonData, &fullJson)
 	if err != nil {
 		return err
 	}
 	slog.Debug("unmarshaled json")
 	var errGrp errgroup.Group
 
-	reader := dynamicstruct.NewReader(dynamicInstance)
-	for _, f := range reader.GetAllFields() {
-		slog.Info("generating configs", "distro", f.Name())
-		if opts.DryRun {
-			slog.Info("skipping because of dry-run.")
+	for kcDistro, f := range fullJson {
+		kernelEntries := f
+
+		dkDistro := root.ToDriverkitDistro(root.KernelCrawlerDistro(kcDistro))
+
+		// Skip unneeded kernel entries
+		// optimization for target-distro: skip entire key
+		// instead of skipping objects one by one.
+		if !opts.DistroFilter(dkDistro.String()) {
 			continue
 		}
-		kernelEntries := f.Interface().([]validate.KernelEntry)
+
 		// A goroutine for each distro
 		errGrp.Go(func() error {
 			for _, kernelEntry := range kernelEntries {
-				// Skip unneeded kernel entries
 				if !opts.KernelVersionFilter(kernelEntry.KernelRelease) {
 					continue
 				}
@@ -143,6 +120,14 @@ func autogenerateConfigs(opts Options) error {
 					continue
 				}
 
+				slog.Info("generating configs",
+					"target", kernelEntry.Target,
+					"kernelrelease", kernelEntry.KernelRelease,
+					"kernelversion", kernelEntry.KernelVersion)
+				if opts.DryRun {
+					slog.Info("skipping because of dry-run.")
+					continue
+				}
 				if pvtErr := dumpConfig(opts, kernelEntry); pvtErr != nil {
 					return pvtErr
 				}
