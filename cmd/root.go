@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
 	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
@@ -26,7 +26,7 @@ var (
 
 			arch := viper.GetString("architecture")
 			driverVersions := viper.GetStringSlice("driver-version")
-			if !utils.IsArchSupported(arch) {
+			if _, present := kernelrelease.SupportedArchs[kernelrelease.Architecture(arch)]; !present {
 				return fmt.Errorf("arch %s is not supported", arch)
 			}
 			if len(driverVersions) == 0 {
@@ -70,7 +70,7 @@ func init() {
 	flags.Bool("dry-run", false, "enable dry-run mode.")
 	flags.StringP("log-level", "l", slog.LevelInfo.String(), "set log verbosity.")
 	flags.String("repo-root", cwd, "test-infra repository root path.")
-	flags.StringP("architecture", "a", utils.FromDebArch(runtime.GOARCH), "architecture to run against.")
+	flags.StringP("architecture", "a", runtime.GOARCH, "architecture to run against.")
 	flags.StringSlice("driver-version", nil, "driver versions to run against.")
 	flags.String("target-kernelrelease", "",
 		`target kernel release to work against. By default tool will work on any kernel release. Can be a regex.`)
@@ -85,7 +85,7 @@ Supported distros: [`+strings.Join(root.SupportedDistroSlice, ",")+"].")
 		return root.SupportedDistroSlice, cobra.ShellCompDirectiveDefault
 	})
 	rootCmd.RegisterFlagCompletionFunc("architecture", func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return utils.SupportedArchList(), cobra.ShellCompDirectiveDefault
+		return kernelrelease.SupportedArchs.Strings(), cobra.ShellCompDirectiveDefault
 	})
 
 	// Subcommands

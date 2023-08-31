@@ -29,3 +29,13 @@ type DriverkitYaml struct {
 func (dy *DriverkitYaml) ToConfigName() string {
 	return fmt.Sprintf("%s_%s_%s.yaml", dy.Target, dy.KernelRelease, dy.KernelVersion)
 }
+
+func (dy *DriverkitYaml) ToOutputPath(driverVersion string, opts Options) string {
+	return fmt.Sprintf(outputPathFmt,
+		driverVersion,
+		opts.Architecture.ToNonDeb(),
+		opts.DriverName,
+		dy.Target,
+		dy.KernelRelease,
+		dy.KernelVersion)
+}

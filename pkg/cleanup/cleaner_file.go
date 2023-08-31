@@ -1,7 +1,6 @@
 package cleanup
 
 import (
-	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
 	"log/slog"
 	"os"
@@ -18,11 +17,7 @@ func (f *fileCleaner) Info() string {
 }
 
 func (f *fileCleaner) CleanupAll(opts Options, driverVersion string) error {
-	configPath := fmt.Sprintf(root.ConfigPathFmt,
-		opts.RepoRoot,
-		driverVersion,
-		opts.Architecture,
-		"")
+	configPath := root.BuildConfigPath(opts.Options, driverVersion, "")
 	slog.Info("removing folder", "config", configPath)
 	if opts.DryRun {
 		slog.Info("skipping because of dry-run.")

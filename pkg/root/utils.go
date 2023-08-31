@@ -11,11 +11,7 @@ type ConfigLooper func(driverVersion, configPath string) error
 func LoopConfigsFiltered(opts Options, message string, worker ConfigLooper) error {
 	configNameGlob := opts.Target.ToGlob()
 	for _, driverVersion := range opts.DriverVersion {
-		configPath := fmt.Sprintf(ConfigPathFmt,
-			opts.RepoRoot,
-			driverVersion,
-			opts.Architecture,
-			configNameGlob)
+		configPath := BuildConfigPath(opts, driverVersion, configNameGlob)
 		configs, err := filepath.Glob(configPath)
 		if err != nil {
 			return err
@@ -33,4 +29,12 @@ func LoopConfigsFiltered(opts Options, message string, worker ConfigLooper) erro
 		}
 	}
 	return nil
+}
+
+func BuildConfigPath(opts Options, driverVersion, configName string) string {
+	return fmt.Sprintf(configPathFmt,
+		opts.RepoRoot,
+		driverVersion,
+		opts.Architecture.ToNonDeb(),
+		configName)
 }

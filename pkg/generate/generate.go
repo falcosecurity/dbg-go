@@ -83,7 +83,7 @@ func autogenerateConfigs(opts Options) error {
 		// If lastDistro is empty it means we need to run on all supported distros; this is done automatically.
 		if lastDistro != "" {
 			// Map back the kernel crawler distro to our internal driverkit distro
-			opts.Distro = root.ToDriverkitDistro(root.KernelCrawlerDistro(lastDistro)).String()
+			opts.Distro = root.ToDriverkitDistro(root.KernelCrawlerDistro(lastDistro))
 			if opts.Distro == "" {
 				return fmt.Errorf("kernel-crawler last run distro '%s' unsupported.\n", lastDistro)
 			}
@@ -169,9 +169,9 @@ func loadKernelHeadersFromDk(opts Options) ([]string, error) {
 		minimumURLs = bb.MinimumURLs()
 	}
 
-	// Load kernelrelease
+	// Load kernelrelease and architecture
 	kr := kernelrelease.FromString(opts.KernelRelease)
-	kr.Architecture = kernelrelease.Architecture(utils.ToDebArch(opts.Architecture))
+	kr.Architecture = opts.Architecture
 
 	// Fetch URLs
 	kernelheaders, err := b.URLs(kr)
@@ -203,23 +203,23 @@ func generateSingleConfig(opts Options) error {
 	driverkitYaml := validate.DriverkitYaml{
 		KernelVersion: opts.KernelVersion,
 		KernelRelease: opts.KernelRelease,
-		Target:        opts.Distro,
+		Target:        opts.Distro.String(),
 		KernelUrls:    kernelheaders,
 	}
 	return dumpConfig(opts, driverkitYaml)
 }
 
 func dumpConfig(opts Options, dkYaml validate.DriverkitYaml) error {
-	dkYaml.Architecture = utils.ToDebArch(opts.Architecture)
+	dkYaml.Architecture = opts.Architecture.String()
 
 	for _, driverVersion := range opts.DriverVersion {
-		outputPath := fmt.Sprintf(validate.OutputPathFmt,
-			driverVersion,
-			opts.Architecture,
-			opts.DriverName,
-			dkYaml.Target,
-			dkYaml.KernelRelease,
-			dkYaml.KernelVersion)
+		outputPath := dkYaml.ToOutputPath(driverVersion,
+			validate.Options{
+				DriverName: opts.DriverName,
+				Options: root.Options{
+					Architecture: opts.Architecture,
+				},
+			})
 		dkYaml.Output = validate.DriverkitYamlOutputs{
 			Module: outputPath + ".ko",
 			Probe:  outputPath + ".o",
@@ -229,11 +229,7 @@ func dumpConfig(opts Options, dkYaml validate.DriverkitYaml) error {
 			return pvtErr
 		}
 
-		configPath := fmt.Sprintf(root.ConfigPathFmt,
-			opts.RepoRoot,
-			driverVersion,
-			opts.Architecture,
-			dkYaml.ToConfigName())
+		configPath := root.BuildConfigPath(opts.Options, driverVersion, dkYaml.ToConfigName())
 
 		// Make sure folder exists
 		pvtErr = os.MkdirAll(filepath.Dir(configPath), os.ModePerm)
