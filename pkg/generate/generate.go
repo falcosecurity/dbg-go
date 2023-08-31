@@ -80,10 +80,13 @@ func autogenerateConfigs(opts Options) error {
 		}
 		slog.Debug("loaded last-distro", "distro", lastDistro)
 
-		// Map back the kernel crawler distro to our internal driverkit distro
-		opts.Distro = root.ToDriverkitDistro(root.KernelCrawlerDistro(lastDistro)).String()
-		if opts.Distro == "" {
-			return fmt.Errorf("kernel-crawler last run distro '%s' unsupported.\n", lastDistro)
+		// If lastDistro is empty it means we need to run on all supported distros; this is done automatically.
+		if lastDistro != "" {
+			// Map back the kernel crawler distro to our internal driverkit distro
+			opts.Distro = root.ToDriverkitDistro(root.KernelCrawlerDistro(lastDistro)).String()
+			if opts.Distro == "" {
+				return fmt.Errorf("kernel-crawler last run distro '%s' unsupported.\n", lastDistro)
+			}
 		}
 	}
 
