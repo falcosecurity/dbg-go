@@ -40,14 +40,14 @@ Available Commands:
   s3          Work with remote s3 bucket
 
 Flags:
-  -a, --architecture string           architecture to run against. (default "x86_64")
+  -a, --architecture string           architecture to run against. Supported: [amd64,arm64] (default "amd64")
       --driver-version strings        driver versions to run against.
       --dry-run                       enable dry-run mode.
   -h, --help                          help for dbg-go
   -l, --log-level string              set log verbosity. (default "INFO")
       --repo-root string              test-infra repository root path. (default "/home/federico/Work/dbg-go")
       --target-distro string          target distro to work against. By default tool will work on any supported distro. Can be a regex.
-                                      Supported distros: [almalinux,amazonlinux,amazonlinux2,amazonlinux2022,amazonlinux2023,bottlerocket,centos,debian,fedora,minikube,talos,ubuntu].
+                                      Supported: [almalinux,amazonlinux,amazonlinux2,amazonlinux2022,amazonlinux2023,bottlerocket,centos,debian,fedora,minikube,talos,ubuntu].
       --target-kernelrelease string   target kernel release to work against. By default tool will work on any kernel release. Can be a regex.
       --target-kernelversion string   target kernel version to work against. By default tool will work on any kernel version. Can be a regex.
 

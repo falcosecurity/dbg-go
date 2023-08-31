@@ -70,7 +70,7 @@ func init() {
 	flags.Bool("dry-run", false, "enable dry-run mode.")
 	flags.StringP("log-level", "l", slog.LevelInfo.String(), "set log verbosity.")
 	flags.String("repo-root", cwd, "test-infra repository root path.")
-	flags.StringP("architecture", "a", runtime.GOARCH, "architecture to run against.")
+	flags.StringP("architecture", "a", runtime.GOARCH, `architecture to run against. Supported: `+kernelrelease.SupportedArchs.String())
 	flags.StringSlice("driver-version", nil, "driver versions to run against.")
 	flags.String("target-kernelrelease", "",
 		`target kernel release to work against. By default tool will work on any kernel release. Can be a regex.`)
@@ -78,7 +78,7 @@ func init() {
 		`target kernel version to work against. By default tool will work on any kernel version. Can be a regex.`)
 	flags.String("target-distro", "",
 		`target distro to work against. By default tool will work on any supported distro. Can be a regex.
-Supported distros: [`+strings.Join(root.SupportedDistroSlice, ",")+"].")
+Supported: [`+strings.Join(root.SupportedDistroSlice, ",")+"].")
 
 	// Custom completions
 	rootCmd.RegisterFlagCompletionFunc("target-distro", func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
