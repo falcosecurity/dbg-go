@@ -23,7 +23,7 @@ func TestCleanup(t *testing.T) {
 		"delete all": {
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
 			}},
 			driverVersionsToBeCreated:     []string{"1.0.0+driver", "2.0.0+driver"},
@@ -33,7 +33,7 @@ func TestCleanup(t *testing.T) {
 		"delete only one": {
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
 			}},
 			driverVersionsToBeCreated:     []string{"1.0.0+driver", "2.0.0+driver"},
@@ -44,9 +44,9 @@ func TestCleanup(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := utils.PreCreateFolders(test.opts.RepoRoot, test.opts.Architecture, test.driverVersionsToBeCreated)
+			err := utils.PreCreateFolders(test.opts.Options, test.driverVersionsToBeCreated)
 			t.Cleanup(func() {
-				os.RemoveAll(test.opts.RepoRoot)
+				_ = os.RemoveAll(test.opts.RepoRoot)
 			})
 			assert.NoError(t, err)
 			err = Run(test.opts, NewFileCleaner())
@@ -58,11 +58,10 @@ func TestCleanup(t *testing.T) {
 
 			// Check that any folder that was asked for removal, is no more present
 			for _, driverVersion := range utils.SliceDifference(test.driverVersionsToBeCreated, test.driverFolderRemainingExpected) {
-				configPath := fmt.Sprintf(root.ConfigPathFmt,
-					test.opts.RepoRoot,
-					driverVersion,
-					test.opts.Architecture,
-					"")
+				configPath := root.BuildConfigPath(root.Options{
+					RepoRoot:     test.opts.RepoRoot,
+					Architecture: test.opts.Architecture,
+				}, driverVersion, "")
 
 				_, err = os.Stat(configPath)
 				fmt.Println(err)
@@ -71,11 +70,10 @@ func TestCleanup(t *testing.T) {
 
 			// Check that any folder that was NOT asked for removal, is still present
 			for _, driverVersion := range test.driverFolderRemainingExpected {
-				configPath := fmt.Sprintf(root.ConfigPathFmt,
-					test.opts.RepoRoot,
-					driverVersion,
-					test.opts.Architecture,
-					"")
+				configPath := root.BuildConfigPath(root.Options{
+					RepoRoot:     test.opts.RepoRoot,
+					Architecture: test.opts.Architecture,
+				}, driverVersion, "")
 
 				_, err = os.Stat(configPath)
 				assert.NoError(t, err)
@@ -93,7 +91,10 @@ func TestCleanupFiltered(t *testing.T) {
 		"./test/driverkit/config/1.0.0+driver/x86_64/amazonlinux_6.0.0_23.yaml",
 	}
 
-	err := utils.PreCreateFolders("./test", "x86_64", []string{"1.0.0+driver"})
+	err := utils.PreCreateFolders(root.Options{
+		RepoRoot:     "./test",
+		Architecture: "amd64",
+	}, []string{"1.0.0+driver"})
 	t.Cleanup(func() {
 		_ = os.RemoveAll("./test")
 	})
@@ -115,7 +116,7 @@ func TestCleanupFiltered(t *testing.T) {
 		{
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
 					Distro: "ubun*",
@@ -127,7 +128,7 @@ func TestCleanupFiltered(t *testing.T) {
 		{
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
 					KernelVersion: "24",
@@ -139,7 +140,7 @@ func TestCleanupFiltered(t *testing.T) {
 		{
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
 					KernelRelease: "6.0.0",
@@ -206,7 +207,7 @@ func TestCleanupS3(t *testing.T) {
 	}{
 		{
 			opts: Options{Options: root.Options{
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"2.0.0+driver"},
 			}},
 			remainingObjects: []string{
@@ -221,7 +222,7 @@ func TestCleanupS3(t *testing.T) {
 		},
 		{
 			opts: Options{Options: root.Options{
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
 					Distro: "debian",
@@ -237,7 +238,7 @@ func TestCleanupS3(t *testing.T) {
 		},
 		{
 			opts: Options{Options: root.Options{
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
 					Distro: "amazonlin*",
@@ -252,7 +253,7 @@ func TestCleanupS3(t *testing.T) {
 		},
 		{
 			opts: Options{Options: root.Options{
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
 				Target: root.Target{
 					KernelRelease: "5.*",
@@ -266,7 +267,7 @@ func TestCleanupS3(t *testing.T) {
 		},
 		{
 			opts: Options{Options: root.Options{
-				Architecture:  "aarch64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"2.0.0+driver"},
 			}},
 			remainingObjects: []string{},

@@ -8,7 +8,6 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -43,13 +42,9 @@ func RunTestParsingLogs(t *testing.T, runTest func() error, parsedMsg interface{
 	}
 }
 
-func PreCreateFolders(repoRoot, architecture string, driverVersionsToBeCreated []string) error {
+func PreCreateFolders(opts root.Options, driverVersionsToBeCreated []string) error {
 	for _, driverVersion := range driverVersionsToBeCreated {
-		configPath := fmt.Sprintf(root.ConfigPathFmt,
-			repoRoot,
-			driverVersion,
-			architecture,
-			"")
+		configPath := root.BuildConfigPath(opts, driverVersion, "")
 		err := os.MkdirAll(configPath, 0700)
 		if err != nil {
 			return err

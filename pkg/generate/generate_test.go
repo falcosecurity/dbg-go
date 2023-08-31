@@ -14,7 +14,7 @@ func BenchmarkAutogenerate(b *testing.B) {
 	opts := Options{
 		Options: root.Options{
 			RepoRoot:      "./test/",
-			Architecture:  "x86_64",
+			Architecture:  "amd64",
 			DriverVersion: []string{"5.0.1+driver"},
 		},
 		DriverName: "falco",
@@ -42,7 +42,7 @@ func TestGenerate(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
 					Target: root.Target{
 						Distro: "load", // Should load it from lastDistro kernel crawler file
@@ -57,7 +57,7 @@ func TestGenerate(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 				},
 				DriverName: "falco",
@@ -69,7 +69,7 @@ func TestGenerate(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						Distro: "centos",
@@ -84,7 +84,7 @@ func TestGenerate(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						Distro: "WRONG_DISTRO",
@@ -99,7 +99,7 @@ func TestGenerate(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						Distro: "centos",
@@ -114,7 +114,7 @@ func TestGenerate(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						Distro: "^cent.*$",
@@ -129,7 +129,7 @@ func TestGenerate(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						Distro:        "centos",
@@ -144,7 +144,7 @@ func TestGenerate(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						Distro:        "centos",
@@ -159,7 +159,7 @@ func TestGenerate(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						KernelRelease: "5.10.0",
@@ -174,7 +174,7 @@ func TestGenerate(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						Distro:        "WRONG_DISTRO",
@@ -192,7 +192,7 @@ func TestGenerate(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						Distro:        "debian",
@@ -208,7 +208,7 @@ func TestGenerate(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := utils.PreCreateFolders(test.opts.RepoRoot, test.opts.Architecture, test.opts.DriverVersion)
+			err := utils.PreCreateFolders(test.opts.Options, test.opts.DriverVersion)
 			t.Cleanup(func() {
 				_ = os.RemoveAll(test.opts.RepoRoot)
 			})

@@ -3,13 +3,14 @@ package root
 import (
 	"fmt"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
+	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
 	"github.com/spf13/viper"
 	"log/slog"
 	"regexp"
 )
 
 type Target struct {
-	Distro        string
+	Distro        builder.Type
 	KernelRelease string
 	KernelVersion string
 }
@@ -33,7 +34,7 @@ func (t Target) ToGlob() string {
 }
 
 func (t Target) DistroFilter(distro string) bool {
-	matched, _ := regexp.MatchString(t.Distro, distro)
+	matched, _ := regexp.MatchString(t.Distro.String(), distro)
 	// check if key is actually supported
 	if matched {
 		_, ok := SupportedDistros[builder.Type(distro)]
@@ -55,7 +56,7 @@ func (t Target) KernelVersionFilter(kernelversion string) bool {
 type Options struct {
 	DryRun        bool
 	RepoRoot      string
-	Architecture  string
+	Architecture  kernelrelease.Architecture
 	DriverVersion []string
 	Target
 }
@@ -64,10 +65,10 @@ func LoadRootOptions() Options {
 	opts := Options{
 		DryRun:        viper.GetBool("dry-run"),
 		RepoRoot:      viper.GetString("repo-root"),
-		Architecture:  viper.GetString("architecture"),
+		Architecture:  kernelrelease.Architecture(viper.GetString("architecture")),
 		DriverVersion: viper.GetStringSlice("driver-version"),
 		Target: Target{
-			Distro:        viper.GetString("target-distro"),
+			Distro:        builder.Type(viper.GetString("target-distro")),
 			KernelRelease: viper.GetString("target-kernelrelease"),
 			KernelVersion: viper.GetString("target-kernelversion"),
 		},

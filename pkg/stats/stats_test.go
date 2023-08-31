@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/fededp/dbg-go/pkg/utils"
 	"github.com/fededp/dbg-go/pkg/validate"
@@ -16,113 +17,60 @@ import (
 
 type DkConfigNamed struct {
 	validate.DriverkitYaml
-	confPath string
+	hasProbe  bool
+	hasModule bool
 }
 
 func TestStats(t *testing.T) {
-	configPath := fmt.Sprintf(root.ConfigPathFmt,
-		"./test/",
-		"1.0.0+driver",
-		"x86_64",
-		"")
+	configPath := root.BuildConfigPath(root.Options{
+		RepoRoot:     "./test/",
+		Architecture: "amd64",
+	}, "1.0.0+driver", "")
 
+	fmt.Println(configPath)
 	dkConfigs := []DkConfigNamed{
 		{
 			DriverkitYaml: validate.DriverkitYaml{
-				KernelVersion: "1",
-				KernelRelease: "5.10.0",
-				Target:        "centos",
-				Architecture:  "amd64",
-				Output: validate.DriverkitYamlOutputs{
-					Module: fmt.Sprintf(validate.OutputPathFmt+".ko",
-						"1.0.0+driver",
-						"x86_64",
-						"falco",
-						"centos",
-						"5.10.0",
-						"1"),
-					Probe: fmt.Sprintf(validate.OutputPathFmt+".o",
-						"1.0.0+driver",
-						"x86_64",
-						"falco",
-						"centos",
-						"5.10.0",
-						"1"),
-				},
+				KernelVersion:    "1",
+				KernelRelease:    "5.10.0",
+				Target:           "centos",
+				Architecture:     "amd64",
 				KernelConfigData: "aaaa", // just to avoid failing validation
 			},
-			confPath: configPath + "centos_5.10.0_1.yaml",
+			hasProbe:  true,
+			hasModule: true,
 		},
 		{
 			DriverkitYaml: validate.DriverkitYaml{
-				KernelVersion: "1",
-				KernelRelease: "5.15.0",
-				Target:        "centos",
-				Architecture:  "amd64",
-				Output: validate.DriverkitYamlOutputs{
-					Module: fmt.Sprintf(validate.OutputPathFmt+".ko",
-						"1.0.0+driver",
-						"x86_64",
-						"falco",
-						"centos",
-						"5.15.0",
-						"1"),
-					Probe: fmt.Sprintf(validate.OutputPathFmt+".o",
-						"1.0.0+driver",
-						"x86_64",
-						"falco",
-						"centos",
-						"5.15.0",
-						"1"),
-				},
+				KernelVersion:    "1",
+				KernelRelease:    "5.15.0",
+				Target:           "centos",
+				Architecture:     "amd64",
 				KernelConfigData: "aaaa", // just to avoid failing validation
 			},
-			confPath: configPath + "centos_5.15.0_1.yaml",
+			hasProbe:  true,
+			hasModule: true,
 		},
 		{
 			DriverkitYaml: validate.DriverkitYaml{
-				KernelVersion: "13",
-				KernelRelease: "5.15.0",
-				Target:        "ubuntu",
-				Architecture:  "amd64",
-				Output: validate.DriverkitYamlOutputs{
-					Module: fmt.Sprintf(validate.OutputPathFmt+".ko",
-						"1.0.0+driver",
-						"x86_64",
-						"falco",
-						"ubuntu",
-						"5.15.0",
-						"13"),
-				},
+				KernelVersion:    "13",
+				KernelRelease:    "5.15.0",
+				Target:           "ubuntu",
+				Architecture:     "amd64",
 				KernelConfigData: "aaaa", // just to avoid failing validation
 			},
-			confPath: configPath + "ubuntu_5.15.0_13.yaml",
+			hasModule: true,
 		},
 		{
 			DriverkitYaml: validate.DriverkitYaml{
-				KernelVersion: "1",
-				KernelRelease: "5.15.25",
-				Target:        "bottlerocket",
-				Architecture:  "amd64",
-				Output: validate.DriverkitYamlOutputs{
-					Module: fmt.Sprintf(validate.OutputPathFmt+".ko",
-						"1.0.0+driver",
-						"x86_64",
-						"falco",
-						"bottlerocket",
-						"5.15.25",
-						"1"),
-					Probe: fmt.Sprintf(validate.OutputPathFmt+".o",
-						"1.0.0+driver",
-						"x86_64",
-						"falco",
-						"bottlerocket",
-						"5.15.25",
-						"1"),
-				},
+				KernelVersion:    "1",
+				KernelRelease:    "5.15.25",
+				Target:           "bottlerocket",
+				Architecture:     "amd64",
 				KernelConfigData: "aaaa", // just to avoid failing validation
 			},
-			confPath: configPath + "bottlerocket_5.15.25_1.yaml",
+			hasProbe:  true,
+			hasModule: true,
 		},
 	}
 
@@ -134,8 +82,22 @@ func TestStats(t *testing.T) {
 
 	// Create all configs needed by the test
 	for _, dkConf := range dkConfigs {
-		file, err := os.OpenFile(dkConf.confPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+		file, err := os.OpenFile(configPath+dkConf.ToConfigName(), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 		assert.NoError(t, err)
+
+		outputPath := dkConf.ToOutputPath("1.0.0+driver",
+			validate.Options{
+				DriverName: "falco",
+				Options: root.Options{
+					Architecture: kernelrelease.Architecture(dkConf.Architecture),
+				},
+			})
+		if dkConf.hasModule {
+			dkConf.DriverkitYaml.Output.Module = outputPath + ".ko"
+		}
+		if dkConf.hasProbe {
+			dkConf.DriverkitYaml.Output.Probe = outputPath + ".o"
+		}
 		enc := yaml.NewEncoder(file)
 		err = enc.Encode(dkConf.DriverkitYaml)
 		_ = file.Close()
@@ -149,7 +111,7 @@ func TestStats(t *testing.T) {
 		"stats 1.0.0+driver x86_64": {
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
 			}},
 			expectedStats: driverStats{
@@ -160,7 +122,7 @@ func TestStats(t *testing.T) {
 		"stats 2.0.0+driver x86_64": {
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"2.0.0+driver"}, // not present
 			}},
 			expectedStats: driverStats{
@@ -171,7 +133,7 @@ func TestStats(t *testing.T) {
 		"stats 1.0.0+driver aarch64": {
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
-				Architecture:  "aarch64", // not present
+				Architecture:  "arm64", // not present
 				DriverVersion: []string{"1.0.0+driver"},
 			}},
 			expectedStats: driverStats{
@@ -182,7 +144,7 @@ func TestStats(t *testing.T) {
 		"stats 1.0.0+driver x86_64 filtered by distro": {
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
 					Distro: "centos",
@@ -196,7 +158,7 @@ func TestStats(t *testing.T) {
 		"stats 1.0.0+driver x86_64 filtered by distro regex": {
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
 					Distro: "cent*",
@@ -210,7 +172,7 @@ func TestStats(t *testing.T) {
 		"stats 1.0.0+driver x86_64 filtered by kernel release": {
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
 					KernelRelease: "5.10.*",
@@ -224,7 +186,7 @@ func TestStats(t *testing.T) {
 		"stats 1.0.0+driver x86_64 filtered by kernel version": {
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
-				Architecture:  "x86_64",
+				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
 				Target: root.Target{
 					KernelVersion: "1",

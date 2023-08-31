@@ -29,14 +29,14 @@ func TestValidateConfig(t *testing.T) {
 	// Normal options
 	opts := Options{
 		Options: root.Options{
-			Architecture:  "x86_64",
+			Architecture:  "amd64",
 			DriverVersion: []string{"1.0.0+driver"},
 		},
 		DriverName: "falco",
 	}
 	namedDriverOpts := Options{
 		Options: root.Options{
-			Architecture:  "x86_64",
+			Architecture:  "amd64",
 			DriverVersion: []string{"2.0.0+driver"},
 		},
 		DriverName: "TEST",
@@ -56,14 +56,14 @@ func TestValidateConfig(t *testing.T) {
 				Target:        "centos",
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".ko",
+					Module: fmt.Sprintf(outputPathFmt+".ko",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
@@ -85,14 +85,14 @@ func TestValidateConfig(t *testing.T) {
 				Target:        "centos",
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".ko",
+					Module: fmt.Sprintf(outputPathFmt+".ko",
 						namedDriverOpts.DriverVersion[0],
 						namedDriverOpts.Architecture,
 						namedDriverOpts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						namedDriverOpts.DriverVersion[0],
 						namedDriverOpts.Architecture,
 						namedDriverOpts.DriverName,
@@ -114,14 +114,14 @@ func TestValidateConfig(t *testing.T) {
 				Target:        "centos",
 				Architecture:  "arm64", // arm64 config running in x86_64 mode
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".ko",
+					Module: fmt.Sprintf(outputPathFmt+".ko",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
@@ -143,14 +143,14 @@ func TestValidateConfig(t *testing.T) {
 				Target:        "centos",
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".ko",
+					Module: fmt.Sprintf(outputPathFmt+".ko",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
@@ -172,14 +172,14 @@ func TestValidateConfig(t *testing.T) {
 				Target:        "centos",
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".ko",
+					Module: fmt.Sprintf(outputPathFmt+".ko",
 						opts.DriverVersion[0],
 						"WRONGARCH",
 						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
@@ -201,14 +201,14 @@ func TestValidateConfig(t *testing.T) {
 				Target:        "centos",
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".ko",
+					Module: fmt.Sprintf(outputPathFmt+".ko",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
 						"WRONGTARGET",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
@@ -230,14 +230,14 @@ func TestValidateConfig(t *testing.T) {
 				Target:        "centos",
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".kooo",
+					Module: fmt.Sprintf(outputPathFmt+".kooo",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
@@ -259,14 +259,14 @@ func TestValidateConfig(t *testing.T) {
 				Target:        "centos",
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".ooo",
+					Module: fmt.Sprintf(outputPathFmt+".ooo",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
@@ -288,14 +288,14 @@ func TestValidateConfig(t *testing.T) {
 				Target:        "centos",
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".ooo",
+					Module: fmt.Sprintf(outputPathFmt+".ooo",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						opts.DriverVersion[0],
 						opts.Architecture,
 						opts.DriverName,
@@ -316,7 +316,7 @@ func TestValidateConfig(t *testing.T) {
 			cleanup, err := generateConfigFile(test.dkConf, test.confName)
 			assert.NoError(t, err)
 			t.Cleanup(cleanup)
-			err = validateConfig(test.confName, test.opts.Architecture, test.opts.DriverName, test.opts.DriverVersion[0])
+			err = validateConfig(test.confName, test.opts, test.opts.DriverVersion[0])
 			if test.errorExpected {
 				assert.Error(t, err)
 			} else {
@@ -332,11 +332,10 @@ type DkConfigNamed struct {
 }
 
 func TestValidateConfigFiltered(t *testing.T) {
-	configPath := fmt.Sprintf(root.ConfigPathFmt,
-		"./test/",
-		"1.0.0+driver",
-		"x86_64",
-		"")
+	configPath := root.BuildConfigPath(root.Options{
+		RepoRoot:     "./test",
+		Architecture: "amd64",
+	}, "1.0.0+driver", "")
 
 	dkConfigs := []DkConfigNamed{
 		{
@@ -346,14 +345,14 @@ func TestValidateConfigFiltered(t *testing.T) {
 				Target:        "centos",
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".ko",
+					Module: fmt.Sprintf(outputPathFmt+".ko",
 						"1.0.0+driver",
 						"x86_64",
 						"falco",
 						"centos",
 						"5.10.0",
 						"1"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						"1.0.0+driver",
 						"x86_64",
 						"falco",
@@ -372,14 +371,14 @@ func TestValidateConfigFiltered(t *testing.T) {
 				Target:        "centos",
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".ko",
+					Module: fmt.Sprintf(outputPathFmt+".ko",
 						"1.0.0+driver",
 						"x86_64",
 						"falco",
 						"centos",
 						"5.15.0",
 						"1"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						"1.0.0+driver",
 						"x86_64",
 						"falco",
@@ -398,14 +397,14 @@ func TestValidateConfigFiltered(t *testing.T) {
 				Target:        "ubuntu",
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".ko",
+					Module: fmt.Sprintf(outputPathFmt+".ko",
 						"1.0.0+driver",
 						"x86_64",
 						"falco",
 						"ubuntu",
 						"5.15.0",
 						"13"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						"1.0.0+driver",
 						"x86_64",
 						"falco",
@@ -424,14 +423,14 @@ func TestValidateConfigFiltered(t *testing.T) {
 				Target:        "bottlerocket",
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
-					Module: fmt.Sprintf(OutputPathFmt+".ko",
+					Module: fmt.Sprintf(outputPathFmt+".ko",
 						"1.0.0+driver",
 						"x86_64",
 						"falco",
 						"bottlerocket",
 						"5.15.25",
 						"1"),
-					Probe: fmt.Sprintf(OutputPathFmt+".o",
+					Probe: fmt.Sprintf(outputPathFmt+".o",
 						"1.0.0+driver",
 						"x86_64",
 						"falco",
@@ -453,7 +452,7 @@ func TestValidateConfigFiltered(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 				},
 				DriverName: "falco",
@@ -464,7 +463,7 @@ func TestValidateConfigFiltered(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						Distro: "centos",
@@ -478,7 +477,7 @@ func TestValidateConfigFiltered(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						Distro: "cent*",
@@ -492,7 +491,7 @@ func TestValidateConfigFiltered(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						Distro: "bottlerocket",
@@ -506,7 +505,7 @@ func TestValidateConfigFiltered(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						KernelRelease: "5.15.*",
@@ -520,7 +519,7 @@ func TestValidateConfigFiltered(t *testing.T) {
 			opts: Options{
 				Options: root.Options{
 					RepoRoot:      "./test/",
-					Architecture:  "x86_64",
+					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
 					Target: root.Target{
 						KernelVersion: "1",

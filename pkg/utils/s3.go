@@ -42,7 +42,7 @@ func LoopBucketFiltered(client *s3.Client,
 	driverVersion string,
 	keyProcessor func(key string) error,
 ) error {
-	prefix := filepath.Join("driver", driverVersion, opts.Architecture)
+	prefix := filepath.Join("driver", driverVersion, opts.Architecture.ToNonDeb())
 	params := &s3.ListObjectsV2Input{
 		Bucket: aws.String(S3Bucket),
 		Prefix: aws.String(prefix),

@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	"log/slog"
@@ -16,7 +15,7 @@ import (
 func Run(opts Options) error {
 	slog.Info("validate config files")
 	return root.LoopConfigsFiltered(opts.Options, "validating", func(driverVersion, configPath string) error {
-		return validateConfig(configPath, opts.Architecture, opts.DriverName, driverVersion)
+		return validateConfig(configPath, opts, driverVersion)
 	})
 }
 
@@ -25,7 +24,7 @@ func isBase64(s string) bool {
 	return err == nil
 }
 
-func validateConfig(configPath, architecture, driverName, driverVersion string) error {
+func validateConfig(configPath string, opts Options, driverVersion string) error {
 	configData, err := os.ReadFile(configPath)
 	if err != nil {
 		return err
@@ -50,9 +49,8 @@ func validateConfig(configPath, architecture, driverName, driverVersion string) 
 	}
 
 	// Check that arch is ok
-	goArch := utils.ToDebArch(architecture)
-	if driverkitYaml.Architecture != goArch {
-		return fmt.Errorf("wrong architecture in config file: %s", configPath)
+	if driverkitYaml.Architecture != opts.Architecture.String() {
+		return fmt.Errorf("wrong architecture in config file %s: %s", configPath, driverkitYaml.Architecture)
 	}
 
 	// Either kernelconfigdata or kernelurls must be set
@@ -60,14 +58,7 @@ func validateConfig(configPath, architecture, driverName, driverVersion string) 
 		return fmt.Errorf("at least one between `kernelurls` and `kernelconfigdata` must be set: %s", configPath)
 	}
 
-	outputPath := fmt.Sprintf(OutputPathFmt,
-		driverVersion,
-		architecture,
-		driverName,
-		driverkitYaml.Target,
-		driverkitYaml.KernelRelease,
-		driverkitYaml.KernelVersion)
-
+	outputPath := driverkitYaml.ToOutputPath(driverVersion, opts)
 	outputPathFilename := filepath.Base(outputPath)
 
 	// Check output probe if present
@@ -77,9 +68,9 @@ func validateConfig(configPath, architecture, driverName, driverVersion string) 
 			return fmt.Errorf("output probe filename is wrong (%s); expected: %s.o", outputProbeFilename, outputPathFilename)
 		}
 
-		if !strings.Contains(driverkitYaml.Output.Probe, architecture) {
+		if !strings.Contains(driverkitYaml.Output.Probe, opts.Architecture.ToNonDeb()) {
 			return fmt.Errorf("output probe filename has wrong architecture in its path (%s); expected %s",
-				driverkitYaml.Output.Probe, architecture)
+				driverkitYaml.Output.Probe, opts.Architecture.ToNonDeb())
 		}
 	}
 
@@ -90,9 +81,9 @@ func validateConfig(configPath, architecture, driverName, driverVersion string) 
 			return fmt.Errorf("output module filename is wrong (%s); expected: %s.ko", outputModuleFilename, outputPathFilename)
 		}
 
-		if !strings.Contains(driverkitYaml.Output.Module, architecture) {
+		if !strings.Contains(driverkitYaml.Output.Module, opts.Architecture.ToNonDeb()) {
 			return fmt.Errorf("output module filename has wrong architecture in its path (%s); expected %s",
-				driverkitYaml.Output.Module, architecture)
+				driverkitYaml.Output.Module, opts.Architecture.ToNonDeb())
 		}
 	}
 
