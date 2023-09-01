@@ -28,7 +28,7 @@ func loadLastRunDistro() (string, error) {
 	}
 	lastDistro := strings.TrimSuffix(string(lastDistroBytes), "\n")
 	if lastDistro == "*" {
-		// Fix up regex (emtpy regex -> always true)
+		// Fix up regex (empty regex -> always true)
 		lastDistro = ""
 	}
 	return lastDistro, nil

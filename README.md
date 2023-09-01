@@ -2,6 +2,8 @@
 
 [![CI build](https://github.com/FedeDP/dbg-go/actions/workflows/ci.yml/badge.svg)](https://github.com/FedeDP/dbg-go/actions/workflows/ci.yml)
 [![Latest](https://img.shields.io/github/v/release/FedeDP/dbg-go)](https://github.com/FedeDP/dbg-go/releases/latest)
+![Architectures](https://img.shields.io/badge/ARCHS-x86__64%7Caarch64-blueviolet)
+[![Go Report Card](https://goreportcard.com/badge/github.com/FedeDP/dbg-go)](https://goreportcard.com/report/github.com/FedeDP/dbg-go)
 
 A go tool to work with falcosecurity [drivers build grid](https://github.com/falcosecurity/test-infra/tree/master/driverkit).  
 Long term aim is to completely reimplement dbg Makefile and bash scripts in a much more maintenable and testable language.  
