@@ -15,8 +15,11 @@ func NewFileStatter() Statter {
 	return &fileStatter{}
 }
 
+func (f *fileStatter) Info() string {
+	return "gathering stats for local config files"
+}
+
 func (f *fileStatter) GetDriverStats(opts root.Options) (driverStatsByDriverVersion, error) {
-	slog.Info("fetching stats for local config files")
 	driverStatsByVersion := make(driverStatsByDriverVersion)
 	err := root.LoopConfigsFiltered(opts, "computing stats", func(driverVersion, configPath string) error {
 		dStats := driverStatsByVersion[driverVersion]

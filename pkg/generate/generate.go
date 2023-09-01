@@ -35,6 +35,7 @@ func loadLastRunDistro() (string, error) {
 }
 
 func Run(opts Options) error {
+	slog.Info("generating config files")
 	if opts.Auto {
 		return autogenerateConfigs(opts)
 	} else if opts.IsSet() {
@@ -204,6 +205,14 @@ func generateSingleConfig(opts Options) error {
 		KernelRelease: opts.KernelRelease,
 		Target:        opts.Distro.String(),
 		KernelUrls:    kernelheaders,
+	}
+	slog.Info("generating",
+		"target", driverkitYaml.Target,
+		"kernelrelease", driverkitYaml.KernelRelease,
+		"kernelversion", driverkitYaml.KernelVersion)
+	if opts.DryRun {
+		slog.Info("skipping because of dry-run.")
+		return nil
 	}
 	return dumpConfig(opts, driverkitYaml)
 }

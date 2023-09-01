@@ -19,10 +19,13 @@ func NewS3Statter() (Statter, error) {
 	return &s3Statter{Client: client}, nil
 }
 
+func (f *s3Statter) Info() string {
+	return "gathering stats for remote drivers"
+}
+
 func (s *s3Statter) GetDriverStats(opts root.Options) (driverStatsByDriverVersion, error) {
 	slog.SetDefault(slog.With("bucket", s3utils.S3Bucket))
 
-	slog.Info("fetching stats for remote drivers")
 	driverStatsByVersion := make(driverStatsByDriverVersion)
 
 	for _, driverVersion := range opts.DriverVersion {

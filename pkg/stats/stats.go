@@ -3,6 +3,7 @@ package stats
 import (
 	"github.com/olekukonko/tablewriter"
 	"io"
+	"log/slog"
 	"os"
 	"strconv"
 )
@@ -13,6 +14,7 @@ import (
 var testOutputWriter io.Writer
 
 func Run(opts Options, statter Statter) error {
+	slog.Info(statter.Info())
 	driverStatsByVersion, err := statter.GetDriverStats(opts.Options)
 	if err != nil {
 		return err
