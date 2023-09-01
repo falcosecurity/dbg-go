@@ -2,54 +2,60 @@ package cleanup
 
 import (
 	"context"
-	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/fededp/dbg-go/pkg/root"
 	s3utils "github.com/fededp/dbg-go/pkg/utils/s3"
 	"github.com/fededp/dbg-go/pkg/utils/test"
 	"github.com/stretchr/testify/assert"
+	"io"
 	"os"
 	"strings"
 	"testing"
 )
 
 func TestCleanup(t *testing.T) {
+	tobeCreated := []string{
+		"./test/driverkit/config/1.0.0+driver/x86_64/ubuntu_5.15.0_1.yaml",
+		"./test/driverkit/config/1.0.0+driver/x86_64/ubuntu_5.19.2_1.yaml",
+		"./test/driverkit/config/1.0.0+driver/x86_64/fedora_5.15.0_24.yaml",
+		"./test/driverkit/config/1.0.0+driver/x86_64/talos_6.0.0_1.yaml",
+		"./test/driverkit/config/1.0.0+driver/x86_64/amazonlinux_6.0.0_23.yaml",
+	}
+
+	err := testutils.PreCreateFolders(root.Options{
+		RepoRoot:     "./test",
+		Architecture: "amd64",
+	}, []string{"1.0.0+driver"})
+	t.Cleanup(func() {
+		_ = os.RemoveAll("./test")
+	})
+	assert.NoError(t, err)
+
+	// Create all empty files needed by the test
+	for _, filepath := range tobeCreated {
+		emptyFile, err := os.Create(filepath)
+		assert.NoError(t, err)
+		_ = emptyFile.Close()
+	}
+
 	tests := map[string]struct {
-		opts                          Options
-		driverVersionsToBeCreated     []string
-		errorExpected                 bool
-		driverFolderRemainingExpected []string
+		opts          Options
+		errorExpected bool
 	}{
 		"delete all": {
 			opts: Options{Options: root.Options{
 				RepoRoot:      "./test/",
 				Architecture:  "amd64",
-				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
-			}},
-			driverVersionsToBeCreated:     []string{"1.0.0+driver", "2.0.0+driver"},
-			errorExpected:                 false,
-			driverFolderRemainingExpected: nil,
-		},
-		"delete only one": {
-			opts: Options{Options: root.Options{
-				RepoRoot:      "./test/",
-				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
+				DriverName:    "falco",
 			}},
-			driverVersionsToBeCreated:     []string{"1.0.0+driver", "2.0.0+driver"},
-			errorExpected:                 false,
-			driverFolderRemainingExpected: []string{"2.0.0+driver"},
+			errorExpected: false,
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := testutils.PreCreateFolders(test.opts.Options, test.driverVersionsToBeCreated)
-			t.Cleanup(func() {
-				_ = os.RemoveAll(test.opts.RepoRoot)
-			})
-			assert.NoError(t, err)
 			err = Run(test.opts, NewFileCleaner())
 			if test.errorExpected {
 				assert.Error(t, err)
@@ -57,28 +63,17 @@ func TestCleanup(t *testing.T) {
 				assert.NoError(t, err)
 			}
 
-			// Check that any folder that was asked for removal, is no more present
-			for _, driverVersion := range testutils.SliceDifference(test.driverVersionsToBeCreated, test.driverFolderRemainingExpected) {
-				configPath := root.BuildConfigPath(root.Options{
-					RepoRoot:     test.opts.RepoRoot,
-					Architecture: test.opts.Architecture,
-				}, driverVersion, "")
-
-				_, err = os.Stat(configPath)
-				fmt.Println(err)
-				assert.True(t, os.IsNotExist(err))
-			}
-
-			// Check that any folder that was NOT asked for removal, is still present
-			for _, driverVersion := range test.driverFolderRemainingExpected {
-				configPath := root.BuildConfigPath(root.Options{
-					RepoRoot:     test.opts.RepoRoot,
-					Architecture: test.opts.Architecture,
-				}, driverVersion, "")
-
-				_, err = os.Stat(configPath)
+			// Check that any file that was asked for removal, is no more present
+			for _, driverVersion := range test.opts.DriverVersion {
+				f, err := os.Open("./test/driverkit/config/" + driverVersion + "/x86_64/")
 				assert.NoError(t, err)
+				t.Cleanup(func() {
+					_ = f.Close()
+				})
+				_, err = f.Readdirnames(1)
+				assert.Equal(t, io.EOF, err)
 			}
+
 		})
 	}
 }
@@ -122,6 +117,7 @@ func TestCleanupFiltered(t *testing.T) {
 				Target: root.Target{
 					Distro: "ubun*",
 				},
+				DriverName: "falco",
 			}},
 			expectedOutputContains: []string{"ubuntu_5.15", "ubuntu_5.19"},
 			name:                   "delete ubuntu configs",
@@ -134,6 +130,7 @@ func TestCleanupFiltered(t *testing.T) {
 				Target: root.Target{
 					KernelVersion: "24",
 				},
+				DriverName: "falco",
 			}},
 			expectedOutputContains: []string{"fedora_5.15.0_24"},
 			name:                   "delete 24 kernelversion configs",
@@ -146,6 +143,7 @@ func TestCleanupFiltered(t *testing.T) {
 				Target: root.Target{
 					KernelRelease: "6.0.0",
 				},
+				DriverName: "falco",
 			}},
 			expectedOutputContains: []string{"amazonlinux_6.0", "talos_6.0"},
 			name:                   "delete 6.0.0 configs",
@@ -210,6 +208,7 @@ func TestCleanupS3(t *testing.T) {
 			opts: Options{Options: root.Options{
 				Architecture:  "amd64",
 				DriverVersion: []string{"2.0.0+driver"},
+				DriverName:    "falco",
 			}},
 			remainingObjects: []string{
 				"driver/1.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
@@ -228,6 +227,7 @@ func TestCleanupS3(t *testing.T) {
 				Target: root.Target{
 					Distro: "debian",
 				},
+				DriverName: "falco",
 			}},
 			remainingObjects: []string{
 				"driver/1.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
@@ -244,6 +244,7 @@ func TestCleanupS3(t *testing.T) {
 				Target: root.Target{
 					Distro: "amazonlin*",
 				},
+				DriverName: "falco",
 			}},
 			remainingObjects: []string{
 				"driver/1.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
@@ -259,6 +260,7 @@ func TestCleanupS3(t *testing.T) {
 				Target: root.Target{
 					KernelRelease: "5.*",
 				},
+				DriverName: "falco",
 			}},
 			remainingObjects: []string{
 				"driver/2.0.0+driver/aarch64/falco_almalinux_4.18.0-477.10.1.el8_8.aarch64_1.ko",
@@ -270,6 +272,7 @@ func TestCleanupS3(t *testing.T) {
 			opts: Options{Options: root.Options{
 				Architecture:  "arm64",
 				DriverVersion: []string{"2.0.0+driver"},
+				DriverName:    "falco",
 			}},
 			remainingObjects: []string{},
 			name:             "cleanup 2.0.0+driver aarch64 drivers",
