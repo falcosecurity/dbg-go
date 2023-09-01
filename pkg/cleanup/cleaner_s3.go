@@ -4,20 +4,20 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/fededp/dbg-go/pkg/utils"
+	s3utils "github.com/fededp/dbg-go/pkg/utils/s3"
 	"log/slog"
 )
 
 type s3Cleaner struct {
-	client *s3.Client
+	*s3utils.Client
 }
 
 func NewS3Cleaner(awsProfile string) (Cleaner, error) {
-	client, err := utils.NewS3Client(false, awsProfile)
+	client, err := s3utils.NewClient(false, awsProfile)
 	if err != nil {
 		return nil, err
 	}
-	return &s3Cleaner{client: client}, nil
+	return &s3Cleaner{Client: client}, nil
 }
 
 func (s *s3Cleaner) Info() string {
@@ -25,7 +25,7 @@ func (s *s3Cleaner) Info() string {
 }
 
 func (s *s3Cleaner) Cleanup(opts Options, driverVersion string) error {
-	err := utils.LoopBucketFiltered(s.client, opts.Options, driverVersion, func(key string) error {
+	err := s.LoopBucketFiltered(opts.Options, driverVersion, func(key string) error {
 		slog.Info("cleaning up remote driver file", "key", key)
 		if opts.DryRun {
 			slog.Info("skipping because of dry-run.")
@@ -44,8 +44,8 @@ func (s *s3Cleaner) CleanupAll(opts Options, driverVersion string) error {
 }
 
 func (s *s3Cleaner) removeKey(key string) error {
-	_, err := s.client.DeleteObject(context.Background(), &s3.DeleteObjectInput{
-		Bucket: aws.String(utils.S3Bucket),
+	_, err := s.DeleteObject(context.Background(), &s3.DeleteObjectInput{
+		Bucket: aws.String(s3utils.S3Bucket),
 		Key:    aws.String(key),
 	})
 	return err

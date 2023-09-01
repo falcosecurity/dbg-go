@@ -1,6 +1,6 @@
 //go:build test_all
 
-package utils
+package testutils
 
 import (
 	"bufio"
@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/fededp/dbg-go/pkg/root"
+	s3utils "github.com/fededp/dbg-go/pkg/utils/s3"
 	"github.com/johannesboyne/gofakes3"
 	"github.com/johannesboyne/gofakes3/backend/s3mem"
 	"github.com/stretchr/testify/assert"
@@ -68,7 +69,7 @@ func SliceDifference(a, b []string) []string {
 	return diff
 }
 
-func S3CreateTestBucket(t *testing.T, objectKeys []string) *s3.Client {
+func S3CreateTestBucket(t *testing.T, objectKeys []string) *s3utils.Client {
 	backend := s3mem.New()
 	faker := gofakes3.New(backend)
 	ts := httptest.NewServer(faker.Server())
@@ -103,22 +104,22 @@ func S3CreateTestBucket(t *testing.T, objectKeys []string) *s3.Client {
 
 	// Create bucket
 	_, err := client.CreateBucket(context.Background(), &s3.CreateBucketInput{
-		Bucket: aws.String(S3Bucket),
+		Bucket: aws.String(s3utils.S3Bucket),
 	})
 	assert.NoError(t, err)
 	t.Cleanup(func() {
 		_, _ = client.DeleteBucket(context.Background(), &s3.DeleteBucketInput{
-			Bucket: aws.String(S3Bucket),
+			Bucket: aws.String(s3utils.S3Bucket),
 		})
 	})
 
 	// Create requested test keys
 	for _, key := range objectKeys {
 		_, err = client.PutObject(context.Background(), &s3.PutObjectInput{
-			Bucket: aws.String(S3Bucket),
+			Bucket: aws.String(s3utils.S3Bucket),
 			Key:    aws.String(key),
 		})
 		assert.NoError(t, err)
 	}
-	return client
+	return &s3utils.Client{Client: client}
 }

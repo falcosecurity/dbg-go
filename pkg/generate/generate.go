@@ -7,7 +7,6 @@ import (
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
 	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
 	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/utils"
 	"github.com/fededp/dbg-go/pkg/validate"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
@@ -23,7 +22,7 @@ var (
 )
 
 func loadLastRunDistro() (string, error) {
-	lastDistroBytes, err := utils.GetURL(urlLastDistro)
+	lastDistroBytes, err := getURL(urlLastDistro)
 	if err != nil {
 		return "", err
 	}
@@ -59,7 +58,7 @@ func autogenerateConfigs(opts Options) error {
 	if testJsonData != nil {
 		jsonData = testJsonData
 	} else {
-		jsonData, err = utils.GetURL(url)
+		jsonData, err = getURL(url)
 		if err != nil {
 			return err
 		}
@@ -157,7 +156,7 @@ func loadKernelHeadersFromDk(opts Options) ([]string, error) {
 	// Just write a config with empty headers.
 
 	// We already received a driverkit target type (not a kernel crawler distro!)
-	targetType := builder.Type(opts.Distro)
+	targetType := opts.Distro
 	b, err := builder.Factory(targetType)
 	if err != nil {
 		return nil, &unsupportedTargetErr{target: targetType}

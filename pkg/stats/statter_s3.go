@@ -1,34 +1,33 @@
 package stats
 
 import (
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/utils"
+	s3utils "github.com/fededp/dbg-go/pkg/utils/s3"
 	"log/slog"
 	"strings"
 )
 
 type s3Statter struct {
-	client *s3.Client
+	*s3utils.Client
 }
 
 func NewS3Statter() (Statter, error) {
-	client, err := utils.NewS3Client(true, "UNNEEDED")
+	client, err := s3utils.NewClient(true, "UNNEEDED")
 	if err != nil {
 		return nil, err
 	}
-	return &s3Statter{client: client}, nil
+	return &s3Statter{Client: client}, nil
 }
 
 func (s *s3Statter) GetDriverStats(opts root.Options) (driverStatsByDriverVersion, error) {
-	slog.SetDefault(slog.With("bucket", utils.S3Bucket))
+	slog.SetDefault(slog.With("bucket", s3utils.S3Bucket))
 
 	slog.Info("fetching stats for remote drivers")
 	driverStatsByVersion := make(driverStatsByDriverVersion)
 
 	for _, driverVersion := range opts.DriverVersion {
 		dStats := driverStatsByVersion[driverVersion]
-		err := utils.LoopBucketFiltered(s.client, opts, driverVersion, func(key string) error {
+		err := s.LoopBucketFiltered(opts, driverVersion, func(key string) error {
 			slog.Info("computing stats", "key", key)
 			if opts.DryRun {
 				slog.Info("skipping because of dry-run.")

@@ -6,7 +6,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/utils"
+	s3utils "github.com/fededp/dbg-go/pkg/utils/s3"
+	"github.com/fededp/dbg-go/pkg/utils/test"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"strings"
@@ -44,7 +45,7 @@ func TestCleanup(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := utils.PreCreateFolders(test.opts.Options, test.driverVersionsToBeCreated)
+			err := testutils.PreCreateFolders(test.opts.Options, test.driverVersionsToBeCreated)
 			t.Cleanup(func() {
 				_ = os.RemoveAll(test.opts.RepoRoot)
 			})
@@ -57,7 +58,7 @@ func TestCleanup(t *testing.T) {
 			}
 
 			// Check that any folder that was asked for removal, is no more present
-			for _, driverVersion := range utils.SliceDifference(test.driverVersionsToBeCreated, test.driverFolderRemainingExpected) {
+			for _, driverVersion := range testutils.SliceDifference(test.driverVersionsToBeCreated, test.driverFolderRemainingExpected) {
 				configPath := root.BuildConfigPath(root.Options{
 					RepoRoot:     test.opts.RepoRoot,
 					Architecture: test.opts.Architecture,
@@ -91,7 +92,7 @@ func TestCleanupFiltered(t *testing.T) {
 		"./test/driverkit/config/1.0.0+driver/x86_64/amazonlinux_6.0.0_23.yaml",
 	}
 
-	err := utils.PreCreateFolders(root.Options{
+	err := testutils.PreCreateFolders(root.Options{
 		RepoRoot:     "./test",
 		Architecture: "amd64",
 	}, []string{"1.0.0+driver"})
@@ -159,7 +160,7 @@ func TestCleanupFiltered(t *testing.T) {
 			var messageJSON MessageJSON
 			found := 0
 			lines := 0
-			utils.RunTestParsingLogs(t, func() error {
+			testutils.RunTestParsingLogs(t, func() error {
 				return Run(test.opts, NewFileCleaner())
 			}, &messageJSON, func() bool {
 				if messageJSON.Path == "" {
@@ -196,8 +197,8 @@ func TestCleanupS3(t *testing.T) {
 		"driver/2.0.0+driver/aarch64/falco_almalinux_4.18.0-477.10.1.el8_8.aarch64_1.ko",
 		"driver/2.0.0+driver/aarch64/falco_bottlerocket_5.10.165_1_1.13.1-aws.o",
 	}
-	client := utils.S3CreateTestBucket(t, keysToBeCreated)
-	cleaner := &s3Cleaner{client: client}
+	client := testutils.S3CreateTestBucket(t, keysToBeCreated)
+	cleaner := &s3Cleaner{Client: client}
 
 	// MUST RUN IN STRICT LOGICAL ORDER; USE A SLICE.
 	tests := []struct {
@@ -282,7 +283,7 @@ func TestCleanupS3(t *testing.T) {
 
 			// Check the remaining objects in the bucket
 			objects, err := client.ListObjects(context.Background(), &s3.ListObjectsInput{
-				Bucket: aws.String(utils.S3Bucket),
+				Bucket: aws.String(s3utils.S3Bucket),
 			})
 			assert.NoError(t, err)
 			for _, obj := range objects.Contents {
