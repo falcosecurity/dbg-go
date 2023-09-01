@@ -3,6 +3,7 @@ package build
 import (
 	"github.com/falcosecurity/driverkit/cmd"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder"
+	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
 	"github.com/fededp/dbg-go/pkg/root"
 	s3utils "github.com/fededp/dbg-go/pkg/utils/s3"
 	"github.com/fededp/dbg-go/pkg/validate"
@@ -11,6 +12,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"reflect"
 )
 
 func Run(opts Options) error {
@@ -78,7 +80,9 @@ func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath
 
 	logger.Info("building", "config", configPath)
 
-	err = driverbuilder.NewDockerBuildProcessor(1000, "").Start( /*ro.ToBuild()*/ nil)
+	// Magic to call unexported method
+	b := reflect.ValueOf(&ro).MethodByName("toBuild").Call(nil)[0].Interface().(*builder.Build)
+	err = driverbuilder.NewDockerBuildProcessor(1000, "").Start( /*ro.ToBuild()*/ b)
 	if err != nil {
 		logger.Error(err.Error())
 		return nil // we don't want to break the builds chain

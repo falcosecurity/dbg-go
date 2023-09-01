@@ -111,6 +111,7 @@ func TestStats(t *testing.T) {
 				RepoRoot:      "./test/",
 				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
+				DriverName:    "falco",
 			}},
 			expectedStats: driverStats{
 				NumProbes:  3,
@@ -122,6 +123,7 @@ func TestStats(t *testing.T) {
 				RepoRoot:      "./test/",
 				Architecture:  "amd64",
 				DriverVersion: []string{"2.0.0+driver"}, // not present
+				DriverName:    "falco",
 			}},
 			expectedStats: driverStats{
 				NumProbes:  0,
@@ -133,6 +135,7 @@ func TestStats(t *testing.T) {
 				RepoRoot:      "./test/",
 				Architecture:  "arm64", // not present
 				DriverVersion: []string{"1.0.0+driver"},
+				DriverName:    "falco",
 			}},
 			expectedStats: driverStats{
 				NumProbes:  0,
@@ -144,6 +147,7 @@ func TestStats(t *testing.T) {
 				RepoRoot:      "./test/",
 				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
+				DriverName:    "falco",
 				Target: root.Target{
 					Distro: "centos",
 				},
@@ -158,6 +162,7 @@ func TestStats(t *testing.T) {
 				RepoRoot:      "./test/",
 				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
+				DriverName:    "falco",
 				Target: root.Target{
 					Distro: "cent*",
 				},
@@ -172,6 +177,7 @@ func TestStats(t *testing.T) {
 				RepoRoot:      "./test/",
 				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
+				DriverName:    "falco",
 				Target: root.Target{
 					KernelRelease: "5.10.*",
 				},
@@ -186,6 +192,7 @@ func TestStats(t *testing.T) {
 				RepoRoot:      "./test/",
 				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver"},
+				DriverName:    "falco",
 				Target: root.Target{
 					KernelVersion: "1",
 				},
@@ -274,6 +281,7 @@ func TestStatsS3(t *testing.T) {
 			opts: Options{Options: root.Options{
 				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
+				DriverName:    "falco",
 			}},
 			expectedStats: driverStatsByDriverVersion{
 				"1.0.0+driver": {
@@ -290,6 +298,7 @@ func TestStatsS3(t *testing.T) {
 			opts: Options{Options: root.Options{
 				Architecture:  "arm64",
 				DriverVersion: []string{"2.0.0+driver"},
+				DriverName:    "falco",
 			}},
 			expectedStats: driverStatsByDriverVersion{
 				"2.0.0+driver": {
@@ -302,6 +311,7 @@ func TestStatsS3(t *testing.T) {
 			opts: Options{Options: root.Options{
 				Architecture:  "amd64",
 				DriverVersion: []string{"2.0.0+driver"},
+				DriverName:    "falco",
 			}},
 			expectedStats: driverStatsByDriverVersion{
 				"2.0.0+driver": {
@@ -314,6 +324,7 @@ func TestStatsS3(t *testing.T) {
 			opts: Options{Options: root.Options{
 				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
+				DriverName:    "falco",
 				Target: root.Target{
 					Distro: "almalinux",
 				},
@@ -333,6 +344,7 @@ func TestStatsS3(t *testing.T) {
 			opts: Options{Options: root.Options{
 				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
+				DriverName:    "falco",
 				Target: root.Target{
 					Distro: "almali*",
 				},
@@ -352,6 +364,7 @@ func TestStatsS3(t *testing.T) {
 			opts: Options{Options: root.Options{
 				Architecture:  "amd64",
 				DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
+				DriverName:    "falco",
 				Target: root.Target{
 					KernelRelease: "5.*",
 				},
