@@ -39,10 +39,6 @@ func (s *s3Cleaner) Cleanup(opts Options, driverVersion string) error {
 	return nil
 }
 
-func (s *s3Cleaner) CleanupAll(opts Options, driverVersion string) error {
-	return s.Cleanup(opts, driverVersion)
-}
-
 func (s *s3Cleaner) removeKey(key string) error {
 	_, err := s.DeleteObject(context.Background(), &s3.DeleteObjectInput{
 		Bucket: aws.String(s3utils.S3Bucket),
