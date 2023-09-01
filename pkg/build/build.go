@@ -3,7 +3,6 @@ package build
 import (
 	"github.com/falcosecurity/driverkit/cmd"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder"
-	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
 	"github.com/fededp/dbg-go/pkg/root"
 	s3utils "github.com/fededp/dbg-go/pkg/utils/s3"
 	"github.com/fededp/dbg-go/pkg/validate"
@@ -83,7 +82,7 @@ func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath
 		}
 	}
 
-	err = driverbuilder.NewDockerBuildProcessor(1000, "").Start( /*ro.ToBuild()*/ toBuild(ro))
+	err = driverbuilder.NewDockerBuildProcessor(1000, "").Start(ro.ToBuild())
 	if err != nil {
 		if opts.IgnoreErrors {
 			logger.Error(err.Error())
@@ -119,50 +118,4 @@ func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath
 		}
 	}
 	return nil
-}
-
-// copied from driverkit
-func toBuild(ro *cmd.RootOptions) *builder.Build {
-	kernelConfigData := ro.KernelConfigData
-	if len(kernelConfigData) == 0 {
-		kernelConfigData = "bm8tZGF0YQ==" // no-data
-	}
-
-	build := &builder.Build{
-		TargetType:        builder.Type(ro.Target),
-		DriverVersion:     ro.DriverVersion,
-		KernelVersion:     ro.KernelVersion,
-		KernelRelease:     ro.KernelRelease,
-		Architecture:      ro.Architecture,
-		KernelConfigData:  kernelConfigData,
-		ModuleFilePath:    ro.Output.Module,
-		ProbeFilePath:     ro.Output.Probe,
-		ModuleDriverName:  ro.ModuleDriverName,
-		ModuleDeviceName:  ro.ModuleDeviceName,
-		GCCVersion:        ro.GCCVersion,
-		BuilderImage:      ro.BuilderImage,
-		BuilderRepos:      ro.BuilderRepos,
-		KernelUrls:        ro.KernelUrls,
-		RepoOrg:           ro.Repo.Org,
-		RepoName:          ro.Repo.Name,
-		Images:            make(builder.ImagesMap),
-		RegistryName:      ro.Registry.Name,
-		RegistryUser:      ro.Registry.Username,
-		RegistryPassword:  ro.Registry.Password,
-		RegistryPlainHTTP: ro.Registry.PlainHTTP,
-	}
-
-	imageLister, _ := builder.NewRepoImagesLister(ro.BuilderRepos[0], build)
-	build.ImagesListers = append(build.ImagesListers, imageLister)
-
-	// attempt the build in case it comes from an invalid config
-	kr := build.KernelReleaseFromBuildConfig()
-	if len(build.ModuleFilePath) > 0 && !kr.SupportsModule() {
-		build.ModuleFilePath = ""
-	}
-	if len(build.ProbeFilePath) > 0 && !kr.SupportsProbe() {
-		build.ProbeFilePath = ""
-	}
-
-	return build
 }
