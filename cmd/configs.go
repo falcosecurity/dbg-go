@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/fededp/dbg-go/cmd/build"
 	"github.com/fededp/dbg-go/cmd/cleanup"
 	"github.com/fededp/dbg-go/cmd/generate"
 	"github.com/fededp/dbg-go/cmd/stats"
@@ -21,4 +22,5 @@ func init() {
 	configsCmd.AddCommand(cleanup.NewCleanupCmd())
 	configsCmd.AddCommand(validate.NewValidateCmd())
 	configsCmd.AddCommand(stats.NewStatsCmd())
+	configsCmd.AddCommand(build.NewBuildCmd())
 }

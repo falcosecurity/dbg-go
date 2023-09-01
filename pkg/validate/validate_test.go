@@ -3,7 +3,7 @@ package validate
 import (
 	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/utils"
+	testutils "github.com/fededp/dbg-go/pkg/utils/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -551,7 +551,7 @@ func TestValidateConfigFiltered(t *testing.T) {
 			var messageJSON MessageJSON
 			found := 0
 			lines := 0
-			utils.RunTestParsingLogs(t,
+			testutils.RunTestParsingLogs(t,
 				func() error {
 					return Run(test.opts)
 				},

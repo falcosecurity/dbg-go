@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
 	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/utils"
+	testutils "github.com/fededp/dbg-go/pkg/utils/test"
 	"github.com/fededp/dbg-go/pkg/validate"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
@@ -211,7 +211,7 @@ func TestStats(t *testing.T) {
 			outputStats := driverStats{}
 			startParsing := false
 			parsingIdx := 0
-			utils.RunTestParsingLogs(t,
+			testutils.RunTestParsingLogs(t,
 				func() error {
 					testOutputWriter = log.Default().Writer()
 					return Run(test.opts, NewFileStatter())
@@ -265,8 +265,8 @@ func TestStatsS3(t *testing.T) {
 		"driver/2.0.0+driver/aarch64/falco_almalinux_4.18.0-477.10.1.el8_8.aarch64_1.ko",
 		"driver/2.0.0+driver/aarch64/falco_bottlerocket_5.10.165_1_1.13.1-aws.o",
 	}
-	client := utils.S3CreateTestBucket(t, keysToBeCreated)
-	statter := s3Statter{client: client}
+	client := testutils.S3CreateTestBucket(t, keysToBeCreated)
+	statter := s3Statter{Client: client}
 
 	tests := map[string]struct {
 		opts          Options

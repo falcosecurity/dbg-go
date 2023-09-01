@@ -2,7 +2,7 @@ package generate
 
 import (
 	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/utils"
+	testutils "github.com/fededp/dbg-go/pkg/utils/test"
 	"github.com/fededp/dbg-go/pkg/validate"
 	"github.com/stretchr/testify/assert"
 	"os"
@@ -208,7 +208,7 @@ func TestGenerate(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := utils.PreCreateFolders(test.opts.Options, test.opts.DriverVersion)
+			err := testutils.PreCreateFolders(test.opts.Options, test.opts.DriverVersion)
 			t.Cleanup(func() {
 				_ = os.RemoveAll(test.opts.RepoRoot)
 			})
