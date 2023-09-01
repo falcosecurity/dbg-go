@@ -58,7 +58,7 @@ func validateConfig(configPath string, opts Options, driverVersion string) error
 		return fmt.Errorf("at least one between `kernelurls` and `kernelconfigdata` must be set: %s", configPath)
 	}
 
-	outputPath := driverkitYaml.ToOutputPath(driverVersion, opts)
+	outputPath := driverkitYaml.ToOutputPath(driverVersion, opts.Options)
 	outputPathFilename := filepath.Base(outputPath)
 
 	// Check output probe if present

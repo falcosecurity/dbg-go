@@ -7,7 +7,6 @@ import (
 
 type Options struct {
 	root.Options
-	DriverName string
 }
 
 type DriverkitYamlOutputs struct {
@@ -30,7 +29,7 @@ func (dy *DriverkitYaml) ToConfigName() string {
 	return fmt.Sprintf("%s_%s_%s.yaml", dy.Target, dy.KernelRelease, dy.KernelVersion)
 }
 
-func (dy *DriverkitYaml) ToOutputPath(driverVersion string, opts Options) string {
+func (dy *DriverkitYaml) ToOutputPath(driverVersion string, opts root.Options) string {
 	return fmt.Sprintf(outputPathFmt,
 		driverVersion,
 		opts.Architecture.ToNonDeb(),

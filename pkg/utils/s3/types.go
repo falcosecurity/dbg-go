@@ -23,7 +23,7 @@ func NewClient(readOnly bool, awsProfile string) (*Client, error) {
 		}
 	} else {
 		cfg = aws.Config{
-			Region:      S3Region,
+			Region:      s3Region,
 			Credentials: aws.AnonymousCredentials{},
 		}
 	}

@@ -57,6 +57,7 @@ type Options struct {
 	DryRun        bool
 	RepoRoot      string
 	Architecture  kernelrelease.Architecture
+	DriverName    string
 	DriverVersion []string
 	Target
 }
@@ -64,6 +65,7 @@ type Options struct {
 func LoadRootOptions() Options {
 	opts := Options{
 		DryRun:        viper.GetBool("dry-run"),
+		DriverName:    viper.GetString("driver-name"),
 		RepoRoot:      viper.GetString("repo-root"),
 		Architecture:  kernelrelease.Architecture(viper.GetString("architecture")),
 		DriverVersion: viper.GetStringSlice("driver-version"),

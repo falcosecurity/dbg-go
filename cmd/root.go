@@ -72,6 +72,7 @@ func init() {
 	flags.String("repo-root", cwd, "test-infra repository root path.")
 	flags.StringP("architecture", "a", runtime.GOARCH, `architecture to run against. Supported: `+kernelrelease.SupportedArchs.String())
 	flags.StringSlice("driver-version", nil, "driver versions to run against.")
+	flags.String("driver-name", "falco", "driver name to be used")
 	flags.String("target-kernelrelease", "",
 		`target kernel release to work against. By default tool will work on any kernel release. Can be a regex.`)
 	flags.String("target-kernelversion", "",

@@ -6,6 +6,5 @@ import (
 
 type Options struct {
 	root.Options
-	Auto       bool
-	DriverName string
+	Auto bool
 }
