@@ -12,15 +12,25 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"reflect"
 )
+
+var testClient *s3utils.Client
 
 func Run(opts Options) error {
 	slog.Info("building drivers")
-	client, err := s3utils.NewClient(false, opts.AwsProfile)
-	if err != nil {
-		return err
+	var (
+		client *s3utils.Client
+		err    error
+	)
+	if testClient == nil {
+		client, err = s3utils.NewClient(false, opts.AwsProfile)
+		if err != nil {
+			return err
+		}
+	} else {
+		client = testClient
 	}
+
 	return root.LoopConfigsFiltered(opts.Options, "building driver", func(driverVersion, configPath string) error {
 		return buildConfig(client, opts, driverVersion, configPath)
 	})
@@ -38,25 +48,20 @@ func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath
 		return errors.WithMessagef(err, "config: %s", configPath)
 	}
 
-	ro := cmd.RootOptions{
-		Architecture:     opts.Architecture.String(),
-		DriverVersion:    driverVersion,
-		KernelVersion:    driverkitYaml.KernelVersion,
-		ModuleDriverName: opts.DriverName,
-		ModuleDeviceName: opts.DriverName,
-		KernelRelease:    driverkitYaml.KernelRelease,
-		Target:           driverkitYaml.Target,
-		KernelConfigData: driverkitYaml.KernelConfigData,
-		BuilderRepos:     []string{"docker.io/falcosecurity/driverkit-builder"},
-		KernelUrls:       driverkitYaml.KernelUrls,
-		Repo: cmd.RepoOptions{
-			Org:  "falcosecurity",
-			Name: "libs",
-		},
-		Output: cmd.OutputOptions{
-			Module: driverkitYaml.Output.Module,
-			Probe:  driverkitYaml.Output.Probe,
-		},
+	ro := cmd.NewRootOptions()
+
+	ro.Architecture = opts.Architecture.String()
+	ro.DriverVersion = driverVersion
+	ro.KernelVersion = driverkitYaml.KernelVersion
+	ro.ModuleDriverName = opts.DriverName
+	ro.ModuleDeviceName = opts.DriverName
+	ro.KernelRelease = driverkitYaml.KernelRelease
+	ro.Target = driverkitYaml.Target
+	ro.KernelConfigData = driverkitYaml.KernelConfigData
+	ro.KernelUrls = driverkitYaml.KernelUrls
+	ro.Output = cmd.OutputOptions{
+		Module: driverkitYaml.Output.Module,
+		Probe:  driverkitYaml.Output.Probe,
 	}
 
 	if opts.SkipExisting {
@@ -73,19 +78,18 @@ func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath
 			}
 		}
 		if ro.Output.Module == "" && ro.Output.Probe == "" {
-			logger.Info("drivers already available on remote, nothing to do")
+			logger.Info("drivers already available on remote, skipping")
 			return nil // nothing to do
 		}
 	}
 
-	logger.Info("building", "config", configPath)
-
-	// Magic to call unexported method
-	b := reflect.ValueOf(&ro).MethodByName("toBuild").Call(nil)[0].Interface().(*builder.Build)
-	err = driverbuilder.NewDockerBuildProcessor(1000, "").Start( /*ro.ToBuild()*/ b)
+	err = driverbuilder.NewDockerBuildProcessor(1000, "").Start( /*ro.ToBuild()*/ toBuild(ro))
 	if err != nil {
-		logger.Error(err.Error())
-		return nil // we don't want to break the builds chain
+		if opts.IgnoreErrors {
+			logger.Error(err.Error())
+			return nil // do not break the configs loop, just try the next one
+		}
+		return err
 	}
 
 	if opts.Publish {
@@ -115,4 +119,50 @@ func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath
 		}
 	}
 	return nil
+}
+
+// copied from driverkit
+func toBuild(ro *cmd.RootOptions) *builder.Build {
+	kernelConfigData := ro.KernelConfigData
+	if len(kernelConfigData) == 0 {
+		kernelConfigData = "bm8tZGF0YQ==" // no-data
+	}
+
+	build := &builder.Build{
+		TargetType:        builder.Type(ro.Target),
+		DriverVersion:     ro.DriverVersion,
+		KernelVersion:     ro.KernelVersion,
+		KernelRelease:     ro.KernelRelease,
+		Architecture:      ro.Architecture,
+		KernelConfigData:  kernelConfigData,
+		ModuleFilePath:    ro.Output.Module,
+		ProbeFilePath:     ro.Output.Probe,
+		ModuleDriverName:  ro.ModuleDriverName,
+		ModuleDeviceName:  ro.ModuleDeviceName,
+		GCCVersion:        ro.GCCVersion,
+		BuilderImage:      ro.BuilderImage,
+		BuilderRepos:      ro.BuilderRepos,
+		KernelUrls:        ro.KernelUrls,
+		RepoOrg:           ro.Repo.Org,
+		RepoName:          ro.Repo.Name,
+		Images:            make(builder.ImagesMap),
+		RegistryName:      ro.Registry.Name,
+		RegistryUser:      ro.Registry.Username,
+		RegistryPassword:  ro.Registry.Password,
+		RegistryPlainHTTP: ro.Registry.PlainHTTP,
+	}
+
+	imageLister, _ := builder.NewRepoImagesLister(ro.BuilderRepos[0], build)
+	build.ImagesListers = append(build.ImagesListers, imageLister)
+
+	// attempt the build in case it comes from an invalid config
+	kr := build.KernelReleaseFromBuildConfig()
+	if len(build.ModuleFilePath) > 0 && !kr.SupportsModule() {
+		build.ModuleFilePath = ""
+	}
+	if len(build.ProbeFilePath) > 0 && !kr.SupportsProbe() {
+		build.ProbeFilePath = ""
+	}
+
+	return build
 }

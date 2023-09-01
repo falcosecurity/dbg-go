@@ -16,5 +16,6 @@ type driverStats struct {
 type driverStatsByDriverVersion map[string]driverStats
 
 type Statter interface {
+	Info() string
 	GetDriverStats(opts root.Options) (driverStatsByDriverVersion, error)
 }

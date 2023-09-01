@@ -6,5 +6,6 @@ type Options struct {
 	root.Options
 	SkipExisting bool
 	Publish      bool
+	IgnoreErrors bool
 	AwsProfile   string
 }

@@ -11,6 +11,7 @@ require (
 	github.com/johannesboyne/gofakes3 v0.0.0-20230506070712-04da935ef877
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/pkg/errors v0.9.1
+	github.com/spance/go-callprivate v0.0.0-20151213012958-d8b9b5523668
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.3
