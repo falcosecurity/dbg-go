@@ -86,11 +86,9 @@ func TestStats(t *testing.T) {
 		assert.NoError(t, err)
 
 		outputPath := dkConf.ToOutputPath("1.0.0+driver",
-			validate.Options{
-				DriverName: "falco",
-				Options: root.Options{
-					Architecture: kernelrelease.Architecture(dkConf.Architecture),
-				},
+			root.Options{
+				DriverName:   "falco",
+				Architecture: kernelrelease.Architecture(dkConf.Architecture),
 			})
 		if dkConf.hasModule {
 			dkConf.DriverkitYaml.Output.Module = outputPath + ".ko"

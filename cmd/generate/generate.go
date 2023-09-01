@@ -23,15 +23,13 @@ Also, in non-automatic mode, kernelurls driverkit config key will be constructed
 	}
 	flags := cmd.Flags()
 	flags.Bool("auto", false, "automatically generate configs from kernel-crawler output")
-	flags.String("driver-name", "falco", "driver name to be used")
 	return cmd
 }
 
 func execute(c *cobra.Command, args []string) error {
 	options := generate.Options{
-		Options:    root.LoadRootOptions(),
-		Auto:       viper.GetBool("auto"),
-		DriverName: viper.GetString("driver-name"),
+		Options: root.LoadRootOptions(),
+		Auto:    viper.GetBool("auto"),
 	}
 	return generate.Run(options)
 }

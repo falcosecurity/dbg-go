@@ -2,6 +2,7 @@ package s3utils
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
@@ -13,17 +14,18 @@ import (
 )
 
 const (
-	S3Bucket = "falco-distribution"
-	S3Region = "eu-west-1"
+	S3Bucket             = "falco-distribution"
+	s3Region             = "eu-west-1"
+	s3DriverNameRegexFmt = `^%s_(?P<Distro>[a-zA-Z-0-9.0-9]*)_(?P<KernelRelease>.*)_(?P<KernelVersion>.*)(\.o|\.ko)`
 )
-
-var s3DriverNameRegex = regexp.MustCompile(`^falco_(?P<Distro>[a-zA-Z-0-9.0-9]*)_(?P<KernelRelease>.*)_(?P<KernelVersion>.*)(\.o|\.ko)`)
 
 func (cl *Client) LoopBucketFiltered(opts root.Options,
 	driverVersion string,
 	keyProcessor func(key string) error,
 ) error {
 	prefix := filepath.Join("driver", driverVersion, opts.Architecture.ToNonDeb())
+	s3DriverNameRegex := regexp.MustCompile(fmt.Sprintf(s3DriverNameRegexFmt, opts.DriverName))
+
 	params := &s3.ListObjectsV2Input{
 		Bucket: aws.String(S3Bucket),
 		Prefix: aws.String(prefix),

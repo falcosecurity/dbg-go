@@ -212,13 +212,7 @@ func dumpConfig(opts Options, dkYaml validate.DriverkitYaml) error {
 	dkYaml.Architecture = opts.Architecture.String()
 
 	for _, driverVersion := range opts.DriverVersion {
-		outputPath := dkYaml.ToOutputPath(driverVersion,
-			validate.Options{
-				DriverName: opts.DriverName,
-				Options: root.Options{
-					Architecture: opts.Architecture,
-				},
-			})
+		outputPath := dkYaml.ToOutputPath(driverVersion, opts.Options)
 		dkYaml.Output = validate.DriverkitYamlOutputs{
 			Module: outputPath + ".ko",
 			Probe:  outputPath + ".o",

@@ -31,15 +31,15 @@ func TestValidateConfig(t *testing.T) {
 		Options: root.Options{
 			Architecture:  "amd64",
 			DriverVersion: []string{"1.0.0+driver"},
+			DriverName:    "falco",
 		},
-		DriverName: "falco",
 	}
 	namedDriverOpts := Options{
 		Options: root.Options{
 			Architecture:  "amd64",
 			DriverVersion: []string{"2.0.0+driver"},
+			DriverName:    "TEST",
 		},
-		DriverName: "TEST",
 	}
 
 	tests := map[string]struct {
@@ -454,8 +454,8 @@ func TestValidateConfigFiltered(t *testing.T) {
 					RepoRoot:      "./test/",
 					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
+					DriverName:    "falco",
 				},
-				DriverName: "falco",
 			},
 			expectedOutputContains: []string{"centos_5.10", "centos_5.15", "ubuntu_5.15", "bottlerocket_5.15"},
 		},
@@ -468,8 +468,8 @@ func TestValidateConfigFiltered(t *testing.T) {
 					Target: root.Target{
 						Distro: "centos",
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
 			},
 			expectedOutputContains: []string{"centos_5.10", "centos_5.15"},
 		},
@@ -482,8 +482,8 @@ func TestValidateConfigFiltered(t *testing.T) {
 					Target: root.Target{
 						Distro: "cent*",
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
 			},
 			expectedOutputContains: []string{"centos_5.10", "centos_5.15"},
 		},
@@ -496,8 +496,8 @@ func TestValidateConfigFiltered(t *testing.T) {
 					Target: root.Target{
 						Distro: "bottlerocket",
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
 			},
 			expectedOutputContains: []string{"bottlerocket_5.15"},
 		},
@@ -510,8 +510,8 @@ func TestValidateConfigFiltered(t *testing.T) {
 					Target: root.Target{
 						KernelRelease: "5.15.*",
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
 			},
 			expectedOutputContains: []string{"centos_5.15", "ubuntu_5.15", "bottlerocket_5.15"},
 		},
@@ -524,8 +524,8 @@ func TestValidateConfigFiltered(t *testing.T) {
 					Target: root.Target{
 						KernelVersion: "1",
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
 			},
 			expectedOutputContains: []string{"centos_5.10", "centos_5.15", "bottlerocket_5.15"},
 		},

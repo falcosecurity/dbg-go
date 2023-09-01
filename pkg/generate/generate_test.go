@@ -16,9 +16,9 @@ func BenchmarkAutogenerate(b *testing.B) {
 			RepoRoot:      "./test/",
 			Architecture:  "amd64",
 			DriverVersion: []string{"5.0.1+driver"},
+			DriverName:    "falco",
 		},
-		DriverName: "falco",
-		Auto:       true,
+		Auto: true,
 	}
 
 	b.StopTimer()
@@ -47,9 +47,9 @@ func TestGenerate(t *testing.T) {
 					Target: root.Target{
 						Distro: "load", // Should load it from lastDistro kernel crawler file
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
-				Auto:       true,
+				Auto: true,
 			},
 			expectError: false,
 		},
@@ -59,9 +59,9 @@ func TestGenerate(t *testing.T) {
 					RepoRoot:      "./test/",
 					Architecture:  "amd64",
 					DriverVersion: []string{"1.0.0+driver"},
+					DriverName:    "falco",
 				},
-				DriverName: "falco",
-				Auto:       true,
+				Auto: true,
 			},
 			expectError: false,
 		},
@@ -74,9 +74,9 @@ func TestGenerate(t *testing.T) {
 					Target: root.Target{
 						Distro: "centos",
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
-				Auto:       true,
+				Auto: true,
 			},
 			expectError: false,
 		},
@@ -89,9 +89,9 @@ func TestGenerate(t *testing.T) {
 					Target: root.Target{
 						Distro: "WRONG_DISTRO",
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
-				Auto:       true,
+				Auto: true,
 			},
 			expectError: false, // we do not expect any error; no configs will be generated though
 		},
@@ -104,9 +104,9 @@ func TestGenerate(t *testing.T) {
 					Target: root.Target{
 						Distro: "centos",
 					},
+					DriverName: "CUSTOM",
 				},
-				DriverName: "CUSTOM",
-				Auto:       true,
+				Auto: true,
 			},
 			expectError: false,
 		},
@@ -119,9 +119,9 @@ func TestGenerate(t *testing.T) {
 					Target: root.Target{
 						Distro: "^cent.*$",
 					},
+					DriverName: "CUSTOM",
 				},
-				DriverName: "CUSTOM",
-				Auto:       true,
+				Auto: true,
 			},
 			expectError: false,
 		},
@@ -135,8 +135,8 @@ func TestGenerate(t *testing.T) {
 						Distro:        "centos",
 						KernelVersion: "1",
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
 			},
 			expectError: true,
 		},
@@ -150,8 +150,8 @@ func TestGenerate(t *testing.T) {
 						Distro:        "centos",
 						KernelRelease: "5.10.0",
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
 			},
 			expectError: true,
 		},
@@ -165,8 +165,8 @@ func TestGenerate(t *testing.T) {
 						KernelRelease: "5.10.0",
 						KernelVersion: "1",
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
 			},
 			expectError: true,
 		},
@@ -181,8 +181,8 @@ func TestGenerate(t *testing.T) {
 						KernelRelease: "5.10.0",
 						KernelVersion: "1",
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
 			},
 			expectError: true,
 		},
@@ -199,8 +199,8 @@ func TestGenerate(t *testing.T) {
 						KernelRelease: "6.1.38-2-amd64",
 						KernelVersion: "1",
 					},
+					DriverName: "falco",
 				},
-				DriverName: "falco",
 			},
 			expectError: false,
 		},
@@ -219,7 +219,7 @@ func TestGenerate(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				// Validate all generated files
-				validateOpts := validate.Options{Options: test.opts.Options, DriverName: test.opts.DriverName}
+				validateOpts := validate.Options{Options: test.opts.Options}
 				if validateOpts.Distro == "load" {
 					// When we load from last kernel-crawler distro,
 					// force validate all
