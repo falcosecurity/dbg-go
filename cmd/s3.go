@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/fededp/dbg-go/cmd/cleanup"
+	"github.com/fededp/dbg-go/cmd/publish"
 	"github.com/fededp/dbg-go/cmd/stats"
 	"github.com/spf13/cobra"
 )
@@ -17,4 +18,5 @@ func init() {
 	// Subcommands
 	s3Cmd.AddCommand(cleanup.NewCleanupS3Cmd())
 	s3Cmd.AddCommand(stats.NewStatsS3Cmd())
+	s3Cmd.AddCommand(publish.NewPublishCmd())
 }

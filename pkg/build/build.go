@@ -3,6 +3,7 @@ package build
 import (
 	"github.com/falcosecurity/driverkit/cmd"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder"
+	"github.com/fededp/dbg-go/pkg/publish"
 	"github.com/fededp/dbg-go/pkg/root"
 	s3utils "github.com/fededp/dbg-go/pkg/utils/s3"
 	"github.com/fededp/dbg-go/pkg/validate"
@@ -13,6 +14,7 @@ import (
 	"path/filepath"
 )
 
+// Used by tests
 var testClient *s3utils.Client
 
 func Run(opts Options) error {
@@ -92,29 +94,9 @@ func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath
 	}
 
 	if opts.Publish {
-		logger.Info("publishing")
-		// Publish object!
-		if ro.Output.Module != "" {
-			f, err := os.Open(ro.Output.Module)
-			if err != nil {
-				return err
-			}
-			err = client.PutObject(opts.Options, driverVersion, filepath.Base(ro.Output.Module), f)
-			_ = f.Close()
-			if err != nil {
-				return err
-			}
-		}
-		if ro.Output.Probe != "" {
-			f, err := os.Open(ro.Output.Probe)
-			if err != nil {
-				return err
-			}
-			err = client.PutObject(opts.Options, driverVersion, filepath.Base(ro.Output.Probe), f)
-			_ = f.Close()
-			if err != nil {
-				return err
-			}
+		err = publish.LoopDriversFiltered(client, opts.Options)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
