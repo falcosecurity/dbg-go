@@ -29,8 +29,3 @@ jobs:
         
       - name: Test
         run: make test
-
-      # NOT WORKING FOR NOW because of build constraints
-      #- name: Update coverage report
-      #  if: github.event_name == 'push'
-      #  uses: ncruces/go-coverage-report@v0
