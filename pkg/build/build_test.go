@@ -10,17 +10,26 @@ import (
 	testutils "github.com/fededp/dbg-go/pkg/utils/test"
 	"github.com/stretchr/testify/assert"
 	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
+	"time"
 )
 
 // NOTE: this test might be flaking because it tries to build some configs against a driverversion
 // When it fails, just update configs to be built.
 func TestBuild(t *testing.T) {
+	if runtime.GOARCH != "amd64" {
+		t.Skip("only supported on amd64")
+	}
+
 	// MUST RUN IN STRICT LOGICAL ORDER; USE A SLICE.
 	tests := []struct {
-		opts            Options
-		name            string
-		expectedObjects []string
+		opts                  Options
+		name                  string
+		expectedLocalObjects  []string
+		expectedBucketObjects []string
+		shouldCreate          bool
 	}{
 		{
 			opts: Options{
@@ -36,14 +45,109 @@ func TestBuild(t *testing.T) {
 					},
 				},
 				SkipExisting: true,
+				Publish:      true,
+				IgnoreErrors: false,
+			},
+			expectedLocalObjects: []string{
+				"falco_centos_5.14.0-361.el9.x86_64_1.ko",
+				"falco_centos_5.14.0-361.el9.x86_64_1.o",
+			},
+			expectedBucketObjects: []string{
+				"falco_centos_5.14.0-361.el9.x86_64_1.ko",
+				"falco_centos_5.14.0-361.el9.x86_64_1.o",
+			},
+			shouldCreate: true,
+			name:         "build 5.0.1+driver centos 5.14.0-361.el9.x86_64",
+		},
+		{
+			opts: Options{
+				Options: root.Options{
+					Architecture:  "amd64",
+					DriverVersion: []string{"5.0.1+driver"},
+					DriverName:    "falco",
+					RepoRoot:      "./test",
+					Target: root.Target{
+						Distro:        "centos",
+						KernelRelease: "5.14.0-354.el9.x86_64",
+						KernelVersion: "1",
+					},
+				},
+				SkipExisting: true,
 				Publish:      false,
 				IgnoreErrors: false,
 			},
-			expectedObjects: []string{
-				"driver/5.0.1+driver/x86_64/falco_centos_5.14.0-284.11.1.el9_2.x86_64_1.ko",
-				"driver/5.0.1+driver/x86_64/falco_centos_5.10.96-90.460.amzn2022.x86_64_1.o",
+			expectedLocalObjects: []string{
+				"falco_centos_5.14.0-354.el9.x86_64_1.ko",
+				"falco_centos_5.14.0-354.el9.x86_64_1.o",
+				"falco_centos_5.14.0-361.el9.x86_64_1.ko",
+				"falco_centos_5.14.0-361.el9.x86_64_1.o",
 			},
-			name: "build 5.0.1+driver centos 5.14.0-361.el9.x86_64",
+			expectedBucketObjects: []string{
+				"falco_centos_5.14.0-361.el9.x86_64_1.ko",
+				"falco_centos_5.14.0-361.el9.x86_64_1.o",
+			},
+			shouldCreate: false,
+			name:         "build 5.0.1+driver centos 5.14.0-354.el9.x86_64",
+		},
+		{
+			opts: Options{
+				Options: root.Options{
+					Architecture:  "amd64",
+					DriverVersion: []string{"5.0.1+driver"},
+					DriverName:    "falco",
+					RepoRoot:      "./test",
+					Target: root.Target{
+						Distro:        "centos",
+						KernelRelease: "5.14.0-361.el9.x86_64", // try to rebuild same object.
+						KernelVersion: "1",
+					},
+				},
+				SkipExisting: true,
+				Publish:      true,
+				IgnoreErrors: false,
+			},
+			expectedLocalObjects: []string{
+				"falco_centos_5.14.0-354.el9.x86_64_1.ko",
+				"falco_centos_5.14.0-354.el9.x86_64_1.o",
+				"falco_centos_5.14.0-361.el9.x86_64_1.ko",
+				"falco_centos_5.14.0-361.el9.x86_64_1.o",
+			},
+			expectedBucketObjects: []string{
+				"falco_centos_5.14.0-361.el9.x86_64_1.ko",
+				"falco_centos_5.14.0-361.el9.x86_64_1.o",
+			},
+			shouldCreate: false, // since objects are already present, nothing should be created
+			name:         "rebuild 5.0.1+driver centos 5.14.0-361.el9.x86_64",
+		},
+		{
+			opts: Options{
+				Options: root.Options{
+					Architecture:  "amd64",
+					DriverVersion: []string{"5.0.1+driver"},
+					DriverName:    "falco",
+					RepoRoot:      "./test",
+					Target: root.Target{
+						Distro:        "centos",
+						KernelRelease: "5.14.0-361.el9.x86_64", // try to rebuild same object.
+						KernelVersion: "1",
+					},
+				},
+				SkipExisting: false, // this time, force-republish
+				Publish:      true,
+				IgnoreErrors: false,
+			},
+			expectedLocalObjects: []string{
+				"falco_centos_5.14.0-354.el9.x86_64_1.ko",
+				"falco_centos_5.14.0-354.el9.x86_64_1.o",
+				"falco_centos_5.14.0-361.el9.x86_64_1.ko",
+				"falco_centos_5.14.0-361.el9.x86_64_1.o",
+			},
+			expectedBucketObjects: []string{
+				"falco_centos_5.14.0-361.el9.x86_64_1.ko",
+				"falco_centos_5.14.0-361.el9.x86_64_1.o",
+			},
+			shouldCreate: true, // since objects are already present, nothing should be created
+			name:         "rebuild 5.0.1+driver centos 5.14.0-361.el9.x86_64",
 		},
 	}
 
@@ -60,9 +164,16 @@ func TestBuild(t *testing.T) {
 		_ = os.RemoveAll("./test/")
 	})
 
+	err = os.MkdirAll("output/5.0.1+driver/x86_64", 0700)
+	assert.NoError(t, err)
+	t.Cleanup(func() {
+		_ = os.RemoveAll("output")
+	})
+
 	// Now, for each test, build the drivers then check s3 bucket objects
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			now := time.Now()
 			// First, generate needed configs
 			err = generate.Run(generate.Options{
 				Options: test.opts.Options,
@@ -74,15 +185,35 @@ func TestBuild(t *testing.T) {
 			err = Run(test.opts)
 			assert.NoError(t, err)
 
-			// Check the remaining objects in the bucket
-			objects, err := testClient.ListObjects(context.Background(), &s3.ListObjectsInput{
-				Bucket: aws.String(s3utils.S3Bucket),
-			})
+			// Check that the files were created
+			f, err := os.Open("output/5.0.1+driver/x86_64/")
 			assert.NoError(t, err)
-			assert.Len(t, objects.Contents, len(test.expectedObjects))
-			for _, obj := range objects.Contents {
-				key := *obj.Key
-				assert.Contains(t, test.expectedObjects, key)
+			t.Cleanup(func() {
+				_ = f.Close()
+			})
+			entries, err := f.Readdirnames(0)
+			for _, e := range entries {
+				assert.Contains(t, test.expectedLocalObjects, e)
+			}
+
+			if test.opts.Publish {
+				// Check the remaining objects in the bucket
+				objects, err := testClient.ListObjects(context.Background(), &s3.ListObjectsInput{
+					Bucket: aws.String(s3utils.S3Bucket),
+					Prefix: aws.String("driver/5.0.1+driver/x86_64/"),
+				})
+				assert.NoError(t, err)
+				assert.Len(t, objects.Contents, len(test.expectedBucketObjects))
+				for _, obj := range objects.Contents {
+					key := filepath.Base(*obj.Key)
+					lastMod := *obj.LastModified
+					if test.shouldCreate {
+						assert.True(t, lastMod.After(now))
+					} else {
+						assert.True(t, lastMod.Before(now))
+					}
+					assert.Contains(t, test.expectedBucketObjects, key)
+				}
 			}
 		})
 	}
