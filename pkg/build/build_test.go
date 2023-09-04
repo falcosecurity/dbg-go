@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-// NOTE: this test might be flaking because it tries to build some configs against a driverversion
+// NOTE: this test might be flaking because it tries to build some configs against a driver version.
 // When it fails, just update configs to be built.
 func TestBuild(t *testing.T) {
 	if runtime.GOARCH != "amd64" {
