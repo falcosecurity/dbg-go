@@ -13,6 +13,7 @@ Right now, the tool implements, under the `configs` subcmd:
 * configs cleanup
 * configs validation
 * configs stats
+* configs build (using driverkit libraries)
 
 Moreover, under the `s3` subcmd:
 * s3 driver stats
@@ -103,3 +104,14 @@ Using `goreleaser`, multiple artifacts are attached to each github release; amon
 ./dbg-go configs generate --repo-root test-infra --auto
 ```
 </details>
+
+<details>
+  <summary>Build all x86_64 5.0.1+driver configs, publishing them to s3</summary>
+  
+```bash
+./dbg-go configs build --repo-root test-infra --driver-version 5.0.1+driver --publish
+```
+</details>
+
+
+> **NOTE:** all commands that require s3 write access, need a proper `--aws-profile` to be passed.
