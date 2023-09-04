@@ -29,3 +29,7 @@ jobs:
         
       - name: Test
         run: make test
+
+      - name: Update coverage report
+        if: github.event_name == 'push'
+        uses: ncruces/go-coverage-report@v0
