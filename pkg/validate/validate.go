@@ -2,7 +2,7 @@ package validate
 
 import (
 	"encoding/base64"
-	"fmt"
+	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
@@ -45,51 +45,57 @@ func validateConfig(configPath string, opts Options, driverVersion string) error
 	expectedFilename := driverkitYaml.ToConfigName()
 	configFilename := filepath.Base(configPath)
 	if configFilename != expectedFilename {
-		return fmt.Errorf("config filename is wrong (%s); should be %s", configFilename, expectedFilename)
+		return &WrongConfigNameErr{configFilename, expectedFilename}
 	}
 
 	// Check that arch is ok
 	if driverkitYaml.Architecture != opts.Architecture.String() {
-		return fmt.Errorf("wrong architecture in config file %s: %s", configPath, driverkitYaml.Architecture)
-	}
-
-	// Either kernelconfigdata or kernelurls must be set
-	if driverkitYaml.KernelConfigData == "" && len(driverkitYaml.KernelUrls) == 0 {
-		return fmt.Errorf("at least one between `kernelurls` and `kernelconfigdata` must be set: %s", configPath)
+		return &WrongArchInConfigErr{configPath, driverkitYaml.Architecture}
 	}
 
 	outputPath := root.BuildOutputPath(opts.Options, driverVersion, driverkitYaml.ToName())
 	outputPathFilename := filepath.Base(outputPath)
 
+	kr := kernelrelease.FromString(driverkitYaml.KernelRelease)
+	kr.Architecture = opts.Architecture
+
 	// Check output probe if present
-	if len(driverkitYaml.Output.Probe) > 0 {
+	if driverkitYaml.Output.Probe != "" {
 		outputProbeFilename := filepath.Base(driverkitYaml.Output.Probe)
 		if outputProbeFilename != outputPathFilename+".o" {
-			return fmt.Errorf("output probe filename is wrong (%s); expected: %s.o", outputProbeFilename, outputPathFilename)
+			return &WrongOutputProbeNameErr{outputProbeFilename, outputPathFilename}
 		}
 
 		if !strings.Contains(driverkitYaml.Output.Probe, opts.Architecture.ToNonDeb()) {
-			return fmt.Errorf("output probe filename has wrong architecture in its path (%s); expected %s",
-				driverkitYaml.Output.Probe, opts.Architecture.ToNonDeb())
+			return &WrongOutputProbeArchErr{driverkitYaml.Output.Probe, opts.Architecture.ToNonDeb()}
+		}
+
+		if !kr.SupportsProbe() {
+			// Not an error, just throw a warning
+			slog.Warn("output probe set on an unsupported kernel release", "kernelrelease", driverkitYaml.KernelRelease)
 		}
 	}
 
 	// Check output driver if present
-	if len(driverkitYaml.Output.Module) > 0 {
+	if driverkitYaml.Output.Module != "" {
 		outputModuleFilename := filepath.Base(driverkitYaml.Output.Module)
 		if outputModuleFilename != outputPathFilename+".ko" {
-			return fmt.Errorf("output module filename is wrong (%s); expected: %s.ko", outputModuleFilename, outputPathFilename)
+			return &WrongOutputModuleNameErr{outputModuleFilename, outputPathFilename}
 		}
 
 		if !strings.Contains(driverkitYaml.Output.Module, opts.Architecture.ToNonDeb()) {
-			return fmt.Errorf("output module filename has wrong architecture in its path (%s); expected %s",
-				driverkitYaml.Output.Module, opts.Architecture.ToNonDeb())
+			return &WrongOutputModuleArchErr{driverkitYaml.Output.Module, opts.Architecture.ToNonDeb()}
+		}
+
+		if !kr.SupportsModule() {
+			// Not an error, just throw a warning
+			slog.Warn("output module set on an unsupported kernel release", "kernelrelease", driverkitYaml.KernelRelease)
 		}
 	}
 
 	// Kernelconfigdata, if present, must be base64 encoded
 	if len(driverkitYaml.KernelConfigData) > 0 && !isBase64(driverkitYaml.KernelConfigData) {
-		return fmt.Errorf("kernelconfigdata must be a base64 encoded string")
+		return &KernelConfigDataNotBase64Err{}
 	}
 
 	return nil
