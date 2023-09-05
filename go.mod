@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.37
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.35
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.38.5
-	github.com/falcosecurity/driverkit v0.14.1-0.20230904111702-8cb6690eb2ed
+	github.com/falcosecurity/driverkit v0.15.0
 	github.com/johannesboyne/gofakes3 v0.0.0-20230506070712-04da935ef877
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/errors v0.9.1
