@@ -16,8 +16,11 @@ func TestPublish(t *testing.T) {
 	// This client will be used by the Run action
 	testClient = testutils.S3CreateTestBucket(t, nil)
 
-	// Create output folder
-	err := os.MkdirAll("./test/driverkit/output/5.0.1+driver/x86_64", 0700)
+	outputPath := root.BuildOutputPath(root.Options{
+		RepoRoot:     "./test",
+		Architecture: "amd64",
+	}, "5.0.1+driver", "")
+	err := os.MkdirAll(outputPath, 0700)
 	assert.NoError(t, err)
 	t.Cleanup(func() {
 		_ = os.RemoveAll("./test")
@@ -25,7 +28,7 @@ func TestPublish(t *testing.T) {
 
 	// Create a fake kernel module object to be uploaded to test bucket
 	d1 := []byte("TEST\n")
-	err = os.WriteFile("./test/driverkit/output/5.0.1+driver/x86_64/falco_almalinux_4.18.0-425.10.1.el8_7.x86_64_1.ko", d1, 0644)
+	err = os.WriteFile(outputPath+"/falco_almalinux_4.18.0-425.10.1.el8_7.x86_64_1.ko", d1, 0644)
 	assert.NoError(t, err)
 
 	// Fetch an existing object metadata

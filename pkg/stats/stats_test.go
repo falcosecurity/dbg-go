@@ -80,7 +80,7 @@ func TestStats(t *testing.T) {
 
 	// Create all configs needed by the test
 	for _, dkConf := range dkConfigs {
-		file, err := os.OpenFile(configPath+dkConf.ToName()+".yaml", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+		file, err := os.OpenFile(configPath+dkConf.ToConfigName(), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 		assert.NoError(t, err)
 
 		dkConf.FillOutputs("1.0.0+driver",

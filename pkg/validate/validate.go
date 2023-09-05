@@ -42,7 +42,7 @@ func validateConfig(configPath string, opts Options, driverVersion string) error
 		"kernelversion", driverkitYaml.KernelVersion)
 
 	// Check that filename is ok
-	expectedFilename := driverkitYaml.ToName() + ".yaml"
+	expectedFilename := driverkitYaml.ToConfigName()
 	configFilename := filepath.Base(configPath)
 	if configFilename != expectedFilename {
 		return fmt.Errorf("config filename is wrong (%s); should be %s", configFilename, expectedFilename)
