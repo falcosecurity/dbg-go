@@ -135,14 +135,6 @@ func autogenerateConfigs(opts Options) error {
 	return errGrp.Wait()
 }
 
-type unsupportedTargetErr struct {
-	target builder.Type
-}
-
-func (err *unsupportedTargetErr) Error() string {
-	return fmt.Sprintf("target %s is unsupported by driverkit", err.target.String())
-}
-
 func loadKernelHeadersFromDk(opts Options) ([]string, error) {
 	// Try to load kernel headers from driverkit. Don't error out if unable.
 	// Just write a config with empty headers.
@@ -151,7 +143,7 @@ func loadKernelHeadersFromDk(opts Options) ([]string, error) {
 	targetType := opts.Distro
 	b, err := builder.Factory(targetType)
 	if err != nil {
-		return nil, &unsupportedTargetErr{target: targetType}
+		return nil, &UnsupportedTargetErr{target: targetType}
 	}
 
 	// Load minimum urls for the builder
@@ -184,7 +176,7 @@ func loadKernelHeadersFromDk(opts Options) ([]string, error) {
 func generateSingleConfig(opts Options) error {
 	kernelheaders, err := loadKernelHeadersFromDk(opts)
 	if err != nil {
-		var unsupportedTargetError *unsupportedTargetErr
+		var unsupportedTargetError *UnsupportedTargetErr
 		if errors.As(err, &unsupportedTargetError) {
 			return unsupportedTargetError
 		}
