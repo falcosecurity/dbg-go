@@ -50,7 +50,7 @@ func TestValidateConfig(t *testing.T) {
 		opts          Options
 		dkConf        DriverkitYaml
 		confName      string
-		errorExpected bool
+		errorExpected interface{}
 	}{
 		"correct config": {
 			opts: opts,
@@ -67,7 +67,7 @@ func TestValidateConfig(t *testing.T) {
 				KernelConfigData: "test",
 			},
 			confName:      "centos_5.10.0_1.yaml",
-			errorExpected: false,
+			errorExpected: nil,
 		},
 		"correct config with custom driver name": {
 			opts: namedDriverOpts,
@@ -84,7 +84,7 @@ func TestValidateConfig(t *testing.T) {
 				KernelConfigData: "test",
 			},
 			confName:      "centos_5.10.0_1.yaml",
-			errorExpected: false,
+			errorExpected: nil,
 		},
 		"wrong arch config": {
 			opts: opts,
@@ -101,7 +101,7 @@ func TestValidateConfig(t *testing.T) {
 				KernelConfigData: "test",
 			},
 			confName:      "centos_5.10.0_1.yaml",
-			errorExpected: true,
+			errorExpected: &WrongArchInConfigErr{},
 		},
 		"wrong name config": {
 			opts: opts,
@@ -118,9 +118,26 @@ func TestValidateConfig(t *testing.T) {
 				KernelConfigData: "test",
 			},
 			confName:      "centos_WRONG_5.10.0_1.yaml",
-			errorExpected: true,
+			errorExpected: &WrongConfigNameErr{},
 		},
-		"wrong arch in config outputs": {
+		"wrong arch in config output probe": {
+			opts: opts,
+			dkConf: DriverkitYaml{
+				KernelVersion: "1",
+				KernelRelease: "5.10.0",
+				Target:        "centos",
+				Architecture:  "amd64",
+				Output: DriverkitYamlOutputs{
+					Module: root.BuildOutputPath(opts.Options, opts.DriverVersion[0], "centos_5.10.0_1.ko"),
+					Probe:  root.BuildOutputPath(wrongArchOpts.Options, opts.DriverVersion[0], "centos_5.10.0_1.o"),
+				},
+				KernelUrls:       nil,
+				KernelConfigData: "test",
+			},
+			confName:      "centos_5.10.0_1.yaml",
+			errorExpected: &WrongOutputProbeArchErr{},
+		},
+		"wrong arch in config output module": {
 			opts: opts,
 			dkConf: DriverkitYaml{
 				KernelVersion: "1",
@@ -129,15 +146,32 @@ func TestValidateConfig(t *testing.T) {
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
 					Module: root.BuildOutputPath(wrongArchOpts.Options, opts.DriverVersion[0], "centos_5.10.0_1.ko"),
-					Probe:  root.BuildOutputPath(wrongArchOpts.Options, opts.DriverVersion[0], "centos_5.10.0_1.o"),
+					Probe:  root.BuildOutputPath(opts.Options, opts.DriverVersion[0], "centos_5.10.0_1.o"),
 				},
 				KernelUrls:       nil,
 				KernelConfigData: "test",
 			},
 			confName:      "centos_5.10.0_1.yaml",
-			errorExpected: true,
+			errorExpected: &WrongOutputModuleArchErr{},
 		},
-		"wrong target in config outputs": {
+		"wrong target in config output probe": {
+			opts: opts,
+			dkConf: DriverkitYaml{
+				KernelVersion: "1",
+				KernelRelease: "5.10.0",
+				Target:        "centos",
+				Architecture:  "amd64",
+				Output: DriverkitYamlOutputs{
+					Module: root.BuildOutputPath(opts.Options, opts.DriverVersion[0], "centos_5.10.0_1.ko"),
+					Probe:  root.BuildOutputPath(opts.Options, opts.DriverVersion[0], "WRONGTARGET_5.10.0_1.o"),
+				},
+				KernelUrls:       nil,
+				KernelConfigData: "test",
+			},
+			confName:      "centos_5.10.0_1.yaml",
+			errorExpected: &WrongOutputProbeNameErr{},
+		},
+		"wrong target in config output module": {
 			opts: opts,
 			dkConf: DriverkitYaml{
 				KernelVersion: "1",
@@ -146,13 +180,13 @@ func TestValidateConfig(t *testing.T) {
 				Architecture:  "amd64",
 				Output: DriverkitYamlOutputs{
 					Module: root.BuildOutputPath(opts.Options, opts.DriverVersion[0], "WRONGTARGET_5.10.0_1.ko"),
-					Probe:  root.BuildOutputPath(opts.Options, opts.DriverVersion[0], "WRONGTARGET_5.10.0_1.o"),
+					Probe:  root.BuildOutputPath(opts.Options, opts.DriverVersion[0], "centos_5.10.0_1.o"),
 				},
 				KernelUrls:       nil,
 				KernelConfigData: "test",
 			},
 			confName:      "centos_5.10.0_1.yaml",
-			errorExpected: true,
+			errorExpected: &WrongOutputModuleNameErr{},
 		},
 		"wrong suffix in config output module": {
 			opts: opts,
@@ -169,7 +203,7 @@ func TestValidateConfig(t *testing.T) {
 				KernelConfigData: "test",
 			},
 			confName:      "centos_5.10.0_1.yaml",
-			errorExpected: true,
+			errorExpected: &WrongOutputModuleNameErr{},
 		},
 		"wrong suffix in config output probe": {
 			opts: opts,
@@ -186,9 +220,9 @@ func TestValidateConfig(t *testing.T) {
 				KernelConfigData: "test",
 			},
 			confName:      "centos_5.10.0_1.yaml",
-			errorExpected: true,
+			errorExpected: &WrongOutputProbeNameErr{},
 		},
-		"no kernelurls nor kernelconfigdata set in config": {
+		"kernelconfigdata not base64 in config": {
 			opts: opts,
 			dkConf: DriverkitYaml{
 				KernelVersion: "1",
@@ -199,11 +233,10 @@ func TestValidateConfig(t *testing.T) {
 					Module: root.BuildOutputPath(opts.Options, opts.DriverVersion[0], "centos_5.10.0_1.ko"),
 					Probe:  root.BuildOutputPath(opts.Options, opts.DriverVersion[0], "centos_5.10.0_1.o"),
 				},
-				KernelUrls:       nil,
-				KernelConfigData: "",
+				KernelConfigData: "&&&&",
 			},
 			confName:      "centos_5.10.0_1.yaml",
-			errorExpected: true,
+			errorExpected: &KernelConfigDataNotBase64Err{},
 		},
 	}
 
@@ -213,8 +246,9 @@ func TestValidateConfig(t *testing.T) {
 			assert.NoError(t, err)
 			t.Cleanup(cleanup)
 			err = validateConfig(test.confName, test.opts, test.opts.DriverVersion[0])
-			if test.errorExpected {
+			if test.errorExpected != nil {
 				assert.Error(t, err)
+				assert.ErrorAs(t, err, &test.errorExpected)
 			} else {
 				assert.NoError(t, err)
 			}
