@@ -31,6 +31,10 @@ func (dy *DriverkitYaml) ToName() string {
 	return fmt.Sprintf("%s_%s_%s", dy.Target, dy.KernelRelease, dy.KernelVersion)
 }
 
+func (dy *DriverkitYaml) ToConfigName() string {
+	return fmt.Sprintf("%s.yaml", dy.ToName())
+}
+
 func (dy *DriverkitYaml) FillOutputs(driverVersion string, opts root.Options) {
 	outputPath := root.BuildOutputPath(opts, driverVersion, dy.ToName())
 	// Tricky because driverkit configs Outputs assume

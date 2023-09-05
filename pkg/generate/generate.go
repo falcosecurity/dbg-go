@@ -218,7 +218,7 @@ func dumpConfig(opts Options, dkYaml validate.DriverkitYaml) error {
 			return pvtErr
 		}
 
-		configPath := root.BuildConfigPath(opts.Options, driverVersion, dkYaml.ToName()+".yaml")
+		configPath := root.BuildConfigPath(opts.Options, driverVersion, dkYaml.ToConfigName())
 
 		// Make sure folder exists
 		pvtErr = os.MkdirAll(filepath.Dir(configPath), os.ModePerm)
