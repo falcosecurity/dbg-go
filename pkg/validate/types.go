@@ -2,6 +2,7 @@ package validate
 
 import (
 	"fmt"
+	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
 	"github.com/fededp/dbg-go/pkg/root"
 	"path/filepath"
 	"strings"
@@ -38,9 +39,17 @@ func (dy *DriverkitYaml) ToConfigName() string {
 func (dy *DriverkitYaml) FillOutputs(driverVersion string, opts root.Options) {
 	outputPath := root.BuildOutputPath(opts, driverVersion, dy.ToName())
 	// Tricky because driverkit configs Outputs assume
-	// that the tool is called from the `driverkit` folder of test-infra.
+	// that the tool is called from the `driverkit` folder of test-infra repo.
+	// Only keep last 4 parts, ie: from "output/" onwards
 	paths := strings.Split(outputPath, "/")
-	configOutputPath := filepath.Join(paths[3:]...)
-	dy.Output.Module = configOutputPath + ".ko"
-	dy.Output.Probe = configOutputPath + ".o"
+	configOutputPath := filepath.Join(paths[len(paths)-4:]...)
+
+	kr := kernelrelease.FromString(dy.KernelRelease)
+	kr.Architecture = opts.Architecture
+	if kr.SupportsModule() {
+		dy.Output.Module = configOutputPath + ".ko"
+	}
+	if kr.SupportsProbe() {
+		dy.Output.Probe = configOutputPath + ".o"
+	}
 }
