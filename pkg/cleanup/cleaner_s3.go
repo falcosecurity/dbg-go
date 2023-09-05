@@ -25,7 +25,7 @@ func (s *s3Cleaner) Info() string {
 }
 
 func (s *s3Cleaner) Cleanup(opts Options, driverVersion string) error {
-	err := s.LoopBucketFiltered(opts.Options, driverVersion, func(key string) error {
+	err := s.LoopDriversFiltered(opts.Options, driverVersion, func(key string) error {
 		slog.Info("cleaning up remote driver file", "key", key)
 		if opts.DryRun {
 			slog.Info("skipping because of dry-run.")

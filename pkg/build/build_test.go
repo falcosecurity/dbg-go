@@ -86,7 +86,7 @@ func TestBuild(t *testing.T) {
 				"falco_centos_5.14.0-361.el9.x86_64_1.ko",
 				"falco_centos_5.14.0-361.el9.x86_64_1.o",
 			},
-			shouldCreate: false,
+			shouldCreate: false, // since it is not publishing
 			name:         "build 5.0.1+driver centos 5.14.0-354.el9.x86_64",
 		},
 		{
@@ -164,11 +164,12 @@ func TestBuild(t *testing.T) {
 		_ = os.RemoveAll("./test/")
 	})
 
-	err = os.MkdirAll("output/5.0.1+driver/x86_64", 0700)
+	outputPath := root.BuildOutputPath(root.Options{
+		RepoRoot:     "./test",
+		Architecture: "amd64",
+	}, "5.0.1+driver", "")
+	err = os.MkdirAll(outputPath, 0700)
 	assert.NoError(t, err)
-	t.Cleanup(func() {
-		_ = os.RemoveAll("output")
-	})
 
 	// Now, for each test, build the drivers then check s3 bucket objects
 	for _, test := range tests {
@@ -186,7 +187,7 @@ func TestBuild(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Check that the files were created
-			f, err := os.Open("output/5.0.1+driver/x86_64/")
+			f, err := os.Open(outputPath)
 			assert.NoError(t, err)
 			t.Cleanup(func() {
 				_ = f.Close()

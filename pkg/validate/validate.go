@@ -14,7 +14,7 @@ import (
 
 func Run(opts Options) error {
 	slog.Info("validate config files")
-	return root.LoopConfigsFiltered(opts.Options, "validating", func(driverVersion, configPath string) error {
+	return root.LoopPathFiltered(opts.Options, root.BuildConfigPath, "validating", "config", func(driverVersion, configPath string) error {
 		return validateConfig(configPath, opts, driverVersion)
 	})
 }
@@ -42,7 +42,7 @@ func validateConfig(configPath string, opts Options, driverVersion string) error
 		"kernelversion", driverkitYaml.KernelVersion)
 
 	// Check that filename is ok
-	expectedFilename := driverkitYaml.ToConfigName()
+	expectedFilename := driverkitYaml.ToName() + ".yaml"
 	configFilename := filepath.Base(configPath)
 	if configFilename != expectedFilename {
 		return fmt.Errorf("config filename is wrong (%s); should be %s", configFilename, expectedFilename)
@@ -58,7 +58,7 @@ func validateConfig(configPath string, opts Options, driverVersion string) error
 		return fmt.Errorf("at least one between `kernelurls` and `kernelconfigdata` must be set: %s", configPath)
 	}
 
-	outputPath := driverkitYaml.ToOutputPath(driverVersion, opts.Options)
+	outputPath := root.BuildOutputPath(opts.Options, driverVersion, driverkitYaml.ToName())
 	outputPathFilename := filepath.Base(outputPath)
 
 	// Check output probe if present

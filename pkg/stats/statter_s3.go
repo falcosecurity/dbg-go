@@ -30,7 +30,7 @@ func (s *s3Statter) GetDriverStats(opts root.Options) (driverStatsByDriverVersio
 
 	for _, driverVersion := range opts.DriverVersion {
 		dStats := driverStatsByVersion[driverVersion]
-		err := s.LoopBucketFiltered(opts, driverVersion, func(key string) error {
+		err := s.LoopDriversFiltered(opts, driverVersion, func(key string) error {
 			slog.Info("computing stats", "key", key)
 			if opts.DryRun {
 				slog.Info("skipping because of dry-run.")
