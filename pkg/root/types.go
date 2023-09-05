@@ -19,7 +19,7 @@ func (t Target) IsSet() bool {
 	return t.Distro != "" && t.KernelRelease != "" && t.KernelVersion != ""
 }
 
-func (t Target) ToGlob() string {
+func (t Target) toGlob() string {
 	// Empty filters fallback at ".*" since we are using a regex match below
 	if t.Distro == "" {
 		t.Distro = "*"
@@ -30,7 +30,7 @@ func (t Target) ToGlob() string {
 	if t.KernelVersion == "" {
 		t.KernelVersion = "*"
 	}
-	return fmt.Sprintf("%s_%s_%s.yaml", t.Distro, t.KernelRelease, t.KernelVersion)
+	return fmt.Sprintf("%s_%s_%s.*", t.Distro, t.KernelRelease, t.KernelVersion)
 }
 
 func (t Target) DistroFilter(distro string) bool {

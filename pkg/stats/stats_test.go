@@ -1,7 +1,6 @@
 package stats
 
 import (
-	"fmt"
 	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
 	"github.com/fededp/dbg-go/pkg/root"
 	testutils "github.com/fededp/dbg-go/pkg/utils/test"
@@ -27,7 +26,6 @@ func TestStats(t *testing.T) {
 		Architecture: "amd64",
 	}, "1.0.0+driver", "")
 
-	fmt.Println(configPath)
 	dkConfigs := []DkConfigNamed{
 		{
 			DriverkitYaml: validate.DriverkitYaml{
@@ -82,19 +80,20 @@ func TestStats(t *testing.T) {
 
 	// Create all configs needed by the test
 	for _, dkConf := range dkConfigs {
-		file, err := os.OpenFile(configPath+dkConf.ToConfigName(), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+		file, err := os.OpenFile(configPath+dkConf.ToName()+".yaml", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 		assert.NoError(t, err)
 
-		outputPath := dkConf.ToOutputPath("1.0.0+driver",
+		dkConf.FillOutputs("1.0.0+driver",
 			root.Options{
 				DriverName:   "falco",
 				Architecture: kernelrelease.Architecture(dkConf.Architecture),
 			})
-		if dkConf.hasModule {
-			dkConf.DriverkitYaml.Output.Module = outputPath + ".ko"
+		// Remove when test requires it
+		if !dkConf.hasModule {
+			dkConf.DriverkitYaml.Output.Module = ""
 		}
-		if dkConf.hasProbe {
-			dkConf.DriverkitYaml.Output.Probe = outputPath + ".o"
+		if !dkConf.hasProbe {
+			dkConf.DriverkitYaml.Output.Probe = ""
 		}
 		enc := yaml.NewEncoder(file)
 		err = enc.Encode(dkConf.DriverkitYaml)

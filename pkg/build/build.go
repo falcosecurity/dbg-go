@@ -3,7 +3,6 @@ package build
 import (
 	"github.com/falcosecurity/driverkit/cmd"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder"
-	"github.com/fededp/dbg-go/pkg/publish"
 	"github.com/fededp/dbg-go/pkg/root"
 	s3utils "github.com/fededp/dbg-go/pkg/utils/s3"
 	"github.com/fededp/dbg-go/pkg/validate"
@@ -32,7 +31,7 @@ func Run(opts Options) error {
 		client = testClient
 	}
 
-	return root.LoopConfigsFiltered(opts.Options, "building driver", func(driverVersion, configPath string) error {
+	return root.LoopPathFiltered(opts.Options, root.BuildConfigPath, "building driver", "config", func(driverVersion, configPath string) error {
 		return buildConfig(client, opts, driverVersion, configPath)
 	})
 }
@@ -60,6 +59,14 @@ func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath
 	ro.Target = driverkitYaml.Target
 	ro.KernelConfigData = driverkitYaml.KernelConfigData
 	ro.KernelUrls = driverkitYaml.KernelUrls
+
+	// If Module or Probe are not absolute paths, assume they are relative to the repo-root/driverkit folder.
+	if !filepath.IsAbs(driverkitYaml.Output.Module) {
+		driverkitYaml.Output.Module = filepath.Join(opts.RepoRoot, "driverkit", driverkitYaml.Output.Module)
+	}
+	if !filepath.IsAbs(driverkitYaml.Output.Probe) {
+		driverkitYaml.Output.Probe = filepath.Join(opts.RepoRoot, "driverkit", driverkitYaml.Output.Probe)
+	}
 	ro.Output = cmd.OutputOptions{
 		Module: driverkitYaml.Output.Module,
 		Probe:  driverkitYaml.Output.Probe,
@@ -68,13 +75,13 @@ func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath
 	if opts.SkipExisting {
 		if ro.Output.Module != "" {
 			moduleName := filepath.Base(ro.Output.Module)
-			if client.ObjectExists(opts.Options, driverVersion, moduleName) {
+			if client.HeadDriver(opts.Options, driverVersion, moduleName) {
 				ro.Output.Module = "" // disable module build
 			}
 		}
 		if ro.Output.Probe != "" {
 			probeName := filepath.Base(ro.Output.Probe)
-			if client.ObjectExists(opts.Options, driverVersion, probeName) {
+			if client.HeadDriver(opts.Options, driverVersion, probeName) {
 				ro.Output.Probe = "" // disable probe build
 			}
 		}
@@ -94,9 +101,17 @@ func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath
 	}
 
 	if opts.Publish {
-		err = publish.LoopDriversFiltered(client, opts.Options)
-		if err != nil {
-			return err
+		if ro.Output.Module != "" {
+			err = client.PutDriver(opts.Options, driverVersion, ro.Output.Module)
+			if err != nil {
+				return err
+			}
+		}
+		if ro.Output.Probe != "" {
+			err = client.PutDriver(opts.Options, driverVersion, ro.Output.Probe)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

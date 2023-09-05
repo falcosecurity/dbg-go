@@ -21,7 +21,7 @@ func (f *fileStatter) Info() string {
 
 func (f *fileStatter) GetDriverStats(opts root.Options) (driverStatsByDriverVersion, error) {
 	driverStatsByVersion := make(driverStatsByDriverVersion)
-	err := root.LoopConfigsFiltered(opts, "computing stats", func(driverVersion, configPath string) error {
+	err := root.LoopPathFiltered(opts, root.BuildConfigPath, "computing stats", "config", func(driverVersion, configPath string) error {
 		dStats := driverStatsByVersion[driverVersion]
 		err := getConfigStats(&dStats, configPath)
 		driverStatsByVersion[driverVersion] = dStats

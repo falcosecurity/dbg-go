@@ -125,15 +125,6 @@ func autogenerateConfigs(opts Options) error {
 				if !opts.KernelVersionFilter(kernelEntry.KernelVersion) {
 					continue
 				}
-
-				slog.Info("generating",
-					"target", kernelEntry.Target,
-					"kernelrelease", kernelEntry.KernelRelease,
-					"kernelversion", kernelEntry.KernelVersion)
-				if opts.DryRun {
-					slog.Info("skipping because of dry-run.")
-					continue
-				}
 				if pvtErr := dumpConfig(opts, kernelEntry); pvtErr != nil {
 					return pvtErr
 				}
@@ -199,39 +190,35 @@ func generateSingleConfig(opts Options) error {
 		}
 		slog.Warn(err.Error())
 	}
-
 	driverkitYaml := validate.DriverkitYaml{
 		KernelVersion: opts.KernelVersion,
 		KernelRelease: opts.KernelRelease,
 		Target:        opts.Distro.String(),
 		KernelUrls:    kernelheaders,
 	}
-	slog.Info("generating",
-		"target", driverkitYaml.Target,
-		"kernelrelease", driverkitYaml.KernelRelease,
-		"kernelversion", driverkitYaml.KernelVersion)
-	if opts.DryRun {
-		slog.Info("skipping because of dry-run.")
-		return nil
-	}
 	return dumpConfig(opts, driverkitYaml)
 }
 
 func dumpConfig(opts Options, dkYaml validate.DriverkitYaml) error {
+	slog.Info("generating",
+		"target", dkYaml.Target,
+		"kernelrelease", dkYaml.KernelRelease,
+		"kernelversion", dkYaml.KernelVersion)
+	if opts.DryRun {
+		slog.Info("skipping because of dry-run.")
+		return nil
+	}
+
 	dkYaml.Architecture = opts.Architecture.String()
 
 	for _, driverVersion := range opts.DriverVersion {
-		outputPath := dkYaml.ToOutputPath(driverVersion, opts.Options)
-		dkYaml.Output = validate.DriverkitYamlOutputs{
-			Module: outputPath + ".ko",
-			Probe:  outputPath + ".o",
-		}
+		dkYaml.FillOutputs(driverVersion, opts.Options)
 		yamlData, pvtErr := yaml.Marshal(&dkYaml)
 		if pvtErr != nil {
 			return pvtErr
 		}
 
-		configPath := root.BuildConfigPath(opts.Options, driverVersion, dkYaml.ToConfigName())
+		configPath := root.BuildConfigPath(opts.Options, driverVersion, dkYaml.ToName()+".yaml")
 
 		// Make sure folder exists
 		pvtErr = os.MkdirAll(filepath.Dir(configPath), os.ModePerm)

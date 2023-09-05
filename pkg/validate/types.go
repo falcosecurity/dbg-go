@@ -3,6 +3,8 @@ package validate
 import (
 	"fmt"
 	"github.com/fededp/dbg-go/pkg/root"
+	"path/filepath"
+	"strings"
 )
 
 type Options struct {
@@ -25,16 +27,16 @@ type DriverkitYaml struct {
 	KernelConfigData string               `yaml:"kernelconfigdata,omitempty" json:"kernelconfigdata"`
 }
 
-func (dy *DriverkitYaml) ToConfigName() string {
-	return fmt.Sprintf("%s_%s_%s.yaml", dy.Target, dy.KernelRelease, dy.KernelVersion)
+func (dy *DriverkitYaml) ToName() string {
+	return fmt.Sprintf("%s_%s_%s", dy.Target, dy.KernelRelease, dy.KernelVersion)
 }
 
-func (dy *DriverkitYaml) ToOutputPath(driverVersion string, opts root.Options) string {
-	return fmt.Sprintf(outputPathFmt,
-		driverVersion,
-		opts.Architecture.ToNonDeb(),
-		opts.DriverName,
-		dy.Target,
-		dy.KernelRelease,
-		dy.KernelVersion)
+func (dy *DriverkitYaml) FillOutputs(driverVersion string, opts root.Options) {
+	outputPath := root.BuildOutputPath(opts, driverVersion, dy.ToName())
+	// Tricky because driverkit configs Outputs assume
+	// that the tool is called from the `driverkit` folder of test-infra.
+	paths := strings.Split(outputPath, "/")
+	configOutputPath := filepath.Join(paths[3:]...)
+	dy.Output.Module = configOutputPath + ".ko"
+	dy.Output.Probe = configOutputPath + ".o"
 }

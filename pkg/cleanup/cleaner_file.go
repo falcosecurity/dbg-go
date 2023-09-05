@@ -17,7 +17,7 @@ func (f *fileCleaner) Info() string {
 
 func (f *fileCleaner) Cleanup(opts Options, driverVersion string) error {
 	opts.DriverVersion = []string{driverVersion} // locally overwrite driverVersions to only match current driverVersion
-	return root.LoopConfigsFiltered(opts.Options, "removing file", func(driverVersion, configPath string) error {
+	return root.LoopPathFiltered(opts.Options, root.BuildConfigPath, "removing file", "config", func(driverVersion, configPath string) error {
 		return os.Remove(configPath)
 	})
 }

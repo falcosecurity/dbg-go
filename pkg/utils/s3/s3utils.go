@@ -9,6 +9,7 @@ import (
 	"github.com/fededp/dbg-go/pkg/root"
 	"io"
 	"log/slog"
+	"os"
 	"path/filepath"
 	"regexp"
 )
@@ -19,7 +20,7 @@ const (
 	s3DriverNameRegexFmt = `^%s_(?P<Distro>[a-zA-Z-0-9.0-9]*)_(?P<KernelRelease>.*)_(?P<KernelVersion>.*)(\.o|\.ko)`
 )
 
-func (cl *Client) LoopBucketFiltered(opts root.Options,
+func (cl *Client) LoopDriversFiltered(opts root.Options,
 	driverVersion string,
 	keyProcessor func(key string) error,
 ) error {
@@ -80,7 +81,7 @@ func (cl *Client) LoopBucketFiltered(opts root.Options,
 	return nil
 }
 
-func (cl *Client) ObjectExists(opts root.Options, driverVersion, key string) bool {
+func (cl *Client) HeadDriver(opts root.Options, driverVersion, key string) bool {
 	prefix := filepath.Join("driver", driverVersion, opts.Architecture.ToNonDeb())
 	fullKey := filepath.Join(prefix, key)
 	object, _ := cl.HeadObject(context.Background(), &s3.HeadObjectInput{
@@ -90,7 +91,17 @@ func (cl *Client) ObjectExists(opts root.Options, driverVersion, key string) boo
 	return object != nil
 }
 
-func (cl *Client) PutObject(opts root.Options, driverVersion, key string, reader io.Reader) error {
+func (cl *Client) PutDriver(opts root.Options, driverVersion, path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	err = cl.putObject(opts, driverVersion, filepath.Base(path), f)
+	_ = f.Close()
+	return err
+}
+
+func (cl *Client) putObject(opts root.Options, driverVersion, key string, reader io.Reader) error {
 	prefix := filepath.Join("driver", driverVersion, opts.Architecture.ToNonDeb())
 	fullKey := filepath.Join(prefix, key)
 	_, err := cl.Client.PutObject(context.Background(), &s3.PutObjectInput{
