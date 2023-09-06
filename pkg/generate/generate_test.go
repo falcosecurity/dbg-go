@@ -21,13 +21,11 @@ func BenchmarkAutogenerate(b *testing.B) {
 		Auto: true,
 	}
 
-	b.StopTimer()
+	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		b.StartTimer()
 		err := Run(opts)
 		assert.NoError(b, err)
-		b.StopTimer()
 		_ = os.RemoveAll("./test/")
 	}
 }

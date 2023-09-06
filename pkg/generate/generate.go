@@ -1,13 +1,13 @@
 package generate
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
 	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/fededp/dbg-go/pkg/validate"
+	json "github.com/json-iterator/go"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
 	"log/slog"
@@ -93,7 +93,6 @@ func autogenerateConfigs(opts Options) error {
 		}
 	}
 
-	slog.SetDefault(slog.With("target-distro", opts.Distro))
 	fullJson := map[string][]validate.DriverkitYaml{}
 
 	// Unmarshal the big json
