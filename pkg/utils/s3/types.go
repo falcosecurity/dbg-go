@@ -11,12 +11,12 @@ type Client struct {
 	*s3.Client
 }
 
-func NewClient(readOnly bool, awsProfile string) (*Client, error) {
+func NewClient(awsProfile string) (*Client, error) {
 	var (
 		cfg aws.Config
 		err error
 	)
-	if !readOnly {
+	if awsProfile != "" {
 		cfg, err = config.LoadDefaultConfig(context.Background(), config.WithRegion(S3Bucket), config.WithSharedConfigProfile(awsProfile))
 		if err != nil {
 			return nil, err

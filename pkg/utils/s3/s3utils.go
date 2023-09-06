@@ -20,9 +20,9 @@ const (
 	s3DriverNameRegexFmt = `^%s_(?P<Distro>[a-zA-Z-0-9.0-9]*)_(?P<KernelRelease>.*)_(?P<KernelVersion>.*)(\.o|\.ko)`
 )
 
-func (cl *Client) LoopDriversFiltered(opts root.Options,
+func (cl *Client) LoopFiltered(opts root.Options,
 	message, tag string,
-	keyProcessor func(driverVersion, key string) error,
+	keyProcessor root.RowWorker,
 ) error {
 	s3DriverNameRegex := regexp.MustCompile(fmt.Sprintf(s3DriverNameRegexFmt, opts.DriverName))
 	for _, driverVersion := range opts.DriverVersion {

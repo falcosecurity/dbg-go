@@ -9,10 +9,12 @@ import (
 	"os"
 )
 
-type fileStatter struct{}
+type fileStatter struct {
+	root.Looper
+}
 
 func NewFileStatter() Statter {
-	return &fileStatter{}
+	return &fileStatter{Looper: root.NewFsLooper(root.BuildConfigPath)}
 }
 
 func (f *fileStatter) Info() string {
@@ -21,7 +23,7 @@ func (f *fileStatter) Info() string {
 
 func (f *fileStatter) GetDriverStats(opts root.Options) (driverStatsByDriverVersion, error) {
 	driverStatsByVersion := make(driverStatsByDriverVersion)
-	err := root.LoopPathFiltered(opts, root.BuildConfigPath, "computing stats", "config", func(driverVersion, configPath string) error {
+	err := f.LoopFiltered(opts, "computing stats", "config", func(driverVersion, configPath string) error {
 		dStats := driverStatsByVersion[driverVersion]
 		err := getConfigStats(&dStats, configPath)
 		driverStatsByVersion[driverVersion] = dStats

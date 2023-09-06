@@ -32,7 +32,7 @@ func TestPublish(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Fetch an existing object metadata
-	realClient, err := s3utils.NewClient(true, "")
+	realClient, err := s3utils.NewClient("")
 	assert.NoError(t, err)
 	object, err := realClient.HeadObject(context.Background(), &s3.HeadObjectInput{
 		Bucket: aws.String(s3utils.S3Bucket),

@@ -14,7 +14,8 @@ import (
 
 func Run(opts Options) error {
 	slog.Info("validate config files")
-	return root.LoopPathFiltered(opts.Options, root.BuildConfigPath, "validating", "config", func(driverVersion, configPath string) error {
+	looper := root.NewFsLooper(root.BuildConfigPath)
+	return looper.LoopFiltered(opts.Options, "validating", "config", func(driverVersion, configPath string) error {
 		return validateConfig(configPath, opts, driverVersion)
 	})
 }
