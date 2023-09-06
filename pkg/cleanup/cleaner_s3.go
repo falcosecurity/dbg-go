@@ -12,7 +12,7 @@ type s3Cleaner struct {
 }
 
 func NewS3Cleaner(awsProfile string) (Cleaner, error) {
-	client, err := s3utils.NewClient(false, awsProfile)
+	client, err := s3utils.NewClient(awsProfile)
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func (s *s3Cleaner) Info() string {
 }
 
 func (s *s3Cleaner) Cleanup(opts Options) error {
-	return s.LoopDriversFiltered(opts.Options, "cleaning up remote driver file", "key", func(driverVersion, key string) error {
+	return s.LoopFiltered(opts.Options, "cleaning up remote driver file", "key", func(driverVersion, key string) error {
 		_, err := s.DeleteObject(context.Background(), &s3.DeleteObjectInput{
 			Bucket: aws.String(s3utils.S3Bucket),
 			Key:    aws.String(key),

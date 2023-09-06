@@ -12,7 +12,7 @@ type s3Statter struct {
 }
 
 func NewS3Statter() (Statter, error) {
-	client, err := s3utils.NewClient(true, "UNNEEDED")
+	client, err := s3utils.NewClient("")
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func (s *s3Statter) GetDriverStats(opts root.Options) (driverStatsByDriverVersio
 	slog.SetDefault(slog.With("bucket", s3utils.S3Bucket))
 
 	driverStatsByVersion := make(driverStatsByDriverVersion)
-	err := s.LoopDriversFiltered(opts, "computing stats", "key", func(driverVersion, key string) error {
+	err := s.LoopFiltered(opts, "computing stats", "key", func(driverVersion, key string) error {
 		dStats := driverStatsByVersion[driverVersion]
 		if strings.HasSuffix(key, ".ko") {
 			dStats.NumModules++

@@ -23,15 +23,15 @@ func Run(opts Options) error {
 		err    error
 	)
 	if testClient == nil {
-		client, err = s3utils.NewClient(false, opts.AwsProfile)
+		client, err = s3utils.NewClient(opts.AwsProfile)
 		if err != nil {
 			return err
 		}
 	} else {
 		client = testClient
 	}
-
-	return root.LoopPathFiltered(opts.Options, root.BuildConfigPath, "building driver", "config", func(driverVersion, configPath string) error {
+	looper := root.NewFsLooper(root.BuildConfigPath)
+	return looper.LoopFiltered(opts.Options, "building driver", "config", func(driverVersion, configPath string) error {
 		return buildConfig(client, opts, driverVersion, configPath)
 	})
 }

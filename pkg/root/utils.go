@@ -6,14 +6,10 @@ import (
 	"path/filepath"
 )
 
-type PathWorker func(driverVersion, path string) error
-
-type PathBuilder func(opts Options, driverVersion, configName string) string
-
-func LoopPathFiltered(opts Options, pathBuilder PathBuilder, message, tag string, worker PathWorker) error {
+func (f *FsLooper) LoopFiltered(opts Options, message, tag string, worker RowWorker) error {
 	configNameGlob := opts.Target.toGlob()
 	for _, driverVersion := range opts.DriverVersion {
-		path := pathBuilder(opts, driverVersion, configNameGlob)
+		path := f.builder(opts, driverVersion, configNameGlob)
 		files, err := filepath.Glob(path)
 		if err != nil {
 			return err

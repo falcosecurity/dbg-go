@@ -5,10 +5,12 @@ import (
 	"os"
 )
 
-type fileCleaner struct{}
+type fileCleaner struct {
+	root.Looper
+}
 
 func NewFileCleaner() Cleaner {
-	return &fileCleaner{}
+	return &fileCleaner{Looper: root.NewFsLooper(root.BuildConfigPath)}
 }
 
 func (f *fileCleaner) Info() string {
@@ -16,7 +18,7 @@ func (f *fileCleaner) Info() string {
 }
 
 func (f *fileCleaner) Cleanup(opts Options) error {
-	return root.LoopPathFiltered(opts.Options, root.BuildConfigPath, "removing file", "config", func(driverVersion, configPath string) error {
+	return f.LoopFiltered(opts.Options, "removing file", "config", func(driverVersion, configPath string) error {
 		return os.Remove(configPath)
 	})
 }

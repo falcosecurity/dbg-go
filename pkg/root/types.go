@@ -9,6 +9,22 @@ import (
 	"regexp"
 )
 
+type RowWorker func(driverVersion, path string) error
+
+type PathBuilder func(opts Options, driverVersion, configName string) string
+
+type Looper interface {
+	LoopFiltered(opts Options, message, tag string, worker RowWorker) error
+}
+
+type FsLooper struct {
+	builder PathBuilder
+}
+
+func NewFsLooper(builder PathBuilder) Looper {
+	return &FsLooper{builder: builder}
+}
+
 type Target struct {
 	Distro        builder.Type
 	KernelRelease string
