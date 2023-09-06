@@ -21,60 +21,66 @@ const (
 )
 
 func (cl *Client) LoopDriversFiltered(opts root.Options,
-	driverVersion string,
-	keyProcessor func(key string) error,
+	message, tag string,
+	keyProcessor func(driverVersion, key string) error,
 ) error {
-	prefix := filepath.Join("driver", driverVersion, opts.Architecture.ToNonDeb())
 	s3DriverNameRegex := regexp.MustCompile(fmt.Sprintf(s3DriverNameRegexFmt, opts.DriverName))
-
-	params := &s3.ListObjectsV2Input{
-		Bucket: aws.String(S3Bucket),
-		Prefix: aws.String(prefix),
-	}
-	maxKeys := 1000
-	p := s3.NewListObjectsV2Paginator(cl, params, func(o *s3.ListObjectsV2PaginatorOptions) {
-		if v := int32(maxKeys); v != 0 {
-			o.Limit = v
+	for _, driverVersion := range opts.DriverVersion {
+		prefix := filepath.Join("driver", driverVersion, opts.Architecture.ToNonDeb())
+		params := &s3.ListObjectsV2Input{
+			Bucket: aws.String(S3Bucket),
+			Prefix: aws.String(prefix),
 		}
-	})
-	for p.HasMorePages() {
-		slog.Debug("fetched a page of objects", "prefix", prefix)
-		page, err := p.NextPage(context.TODO())
-		if err != nil {
-			return err
-		}
-	keyLoop:
-		for _, object := range page.Contents {
-			if object.Key == nil {
-				continue
+		maxKeys := 1000
+		p := s3.NewListObjectsV2Paginator(cl, params, func(o *s3.ListObjectsV2PaginatorOptions) {
+			if v := int32(maxKeys); v != 0 {
+				o.Limit = v
 			}
-			key := filepath.Base(*object.Key)
-			matches := s3DriverNameRegex.FindStringSubmatch(key)
-			if len(matches) == 0 {
-				slog.Warn("skipping key, malformed", "key", key)
-				continue
+		})
+		for p.HasMorePages() {
+			slog.Debug("fetched a page of objects", "prefix", prefix)
+			page, err := p.NextPage(context.TODO())
+			if err != nil {
+				return err
 			}
-			for i, name := range s3DriverNameRegex.SubexpNames() {
-				if i > 0 && i <= len(matches) {
-					switch name {
-					case "Distro":
-						if !opts.DistroFilter(matches[i]) {
-							continue keyLoop
-						}
-					case "KernelRelease":
-						if !opts.KernelReleaseFilter(matches[i]) {
-							continue keyLoop
-						}
-					case "KernelVersion":
-						if !opts.KernelVersionFilter(matches[i]) {
-							continue keyLoop
+		keyLoop:
+			for _, object := range page.Contents {
+				if object.Key == nil {
+					continue
+				}
+				key := filepath.Base(*object.Key)
+				matches := s3DriverNameRegex.FindStringSubmatch(key)
+				if len(matches) == 0 {
+					slog.Warn("skipping key, malformed", "key", key)
+					continue
+				}
+				for i, name := range s3DriverNameRegex.SubexpNames() {
+					if i > 0 && i <= len(matches) {
+						switch name {
+						case "Distro":
+							if !opts.DistroFilter(matches[i]) {
+								continue keyLoop
+							}
+						case "KernelRelease":
+							if !opts.KernelReleaseFilter(matches[i]) {
+								continue keyLoop
+							}
+						case "KernelVersion":
+							if !opts.KernelVersionFilter(matches[i]) {
+								continue keyLoop
+							}
 						}
 					}
 				}
-			}
-			err = keyProcessor(filepath.Join(prefix, key))
-			if err != nil {
-				return err
+				slog.Info(message, tag, key)
+				if opts.DryRun {
+					slog.Info("skipping because of dry-run.")
+					return nil
+				}
+				err = keyProcessor(driverVersion, filepath.Join(prefix, key))
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}

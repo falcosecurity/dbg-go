@@ -27,26 +27,15 @@ func (s *s3Statter) GetDriverStats(opts root.Options) (driverStatsByDriverVersio
 	slog.SetDefault(slog.With("bucket", s3utils.S3Bucket))
 
 	driverStatsByVersion := make(driverStatsByDriverVersion)
-
-	for _, driverVersion := range opts.DriverVersion {
+	err := s.LoopDriversFiltered(opts, "computing stats", "key", func(driverVersion, key string) error {
 		dStats := driverStatsByVersion[driverVersion]
-		err := s.LoopDriversFiltered(opts, driverVersion, func(key string) error {
-			slog.Info("computing stats", "key", key)
-			if opts.DryRun {
-				slog.Info("skipping because of dry-run.")
-				return nil
-			}
-			if strings.HasSuffix(key, ".ko") {
-				dStats.NumModules++
-			} else if strings.HasSuffix(key, ".o") {
-				dStats.NumProbes++
-			}
-			return nil
-		})
-		if err != nil {
-			return driverStatsByVersion, err
+		if strings.HasSuffix(key, ".ko") {
+			dStats.NumModules++
+		} else if strings.HasSuffix(key, ".o") {
+			dStats.NumProbes++
 		}
 		driverStatsByVersion[driverVersion] = dStats
-	}
-	return driverStatsByVersion, nil
+		return nil
+	})
+	return driverStatsByVersion, err
 }

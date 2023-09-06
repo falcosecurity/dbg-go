@@ -8,5 +8,5 @@ type Options struct {
 
 type Cleaner interface {
 	Info() string
-	Cleanup(opts Options, driverVersion string) error
+	Cleanup(opts Options) error
 }
