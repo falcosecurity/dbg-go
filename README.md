@@ -39,11 +39,12 @@ Usage:
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
   configs     Work with local dbg configs
+  drivers     Work with remote drivers bucket
   help        Help about any command
-  s3          Work with remote s3 bucket
 
 Flags:
   -a, --architecture string           architecture to run against. Supported: [amd64,arm64] (default "amd64")
+      --driver-name string            driver name to be used (default "falco")
       --driver-version strings        driver versions to run against.
       --dry-run                       enable dry-run mode.
   -h, --help                          help for dbg-go
@@ -111,6 +112,14 @@ Using `goreleaser`, multiple artifacts are attached to each github release; amon
   
 ```bash
 ./dbg-go configs build --repo-root test-infra --driver-version 5.0.1+driver --publish
+```
+</details>
+
+<details>
+  <summary>Publish locally built drivers for aarch64 for all supported driver versions by test-infra</summary>
+
+```bash
+./dbg-go drivers publish --repo-root test-infra --architecture arm64
 ```
 </details>
 

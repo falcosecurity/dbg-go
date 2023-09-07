@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewGenerateCmd() *cobra.Command {
+func NewGenerateConfigsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate",
 		Short: "Generate new dbg configs",
@@ -19,14 +19,14 @@ Instead, when auto mode is disabled, the tool is able to generate a single confi
 In this scenario, target-{distro,kernelrelease,kernelversion} CANNOT be regexes but must be exact values.
 Also, in non-automatic mode, kernelurls driverkit config key will be constructed using driverkit libraries.
 `,
-		RunE: execute,
+		RunE: executeConfigs,
 	}
 	flags := cmd.Flags()
 	flags.Bool("auto", false, "automatically generate configs from kernel-crawler output")
 	return cmd
 }
 
-func execute(c *cobra.Command, args []string) error {
+func executeConfigs(c *cobra.Command, args []string) error {
 	options := generate.Options{
 		Options: root.LoadRootOptions(),
 		Auto:    viper.GetBool("auto"),

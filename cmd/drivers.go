@@ -9,14 +9,14 @@ import (
 
 var (
 	s3Cmd = &cobra.Command{
-		Use:   "s3",
-		Short: "Work with remote s3 bucket",
+		Use:   "drivers",
+		Short: "Work with remote drivers bucket",
 	}
 )
 
 func init() {
 	// Subcommands
-	s3Cmd.AddCommand(cleanup.NewCleanupS3Cmd())
-	s3Cmd.AddCommand(stats.NewStatsS3Cmd())
-	s3Cmd.AddCommand(publish.NewPublishCmd())
+	s3Cmd.AddCommand(cleanup.NewCleanupDriversCmd())
+	s3Cmd.AddCommand(stats.NewStatsDriversCmd())
+	s3Cmd.AddCommand(publish.NewPublishDriversCmd())
 }

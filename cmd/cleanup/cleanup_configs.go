@@ -6,15 +6,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCleanupCmd() *cobra.Command {
+func NewCleanupConfigsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cleanup",
-		Short: "Cleanup outdated dbg configs",
-		RunE:  execute,
+		Short: "Cleanup dbg configs",
+		RunE:  executeConfigs,
 	}
 	return cmd
 }
 
-func execute(c *cobra.Command, args []string) error {
+func executeConfigs(c *cobra.Command, args []string) error {
 	return cleanup.Run(cleanup.Options{Options: root.LoadRootOptions()}, cleanup.NewFileCleaner())
 }

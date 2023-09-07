@@ -7,11 +7,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewPublishCmd() *cobra.Command {
+func NewPublishDriversCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "publish",
 		Short: "publish local drivers to remote bucket",
-		RunE:  execute,
+		RunE:  executeDrivers,
 	}
 	flags := cmd.Flags()
 	flags.String("aws-profile", "", "aws-profile to be used. Mandatory.")
@@ -20,7 +20,7 @@ func NewPublishCmd() *cobra.Command {
 	return cmd
 }
 
-func execute(_ *cobra.Command, _ []string) error {
+func executeDrivers(_ *cobra.Command, _ []string) error {
 	options := publish.Options{
 		Options:    root.LoadRootOptions(),
 		AwsProfile: viper.GetString("aws-profile"),

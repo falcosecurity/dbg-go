@@ -18,9 +18,9 @@ var (
 
 func init() {
 	// Subcommands
-	configsCmd.AddCommand(generate.NewGenerateCmd())
-	configsCmd.AddCommand(cleanup.NewCleanupCmd())
-	configsCmd.AddCommand(validate.NewValidateCmd())
-	configsCmd.AddCommand(stats.NewStatsCmd())
-	configsCmd.AddCommand(build.NewBuildCmd())
+	configsCmd.AddCommand(generate.NewGenerateConfigsCmd())
+	configsCmd.AddCommand(cleanup.NewCleanupConfigsCmd())
+	configsCmd.AddCommand(validate.NewValidateConfigsCmd())
+	configsCmd.AddCommand(stats.NewStatsConfigsCmd())
+	configsCmd.AddCommand(build.NewBuildConfigsCmd())
 }

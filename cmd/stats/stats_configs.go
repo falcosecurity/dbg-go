@@ -6,15 +6,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewStatsCmd() *cobra.Command {
+func NewStatsConfigsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stats",
-		Short: "Fetch stats about configs",
-		RunE:  execute,
+		Short: "Fetch stats about dbg configs",
+		RunE:  executeConfigs,
 	}
 	return cmd
 }
 
-func execute(_ *cobra.Command, _ []string) error {
+func executeConfigs(_ *cobra.Command, _ []string) error {
 	return stats.Run(stats.Options{Options: root.LoadRootOptions()}, stats.NewFileStatter())
 }
