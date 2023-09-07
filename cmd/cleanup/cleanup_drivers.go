@@ -15,7 +15,7 @@ func NewCleanupDriversCmd() *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.String("aws-profile", "", "aws-profile to be used. Mandatory.")
+	flags.String("aws-profile", "", "aws-profile to be used. Mandatory")
 
 	_ = cmd.MarkFlagRequired("aws-profile")
 	return cmd

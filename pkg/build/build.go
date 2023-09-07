@@ -35,7 +35,7 @@ func Run(opts Options) error {
 
 	var redirectErrorsF *os.File
 	if opts.RedirectErrors != "" {
-		redirectErrorsF, err = os.Open(opts.RedirectErrors)
+		redirectErrorsF, err = os.OpenFile(opts.RedirectErrors, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			return err
 		}
