@@ -26,7 +26,7 @@ Also, in non-automatic mode, kernelurls driverkit config key will be constructed
 	return cmd
 }
 
-func executeConfigs(c *cobra.Command, args []string) error {
+func executeConfigs(_ *cobra.Command, _ []string) error {
 	options := generate.Options{
 		Options: root.LoadRootOptions(),
 		Auto:    viper.GetBool("auto"),

@@ -1,6 +1,7 @@
 package build
 
 import (
+	"fmt"
 	"github.com/falcosecurity/driverkit/cmd"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder"
 	"github.com/fededp/dbg-go/pkg/root"
@@ -31,12 +32,22 @@ func Run(opts Options) error {
 		client = testClient
 	}
 	looper := root.NewFsLooper(root.BuildConfigPath)
+
+	var redirectErrorsF *os.File
+	if opts.RedirectErrors != "" {
+		redirectErrorsF, err = os.Open(opts.RedirectErrors)
+		if err != nil {
+			return err
+		}
+		defer redirectErrorsF.Close()
+	}
+
 	return looper.LoopFiltered(opts.Options, "building driver", "config", func(driverVersion, configPath string) error {
-		return buildConfig(client, opts, driverVersion, configPath)
+		return buildConfig(client, opts, redirectErrorsF, driverVersion, configPath)
 	})
 }
 
-func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath string) error {
+func buildConfig(client *s3utils.Client, opts Options, redirectErrorsF *os.File, driverVersion, configPath string) error {
 	logger := slog.With("config", configPath)
 	configData, err := os.ReadFile(configPath)
 	if err != nil {
@@ -76,12 +87,14 @@ func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath
 		if ro.Output.Module != "" {
 			moduleName := filepath.Base(ro.Output.Module)
 			if client.HeadDriver(opts.Options, driverVersion, moduleName) {
+				logger.Info("output module already exists inside S3 bucket - skipping", "path", ro.Output.Module)
 				ro.Output.Module = "" // disable module build
 			}
 		}
 		if ro.Output.Probe != "" {
 			probeName := filepath.Base(ro.Output.Probe)
 			if client.HeadDriver(opts.Options, driverVersion, probeName) {
+				logger.Info("output probe already exists inside S3 bucket - skipping", "path", ro.Output.Probe)
 				ro.Output.Probe = "" // disable probe build
 			}
 		}
@@ -93,6 +106,10 @@ func buildConfig(client *s3utils.Client, opts Options, driverVersion, configPath
 
 	err = driverbuilder.NewDockerBuildProcessor(1000, "").Start(ro.ToBuild())
 	if err != nil {
+		if redirectErrorsF != nil {
+			logLine := fmt.Sprintf("config: %s | error: %s\n", configPath, err.Error())
+			_, _ = redirectErrorsF.WriteString(logLine)
+		}
 		if opts.IgnoreErrors {
 			logger.Error(err.Error())
 			return nil // do not break the configs loop, just try the next one
