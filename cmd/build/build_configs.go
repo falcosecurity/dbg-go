@@ -18,8 +18,8 @@ func NewBuildConfigsCmd() *cobra.Command {
 	flags.Bool("skip-existing", true, "whether to skip the build of drivers existing on S3")
 	flags.Bool("publish", false, "whether artifacts must be published on S3")
 	flags.Bool("ignore-errors", false, "whether to ignore build errors and go on looping on config files")
-	flags.String("redirect-errors", "", "redirect error logs to a file")
-	flags.String("aws-profile", "", "aws-profile to be used. Mandatory if publish is enabled.")
+	flags.String("redirect-errors", "", "redirect build errors to the specified file")
+	flags.String("aws-profile", "", "aws-profile to be used. Mandatory if publish is enabled")
 
 	return cmd
 }
