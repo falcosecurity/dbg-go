@@ -7,11 +7,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewBuildCmd() *cobra.Command {
+func NewBuildConfigsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "build",
 		Short: "build dbg configs",
-		RunE:  execute,
+		RunE:  executeConfigs,
 	}
 	flags := cmd.Flags()
 	flags.Bool("skip-existing", true, "whether to skip the build of drivers existing on S3")
@@ -23,7 +23,7 @@ func NewBuildCmd() *cobra.Command {
 	return cmd
 }
 
-func execute(_ *cobra.Command, _ []string) error {
+func executeConfigs(_ *cobra.Command, _ []string) error {
 	options := build.Options{
 		Options:      root.LoadRootOptions(),
 		SkipExisting: viper.GetBool("skip-existing"),

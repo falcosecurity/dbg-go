@@ -6,16 +6,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewValidateCmd() *cobra.Command {
+func NewValidateConfigsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "validate",
 		Short: "Validate dbg configs",
-		RunE:  execute,
+		RunE:  executeConfigs,
 	}
 	return cmd
 }
 
-func execute(c *cobra.Command, args []string) error {
+func executeConfigs(c *cobra.Command, args []string) error {
 	options := validate.Options{
 		Options: root.LoadRootOptions(),
 	}

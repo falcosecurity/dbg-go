@@ -6,16 +6,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewStatsS3Cmd() *cobra.Command {
+func NewStatsDriversCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stats",
 		Short: "Fetch stats about remote drivers",
-		RunE:  executeS3,
+		RunE:  executeDrivers,
 	}
 	return cmd
 }
 
-func executeS3(_ *cobra.Command, _ []string) error {
+func executeDrivers(_ *cobra.Command, _ []string) error {
 	statter, err := stats.NewS3Statter()
 	if err != nil {
 		return err
