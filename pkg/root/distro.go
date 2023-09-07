@@ -33,7 +33,7 @@ var (
 
 func init() {
 	SupportedDistroSlice = make([]string, 0)
-	for distro, _ := range SupportedDistros {
+	for distro := range SupportedDistros {
 		SupportedDistroSlice = append(SupportedDistroSlice, string(distro))
 	}
 	sort.Strings(SupportedDistroSlice)

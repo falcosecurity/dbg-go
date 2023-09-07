@@ -193,6 +193,7 @@ func TestBuild(t *testing.T) {
 				_ = f.Close()
 			})
 			entries, err := f.Readdirnames(0)
+			assert.NoError(t, err)
 			for _, e := range entries {
 				assert.Contains(t, test.expectedLocalObjects, e)
 			}

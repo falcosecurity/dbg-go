@@ -61,6 +61,7 @@ func TestPublish(t *testing.T) {
 		Bucket: aws.String(s3utils.S3Bucket),
 		Key:    aws.String("driver/5.0.1+driver/x86_64/falco_almalinux_4.18.0-425.10.1.el8_7.x86_64_1.ko"),
 	})
+	assert.NoError(t, err)
 
 	// Check that published object has correct metadata
 	assert.Equal(t, testObject.ServerSideEncryption, object.ServerSideEncryption)
