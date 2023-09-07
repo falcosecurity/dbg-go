@@ -87,7 +87,7 @@ Using `goreleaser`, multiple artifacts are attached to each github release; amon
   <summary>Fetch stats about remote drivers for 5.0.1+driver driver version, for host architecture</summary>
   
 ```bash
-./dbg-go s3 stats --driver-version 5.0.1+driver
+./dbg-go drivers stats --driver-version 5.0.1+driver
 ```
 </details>
 
