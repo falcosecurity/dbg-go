@@ -6,9 +6,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/FedeDP/dbg-go)](https://goreportcard.com/report/github.com/FedeDP/dbg-go)
 
 A go tool to work with falcosecurity [drivers build grid](https://github.com/falcosecurity/test-infra/tree/master/driverkit).  
-Long term aim is to completely reimplement dbg Makefile and bash scripts in a much more maintenable and testable language.  
 
-Right now, the tool implements, under the `configs` subcmd:
+The tool implements, under the `configs` subcmd:
 * configs generation (comprehensive of automatic generation from kernel-crawler output)
 * configs cleanup
 * configs validation
@@ -19,12 +18,6 @@ Moreover, under the `drivers` subcmd:
 * remote driver stats
 * remote driver cleanup
 * remote driver publish
-
-This is enough to port [`update-dbg` image](https://github.com/falcosecurity/test-infra/tree/master/images/update-dbg) to make use of this tool instead of the currently used bash scripts.  
-First benchmarks showed a tremendous perf improvement: old update-dbg scripts took around 50m on my laptop for a single driverversion. The new tool takes ~10s.  
-For more info, see https://github.com/falcosecurity/test-infra/pull/1204#issuecomment-1663822663.  
-
-Tracking issue: https://github.com/falcosecurity/test-infra/issues/1221
 
 ## CLI options
 
