@@ -15,10 +15,10 @@ Right now, the tool implements, under the `configs` subcmd:
 * configs stats
 * configs build (using driverkit libraries)
 
-Moreover, under the `s3` subcmd:
-* s3 driver stats
-* s3 driver cleanup
-* s3 driver publish
+Moreover, under the `drivers` subcmd:
+* remote driver stats
+* remote driver cleanup
+* remote driver publish
 
 This is enough to port [`update-dbg` image](https://github.com/falcosecurity/test-infra/tree/master/images/update-dbg) to make use of this tool instead of the currently used bash scripts.  
 First benchmarks showed a tremendous perf improvement: old update-dbg scripts took around 50m on my laptop for a single driverversion. The new tool takes ~10s.  
