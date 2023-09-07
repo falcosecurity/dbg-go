@@ -125,3 +125,11 @@ Using `goreleaser`, multiple artifacts are attached to each github release; amon
 
 
 > **NOTE:** all commands that require s3 write access, need a proper `--aws-profile` to be passed.
+
+## Bumping driverkit
+
+To bump driverkit, you just need:
+```shell
+go get github.com/falcosecurity/driverkit@vX.Y.Z
+```
+and then update Makefile LDFLAGS defaultImageTag to same version.

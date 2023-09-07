@@ -87,19 +87,19 @@ func buildConfig(client *s3utils.Client, opts Options, redirectErrorsF *os.File,
 		if ro.Output.Module != "" {
 			moduleName := filepath.Base(ro.Output.Module)
 			if client.HeadDriver(opts.Options, driverVersion, moduleName) {
-				logger.Info("output module already exists inside S3 bucket - skipping", "path", ro.Output.Module)
+				logger.Info("output module already exists inside S3 bucket - skipping")
 				ro.Output.Module = "" // disable module build
 			}
 		}
 		if ro.Output.Probe != "" {
 			probeName := filepath.Base(ro.Output.Probe)
 			if client.HeadDriver(opts.Options, driverVersion, probeName) {
-				logger.Info("output probe already exists inside S3 bucket - skipping", "path", ro.Output.Probe)
+				logger.Info("output probe already exists inside S3 bucket - skipping")
 				ro.Output.Probe = "" // disable probe build
 			}
 		}
 		if ro.Output.Module == "" && ro.Output.Probe == "" {
-			logger.Info("drivers already available on remote, skipping")
+			logger.Info("drivers already available on S3 bucket, skipping build")
 			return nil // nothing to do
 		}
 	}
