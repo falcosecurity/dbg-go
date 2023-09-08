@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 // Used by tests
@@ -42,12 +43,31 @@ func Run(opts Options) error {
 		defer redirectErrorsF.Close()
 	}
 
-	return looper.LoopFiltered(opts.Options, "building driver", "config", func(driverVersion, configPath string) error {
-		return buildConfig(client, opts, redirectErrorsF, driverVersion, configPath)
+	var publishCh chan publishVal
+	var wg sync.WaitGroup
+	if opts.Publish {
+		publishCh = make(chan publishVal, 64)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			publishLoop(publishCh, opts.Options, client)
+		}()
+	}
+
+	err = looper.LoopFiltered(opts.Options, "building driver", "config", func(driverVersion, configPath string) error {
+		return buildConfig(client, opts, publishCh, redirectErrorsF, driverVersion, configPath)
 	})
+
+	if publishCh != nil {
+		close(publishCh)
+	}
+	wg.Wait()
+	return err
 }
 
-func buildConfig(client *s3utils.Client, opts Options, redirectErrorsF *os.File, driverVersion, configPath string) error {
+func buildConfig(client *s3utils.Client, opts Options,
+	publishCh chan<- publishVal, redirectErrorsF *os.File,
+	driverVersion, configPath string) error {
 	logger := slog.With("config", configPath)
 	configData, err := os.ReadFile(configPath)
 	if err != nil {
@@ -117,19 +137,32 @@ func buildConfig(client *s3utils.Client, opts Options, redirectErrorsF *os.File,
 		return err
 	}
 
-	if opts.Publish {
-		if ro.Output.Module != "" {
-			err = client.PutDriver(opts.Options, driverVersion, ro.Output.Module)
-			if err != nil {
-				return err
-			}
-		}
-		if ro.Output.Probe != "" {
-			err = client.PutDriver(opts.Options, driverVersion, ro.Output.Probe)
-			if err != nil {
-				return err
-			}
+	if publishCh != nil {
+		publishCh <- publishVal{
+			driverVersion: driverVersion,
+			out:           ro.Output,
 		}
 	}
 	return nil
+}
+
+func publishLoop(publishCh <-chan publishVal, opts root.Options, client *s3utils.Client) {
+	for val := range publishCh {
+		if val.out.Module != "" {
+			err := client.PutDriver(opts, val.driverVersion, val.out.Module)
+			if err != nil {
+				slog.Warn("failed to upload module", "path", val.out.Module, "err", err.Error())
+			} else {
+				slog.Info("published module", "path", val.out.Module)
+			}
+		}
+		if val.out.Probe != "" {
+			err := client.PutDriver(opts, val.driverVersion, val.out.Probe)
+			if err != nil {
+				slog.Warn("failed to upload probe", "path", val.out.Probe, "err", err.Error())
+			} else {
+				slog.Info("published probe", "path", val.out.Probe)
+			}
+		}
+	}
 }
