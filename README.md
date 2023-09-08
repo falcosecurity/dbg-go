@@ -123,6 +123,5 @@ Using `goreleaser`, multiple artifacts are attached to each github release; amon
 
 To bump driverkit, you just need:
 ```shell
-go get github.com/falcosecurity/driverkit@vX.Y.Z
+make bump-driverkit DRIVERKIT_VER=vX.Y.Z
 ```
-and then update Makefile LDFLAGS defaultImageTag to same version.
