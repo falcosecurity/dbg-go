@@ -117,7 +117,7 @@ Using `goreleaser`, multiple artifacts are attached to each github release; amon
 </details>
 
 
-> **NOTE:** all commands that require s3 write access, need a proper `--aws-profile` to be passed.
+> **NOTE:** all commands that require s3 write access, need proper env variables (AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY) exported.
 
 ## Bumping driverkit
 
