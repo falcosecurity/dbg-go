@@ -1,7 +1,8 @@
 GO ?= go
 output ?= dbg-go
 TEST_FLAGS ?= -v -race -tags=test_all
-LDFLAGS := -X github.com/falcosecurity/driverkit/pkg/driverbuilder/builder.defaultImageTag=v0.15.0
+DRIVERKIT_VERSION=v0.15.0
+LDFLAGS := -X github.com/falcosecurity/driverkit/pkg/driverbuilder/builder.defaultImageTag=${DRIVERKIT_VERSION}
 
 .PHONY: build
 build: ${output}
@@ -17,3 +18,8 @@ clean:
 .PHONY: test
 test:
 	$(GO) test ${TEST_FLAGS} ./...
+
+.PHONY: bump-driverkit
+bump-driverkit:
+	go get github.com/falcosecurity/driverkit@$(DRIVERKIT_VER)
+	sed -E "s/DRIVERKIT_VERSION=${DRIVERKIT_VERSION}/DRIVERKIT_VERSION=${DRIVERKIT_VER}/" Makefile
