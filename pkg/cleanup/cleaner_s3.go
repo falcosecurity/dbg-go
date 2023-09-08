@@ -11,8 +11,8 @@ type s3Cleaner struct {
 	*s3utils.Client
 }
 
-func NewS3Cleaner(awsProfile string) (Cleaner, error) {
-	client, err := s3utils.NewClient(awsProfile)
+func NewS3Cleaner() (Cleaner, error) {
+	client, err := s3utils.NewClient(false)
 	if err != nil {
 		return nil, err
 	}

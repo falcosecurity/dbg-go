@@ -12,7 +12,7 @@ type s3Statter struct {
 }
 
 func NewS3Statter() (Statter, error) {
-	client, err := s3utils.NewClient("")
+	client, err := s3utils.NewClient(true)
 	if err != nil {
 		return nil, err
 	}

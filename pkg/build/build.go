@@ -25,7 +25,8 @@ func Run(opts Options) error {
 		err    error
 	)
 	if testClient == nil {
-		client, err = s3utils.NewClient(opts.AwsProfile)
+		// writable client only if we need to publish
+		client, err = s3utils.NewClient(!opts.Publish)
 		if err != nil {
 			return err
 		}
