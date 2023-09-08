@@ -1,7 +1,6 @@
 package build
 
 import (
-	"fmt"
 	"github.com/fededp/dbg-go/pkg/build"
 	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/spf13/cobra"
@@ -19,8 +18,6 @@ func NewBuildConfigsCmd() *cobra.Command {
 	flags.Bool("publish", false, "whether artifacts must be published on S3")
 	flags.Bool("ignore-errors", false, "whether to ignore build errors and go on looping on config files")
 	flags.String("redirect-errors", "", "redirect build errors to the specified file")
-	flags.String("aws-profile", "", "aws-profile to be used. Mandatory if publish is enabled")
-
 	return cmd
 }
 
@@ -31,12 +28,6 @@ func executeConfigs(_ *cobra.Command, _ []string) error {
 		Publish:        viper.GetBool("publish"),
 		IgnoreErrors:   viper.GetBool("ignore-errors"),
 		RedirectErrors: viper.GetString("redirect-errors"),
-		AwsProfile:     viper.GetString("aws-profile"),
 	}
-
-	if options.Publish && options.AwsProfile == "" {
-		return fmt.Errorf("if publish is enabled, aws-profile is mandatory")
-	}
-
 	return build.Run(options)
 }

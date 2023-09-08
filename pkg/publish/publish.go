@@ -16,7 +16,7 @@ func Run(opts Options) error {
 		err    error
 	)
 	if testClient == nil {
-		client, err = s3utils.NewClient(opts.AwsProfile)
+		client, err = s3utils.NewClient(false)
 		if err != nil {
 			return err
 		}

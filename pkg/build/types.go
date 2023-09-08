@@ -11,7 +11,6 @@ type Options struct {
 	Publish        bool
 	IgnoreErrors   bool
 	RedirectErrors string
-	AwsProfile     string
 }
 
 type publishVal struct {
