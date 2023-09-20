@@ -9,7 +9,7 @@ build: ${output}
 
 .PHONY: ${output}
 ${output}:
-	CGO_ENABLED=0 $(GO) build -ldflags '${LDFLAGS}' -o $@
+	CGO_ENABLED=0 GOEXPERIMENT=loopvar $(GO) build -ldflags '${LDFLAGS}' -o $@
 
 .PHONY: clean
 clean:
