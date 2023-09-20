@@ -17,7 +17,7 @@ clean:
 
 .PHONY: test
 test:
-	$(GO) test ${TEST_FLAGS} ./...
+	GOEXPERIMENT=loopvar $(GO) test ${TEST_FLAGS} ./...
 
 .PHONY: bump-driverkit
 bump-driverkit:
