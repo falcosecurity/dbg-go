@@ -1,8 +1,8 @@
 package build
 
 import (
-	"github.com/fededp/dbg-go/pkg/build"
-	"github.com/fededp/dbg-go/pkg/root"
+	"github.com/falcosecurity/dbg-go/pkg/build"
+	"github.com/falcosecurity/dbg-go/pkg/root"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

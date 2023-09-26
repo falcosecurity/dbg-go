@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"github.com/fededp/dbg-go/cmd/build"
-	"github.com/fededp/dbg-go/cmd/cleanup"
-	"github.com/fededp/dbg-go/cmd/generate"
-	"github.com/fededp/dbg-go/cmd/stats"
-	"github.com/fededp/dbg-go/cmd/validate"
+	"github.com/falcosecurity/dbg-go/cmd/build"
+	"github.com/falcosecurity/dbg-go/cmd/cleanup"
+	"github.com/falcosecurity/dbg-go/cmd/generate"
+	"github.com/falcosecurity/dbg-go/cmd/stats"
+	"github.com/falcosecurity/dbg-go/cmd/validate"
 	"github.com/spf13/cobra"
 )
 

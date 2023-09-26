@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/fededp/dbg-go/cmd/cleanup"
-	"github.com/fededp/dbg-go/cmd/publish"
-	"github.com/fededp/dbg-go/cmd/stats"
+	"github.com/falcosecurity/dbg-go/cmd/cleanup"
+	"github.com/falcosecurity/dbg-go/cmd/publish"
+	"github.com/falcosecurity/dbg-go/cmd/stats"
 	"github.com/spf13/cobra"
 )
 

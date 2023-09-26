@@ -1,4 +1,4 @@
-module github.com/fededp/dbg-go
+module github.com/falcosecurity/dbg-go
 
 go 1.21
 

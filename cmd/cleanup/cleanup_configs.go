@@ -1,8 +1,8 @@
 package cleanup
 
 import (
-	"github.com/fededp/dbg-go/pkg/cleanup"
-	"github.com/fededp/dbg-go/pkg/root"
+	"github.com/falcosecurity/dbg-go/pkg/cleanup"
+	"github.com/falcosecurity/dbg-go/pkg/root"
 	"github.com/spf13/cobra"
 )
 

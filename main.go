@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/fededp/dbg-go/cmd"
+	"github.com/falcosecurity/dbg-go/cmd"
 	"log/slog"
 )
 

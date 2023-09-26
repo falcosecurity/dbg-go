@@ -1,8 +1,8 @@
 package stats
 
 import (
-	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/stats"
+	"github.com/falcosecurity/dbg-go/pkg/root"
+	"github.com/falcosecurity/dbg-go/pkg/stats"
 	"github.com/spf13/cobra"
 )
 

@@ -1,8 +1,8 @@
 package validate
 
 import (
-	"github.com/fededp/dbg-go/pkg/root"
-	testutils "github.com/fededp/dbg-go/pkg/utils/test"
+	"github.com/falcosecurity/dbg-go/pkg/root"
+	testutils "github.com/falcosecurity/dbg-go/pkg/utils/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 	"os"

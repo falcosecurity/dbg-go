@@ -1,8 +1,8 @@
 package stats
 
 import (
-	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/validate"
+	"github.com/falcosecurity/dbg-go/pkg/root"
+	"github.com/falcosecurity/dbg-go/pkg/validate"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	"log/slog"

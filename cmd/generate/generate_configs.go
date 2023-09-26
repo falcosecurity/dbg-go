@@ -1,8 +1,8 @@
 package generate
 
 import (
-	"github.com/fededp/dbg-go/pkg/generate"
-	"github.com/fededp/dbg-go/pkg/root"
+	"github.com/falcosecurity/dbg-go/pkg/generate"
+	"github.com/falcosecurity/dbg-go/pkg/root"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
