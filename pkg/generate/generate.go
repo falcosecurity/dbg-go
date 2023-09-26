@@ -3,6 +3,11 @@ package generate
 import (
 	"errors"
 	"fmt"
+	"log/slog"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/falcosecurity/dbg-go/pkg/root"
 	"github.com/falcosecurity/dbg-go/pkg/validate"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
@@ -10,10 +15,6 @@ import (
 	json "github.com/json-iterator/go"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
-	"log/slog"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 var (
@@ -118,7 +119,7 @@ func autogenerateConfigs(opts Options) error {
 		// A goroutine for each distro
 		errGrp.Go(func() error {
 			for _, kernelEntry := range kernelEntries {
-				if !opts.KernelVersionFilter(kernelEntry.KernelRelease) {
+				if !opts.KernelReleaseFilter(kernelEntry.KernelRelease) {
 					continue
 				}
 				if !opts.KernelVersionFilter(kernelEntry.KernelVersion) {
