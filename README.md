@@ -1,11 +1,11 @@
 # dbg-go
 
-[![Falco Ecosystem Repository](https://github.com/falcosecurity/evolution/blob/main/repos/badges/falco-ecosystem-blue.svg)](https://github.com/falcosecurity/evolution/blob/main/REPOSITORIES.md#ecosystem-scope) [![Incubating](https://img.shields.io/badge/status-incubating-orange?style=for-the-badge)](https://github.com/falcosecurity/evolution/blob/main/REPOSITORIES.md#incubating)
+ [![Falco Infra Repository](https://github.com/falcosecurity/evolution/blob/main/repos/badges/falco-infra-blue.svg)](https://github.com/falcosecurity/evolution/blob/main/REPOSITORIES.md#infra-scope) [![Incubating](https://img.shields.io/badge/status-incubating-orange?style=for-the-badge)](https://github.com/falcosecurity/evolution/blob/main/REPOSITORIES.md#incubating) [![License](https://img.shields.io/github/license/falcosecurity/dbg-go?style=for-the-badge)](./LICENSE)
 
-[![CI build](https://github.com/FedeDP/dbg-go/actions/workflows/ci.yml/badge.svg)](https://github.com/FedeDP/dbg-go/actions/workflows/ci.yml)
-[![Latest](https://img.shields.io/github/v/release/FedeDP/dbg-go)](https://github.com/FedeDP/dbg-go/releases/latest)
+[![CI build](https://github.com/falcosecurity/dbg-go/actions/workflows/ci.yml/badge.svg)](https://github.com/falcosecurity/dbg-go/actions/workflows/ci.yml)
+[![Latest](https://img.shields.io/github/v/release/falcosecurity/dbg-go)](https://github.com/falcosecurity/dbg-go/releases/latest)
 ![Architectures](https://img.shields.io/badge/ARCHS-x86__64%7Caarch64-blueviolet)
-[![Go Report Card](https://goreportcard.com/badge/github.com/FedeDP/dbg-go)](https://goreportcard.com/report/github.com/FedeDP/dbg-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/falcosecurity/dbg-go)](https://goreportcard.com/report/github.com/falcosecurity/dbg-go)
 
 A go tool to work with falcosecurity [drivers build grid](https://github.com/falcosecurity/test-infra/tree/master/driverkit).  
 
