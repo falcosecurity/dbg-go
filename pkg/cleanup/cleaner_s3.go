@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	s3utils "github.com/fededp/dbg-go/pkg/utils/s3"
+	s3utils "github.com/falcosecurity/dbg-go/pkg/utils/s3"
 )
 
 type s3Cleaner struct {

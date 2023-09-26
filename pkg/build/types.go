@@ -1,8 +1,8 @@
 package build
 
 import (
+	"github.com/falcosecurity/dbg-go/pkg/root"
 	"github.com/falcosecurity/driverkit/cmd"
-	"github.com/fededp/dbg-go/pkg/root"
 )
 
 type Options struct {

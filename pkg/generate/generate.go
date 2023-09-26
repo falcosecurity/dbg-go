@@ -3,10 +3,10 @@ package generate
 import (
 	"errors"
 	"fmt"
+	"github.com/falcosecurity/dbg-go/pkg/root"
+	"github.com/falcosecurity/dbg-go/pkg/validate"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
 	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
-	"github.com/fededp/dbg-go/pkg/root"
-	"github.com/fededp/dbg-go/pkg/validate"
 	json "github.com/json-iterator/go"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"

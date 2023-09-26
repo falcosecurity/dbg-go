@@ -1,8 +1,8 @@
 package publish
 
 import (
-	"github.com/fededp/dbg-go/pkg/publish"
-	"github.com/fededp/dbg-go/pkg/root"
+	"github.com/falcosecurity/dbg-go/pkg/publish"
+	"github.com/falcosecurity/dbg-go/pkg/root"
 	"github.com/spf13/cobra"
 )
 

@@ -2,11 +2,11 @@ package build
 
 import (
 	"fmt"
+	"github.com/falcosecurity/dbg-go/pkg/root"
+	s3utils "github.com/falcosecurity/dbg-go/pkg/utils/s3"
+	"github.com/falcosecurity/dbg-go/pkg/validate"
 	"github.com/falcosecurity/driverkit/cmd"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder"
-	"github.com/fededp/dbg-go/pkg/root"
-	s3utils "github.com/fededp/dbg-go/pkg/utils/s3"
-	"github.com/fededp/dbg-go/pkg/validate"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	"log/slog"

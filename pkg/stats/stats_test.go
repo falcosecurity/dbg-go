@@ -1,10 +1,10 @@
 package stats
 
 import (
+	"github.com/falcosecurity/dbg-go/pkg/root"
+	testutils "github.com/falcosecurity/dbg-go/pkg/utils/test"
+	"github.com/falcosecurity/dbg-go/pkg/validate"
 	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
-	"github.com/fededp/dbg-go/pkg/root"
-	testutils "github.com/fededp/dbg-go/pkg/utils/test"
-	"github.com/fededp/dbg-go/pkg/validate"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 	"log"

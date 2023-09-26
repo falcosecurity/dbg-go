@@ -1,8 +1,8 @@
 package stats
 
 import (
-	"github.com/fededp/dbg-go/pkg/root"
-	s3utils "github.com/fededp/dbg-go/pkg/utils/s3"
+	"github.com/falcosecurity/dbg-go/pkg/root"
+	s3utils "github.com/falcosecurity/dbg-go/pkg/utils/s3"
 	"log/slog"
 	"strings"
 )

@@ -2,8 +2,8 @@ package validate
 
 import (
 	"encoding/base64"
+	"github.com/falcosecurity/dbg-go/pkg/root"
 	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
-	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	"log/slog"

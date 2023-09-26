@@ -6,7 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"github.com/fededp/dbg-go/pkg/root"
+	"github.com/falcosecurity/dbg-go/pkg/root"
 	"io"
 	"log/slog"
 	"os"

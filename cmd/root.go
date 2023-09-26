@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/falcosecurity/dbg-go/pkg/root"
 	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
-	"github.com/fededp/dbg-go/pkg/root"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
