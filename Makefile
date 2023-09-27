@@ -1,4 +1,5 @@
 GO ?= go
+GORELEASER ?= goreleaser
 output ?= dbg-go
 TEST_FLAGS ?= -v -race -tags=test_all
 DRIVERKIT_VERSION=v0.15.0
@@ -19,6 +20,10 @@ clean:
 test:
 	GOEXPERIMENT=loopvar $(GO) test ${TEST_FLAGS} ./...
 
+.PHONY: release
+release: clean
+	CGO_ENABLED=0 GOEXPERIMENT=loopvar LDFLAGS="${LDFLAGS}" $(GORELEASER) release
+	
 .PHONY: bump-driverkit
 bump-driverkit:
 	go get github.com/falcosecurity/driverkit@$(DRIVERKIT_VER)
