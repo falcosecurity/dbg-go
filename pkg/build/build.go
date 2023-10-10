@@ -7,6 +7,7 @@ import (
 	"github.com/falcosecurity/dbg-go/pkg/validate"
 	"github.com/falcosecurity/driverkit/cmd"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder"
+	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	"log/slog"
@@ -99,9 +100,15 @@ func buildConfig(client *s3utils.Client, opts Options,
 	if !filepath.IsAbs(driverkitYaml.Output.Probe) {
 		driverkitYaml.Output.Probe = filepath.Join(opts.RepoRoot, "driverkit", driverkitYaml.Output.Probe)
 	}
-	ro.Output = cmd.OutputOptions{
-		Module: driverkitYaml.Output.Module,
-		Probe:  driverkitYaml.Output.Probe,
+
+	// Only require the build for supported drivers
+	kr := kernelrelease.FromString(driverkitYaml.KernelRelease)
+	kr.Architecture = opts.Architecture
+	if kr.SupportsModule() {
+		ro.Output.Module = driverkitYaml.Output.Module
+	}
+	if kr.SupportsProbe() {
+		ro.Output.Probe = driverkitYaml.Output.Probe
 	}
 
 	if opts.SkipExisting {
