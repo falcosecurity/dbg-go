@@ -137,6 +137,8 @@ github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f h1:Wl78ApPPB2
 github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f/go.mod h1:OSYXu++VVOHnXeitef/D8n/6y4QV8uLHSFXX4NeXMGc=
 github.com/falcosecurity/driverkit v0.15.0 h1:pi4GT+qQU+6kx6w1/yZ3DsPqzXiHFkCs4NHz2xUm+Cw=
 github.com/falcosecurity/driverkit v0.15.0/go.mod h1:RPI15yAVBOELYZ2iJUl3+cOwVBi4o8kWd0AYoBF4xrk=
+github.com/falcosecurity/driverkit v0.15.1 h1:wTSrY3QKzOv4oEaJZERWVsNd5tN7hJ8Y+9neGpfKeg4=
+github.com/falcosecurity/driverkit v0.15.1/go.mod h1:RPI15yAVBOELYZ2iJUl3+cOwVBi4o8kWd0AYoBF4xrk=
 github.com/falcosecurity/falcoctl v0.6.0 h1:+VW6/HJ9mWU2p8apiTQuKRHFsBngfG1s35ao4X2BEfc=
 github.com/falcosecurity/falcoctl v0.6.0/go.mod h1:4Hx4h3KtcaQzPKxvYn5S9x4IHxwd6QRK9Gu04HHNbhE=
 github.com/fatih/camelcase v1.0.0 h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8=
