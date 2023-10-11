@@ -1,5 +1,19 @@
 //go:build test_all
 
+// SPDX-License-Identifier: Apache-2.0
+/*
+Copyright (C) 2023 The Falco Authors.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package testutils
 
 import (
@@ -7,6 +21,13 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"io"
+	"log/slog"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -17,12 +38,6 @@ import (
 	"github.com/johannesboyne/gofakes3/backend/s3mem"
 	json "github.com/json-iterator/go"
 	"github.com/stretchr/testify/assert"
-	"io"
-	"log/slog"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"testing"
 )
 
 func RunTestParsingLogs(t *testing.T, runTest func() error, parsedMsg interface{}, parsingCB func() bool) {
