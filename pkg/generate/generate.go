@@ -17,11 +17,6 @@ package generate
 import (
 	"errors"
 	"fmt"
-	"log/slog"
-	"os"
-	"path/filepath"
-	"strings"
-
 	"github.com/falcosecurity/dbg-go/pkg/root"
 	"github.com/falcosecurity/dbg-go/pkg/validate"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
@@ -29,25 +24,15 @@ import (
 	json "github.com/json-iterator/go"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
+	"log/slog"
+	"os"
+	"path/filepath"
 )
 
 var (
 	testJsonData  []byte
 	testCacheData bool
 )
-
-func loadLastRunDistro() (string, error) {
-	lastDistroBytes, err := getURL(urlLastDistro)
-	if err != nil {
-		return "", err
-	}
-	lastDistro := strings.TrimSuffix(string(lastDistroBytes), "\n")
-	if lastDistro == "*" {
-		// Fix up regex (empty regex -> always true)
-		lastDistro = ""
-	}
-	return lastDistro, nil
-}
 
 func Run(opts Options) error {
 	slog.Info("generating config files")
@@ -83,29 +68,6 @@ func autogenerateConfigs(opts Options) error {
 	slog.Debug("fetched json")
 	if testCacheData {
 		testJsonData = jsonData
-	}
-
-	// either download latest distro from kernel-crawler
-	// or translate the driverkit distro provided by the user to its kernel-crawler naming
-	if opts.Distro == "load" {
-		// Fetch last distro kernel-crawler ran against
-		lastDistro, err := loadLastRunDistro()
-		if err != nil {
-			return err
-		}
-		slog.Info("loaded last-distro", "distro", lastDistro)
-
-		// If lastDistro is empty it means we need to run on all supported distros; this is done automatically.
-		if lastDistro != "" {
-			// Map back the kernel crawler distro to our internal driverkit distro
-			opts.Distro = root.ToDriverkitDistro(root.KernelCrawlerDistro(lastDistro))
-			if opts.Distro == "" {
-				return fmt.Errorf("kernel-crawler last run distro '%s' unsupported.\n", lastDistro)
-			}
-		} else {
-			// This will match all supported distros
-			opts.Distro = ""
-		}
 	}
 
 	fullJson := map[string][]validate.DriverkitYaml{}

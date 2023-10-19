@@ -53,22 +53,6 @@ func TestGenerate(t *testing.T) {
 		expectError        bool
 		expectedMinConfigs int
 	}{
-		"run in auto mode with loaded from kernel-crawler distro on multiple driver versions": {
-			opts: Options{
-				Options: root.Options{
-					RepoRoot:      "./test/",
-					Architecture:  "amd64",
-					DriverVersion: []string{"1.0.0+driver", "2.0.0+driver"},
-					Target: root.Target{
-						Distro: "load", // Should load it from lastDistro kernel crawler file
-					},
-					DriverName: "falco",
-				},
-				Auto: true,
-			},
-			expectError:        false,
-			expectedMinConfigs: 1,
-		},
 		"run in auto mode with any target distro filter on single driver version": {
 			opts: Options{
 				Options: root.Options{
@@ -289,17 +273,12 @@ func TestGenerate(t *testing.T) {
 				statsOpts.KernelRelease = ""
 				statsOpts.Distro = ""
 
-				stats, err := statter.GetDriverStats(statsOpts)
+				driverStats, err := statter.GetDriverStats(statsOpts)
 				assert.NoError(t, err)
-				assert.GreaterOrEqual(t, len(stats), test.expectedMinConfigs)
+				assert.GreaterOrEqual(t, len(driverStats), test.expectedMinConfigs)
 
 				// Validate all generated files
 				validateOpts := validate.Options{Options: test.opts.Options}
-				if validateOpts.Distro == "load" {
-					// When we load from last kernel-crawler distro,
-					// force validate all
-					validateOpts.Distro = ""
-				}
 				err = validate.Run(validateOpts)
 				assert.NoError(t, err)
 			}
