@@ -140,6 +140,9 @@ func buildConfig(client *s3utils.Client, opts Options,
 		}
 	}
 
+	// Ensure output folder exist; don't check for error, it will fail at next step anyway.
+	_ = os.MkdirAll(filepath.Dir(driverkitYaml.Output.Module), 0700)
+
 	err = driverbuilder.NewDockerBuildProcessor(1000, "").Start(ro.ToBuild())
 	if err != nil {
 		if redirectErrorsF != nil {
