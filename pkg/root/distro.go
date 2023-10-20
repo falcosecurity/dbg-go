@@ -41,6 +41,7 @@ var (
 		builder.TargetTypeDebian:          "Debian",
 		builder.TargetTypeFedora:          "Fedora",
 		builder.TargetTypeMinikube:        "Minikube",
+		builder.TargetTypePhoton:          "PhotonOS",
 		builder.TargetTypeTalos:           "Talos",
 		builder.TargetTypeUbuntu:          "Ubuntu",
 	}
