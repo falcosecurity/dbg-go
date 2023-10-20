@@ -183,8 +183,6 @@ func TestBuild(t *testing.T) {
 		RepoRoot:     "./test",
 		Architecture: "amd64",
 	}, "5.0.1+driver", "")
-	err = os.MkdirAll(outputPath, 0700)
-	assert.NoError(t, err)
 
 	// Now, for each test, build the drivers then check s3 bucket objects
 	for _, test := range tests {
