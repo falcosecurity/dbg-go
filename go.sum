@@ -141,6 +141,8 @@ github.com/falcosecurity/driverkit v0.15.1 h1:wTSrY3QKzOv4oEaJZERWVsNd5tN7hJ8Y+9
 github.com/falcosecurity/driverkit v0.15.1/go.mod h1:RPI15yAVBOELYZ2iJUl3+cOwVBi4o8kWd0AYoBF4xrk=
 github.com/falcosecurity/driverkit v0.15.2 h1:QDC3PEzpIILTwZA8/bqGZYBXxWRD2ZVVEAtZcDtLLno=
 github.com/falcosecurity/driverkit v0.15.2/go.mod h1:RXG4bbofv903PwXKZne3RgnFcVKlyOTioKeWnDt9qBw=
+github.com/falcosecurity/driverkit v0.15.3 h1:3FdxAG4HnxP5NsHy5KIiVnG6fS9vY4iileVDU0uY8J4=
+github.com/falcosecurity/driverkit v0.15.3/go.mod h1:RXG4bbofv903PwXKZne3RgnFcVKlyOTioKeWnDt9qBw=
 github.com/falcosecurity/falcoctl v0.6.0 h1:+VW6/HJ9mWU2p8apiTQuKRHFsBngfG1s35ao4X2BEfc=
 github.com/falcosecurity/falcoctl v0.6.0/go.mod h1:4Hx4h3KtcaQzPKxvYn5S9x4IHxwd6QRK9Gu04HHNbhE=
 github.com/fatih/camelcase v1.0.0 h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8=
