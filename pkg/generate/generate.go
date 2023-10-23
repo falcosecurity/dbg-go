@@ -81,15 +81,13 @@ func autogenerateConfigs(opts Options) error {
 	slog.Debug("unmarshaled json")
 	var errGrp errgroup.Group
 
-	for kcDistro, f := range fullJson {
+	for distro, f := range fullJson {
 		kernelEntries := f
-
-		dkDistro := root.ToDriverkitDistro(root.KernelCrawlerDistro(kcDistro))
 
 		// Skip unneeded kernel entries
 		// optimization for target-distro: skip entire key
 		// instead of skipping objects one by one.
-		if !opts.DistroFilter(dkDistro.String()) {
+		if !opts.DistroFilter(distro) {
 			continue
 		}
 
