@@ -27,6 +27,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"slices"
 )
 
 var (
@@ -178,6 +179,9 @@ func dumpConfig(opts Options, dkYaml validate.DriverkitYaml) error {
 	}
 
 	dkYaml.Architecture = opts.Architecture.String()
+
+	// Sort kernelurls, so that we always get the same sorting for dbg configs.
+	slices.Sort(dkYaml.KernelUrls)
 
 	for _, driverVersion := range opts.DriverVersion {
 		dkYaml.FillOutputs(driverVersion, opts.Options)
