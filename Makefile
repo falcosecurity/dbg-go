@@ -2,7 +2,7 @@ GO ?= go
 GORELEASER ?= goreleaser
 output ?= dbg-go
 TEST_FLAGS ?= -v -race -tags=test_all
-DRIVERKIT_VERSION=v0.15.3
+DRIVERKIT_VERSION=v0.15.4
 LDFLAGS := -X github.com/falcosecurity/driverkit/pkg/driverbuilder/builder.defaultImageTag=${DRIVERKIT_VERSION}
 
 .PHONY: build
