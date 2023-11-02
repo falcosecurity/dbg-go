@@ -28,7 +28,7 @@ jobs:
         with:
           go-version: '1.21'
 
-      - uses: sigstore/cosign-installer@c3667d99424e7e6047999fb6246c0da843953c65 #v3.0.1
+      - uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b9192b8f19 #v3.1.2
 
       - uses: anchore/sbom-action/download-syft@448520c4f19577ffce70a8317e619089054687e3 #v0.13.4
 
