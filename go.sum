@@ -90,8 +90,8 @@ github.com/evanphx/json-patch v5.9.0+incompatible h1:fBXyNpNMuTTDdquAq/uisOr2lSh
 github.com/evanphx/json-patch v5.9.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f h1:Wl78ApPPB2Wvf/TIe2xdyJxTlb6obmF18d8QdkxNDu4=
 github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f/go.mod h1:OSYXu++VVOHnXeitef/D8n/6y4QV8uLHSFXX4NeXMGc=
-github.com/falcosecurity/driverkit v0.17.0 h1:04UQWvLed9zChi7W52luGo2s5+h7pVOkpYi15U+PZJM=
-github.com/falcosecurity/driverkit v0.17.0/go.mod h1:uVYeLnap5AXPaY9aDewzV4MAZMTHo2FECYnnMJ+i8sw=
+github.com/falcosecurity/driverkit v0.17.1 h1:+PLLSq57B+ApU/Kof28duZtO4OORWaflpYD+fJq0X0c=
+github.com/falcosecurity/driverkit v0.17.1/go.mod h1:uVYeLnap5AXPaY9aDewzV4MAZMTHo2FECYnnMJ+i8sw=
 github.com/falcosecurity/falcoctl v0.7.2 h1:BPiN68/pUzvEa8JcCfLNYHlGFn/17keGDwLE+tOs6jI=
 github.com/falcosecurity/falcoctl v0.7.2/go.mod h1:oTe3WFuLjoE5Oka2JspMA3X7mR6aOuIck32ArEM0YlU=
 github.com/fatih/camelcase v1.0.0 h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8=
