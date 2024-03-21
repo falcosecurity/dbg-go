@@ -21,6 +21,7 @@ import (
 	"github.com/falcosecurity/dbg-go/pkg/validate"
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
 	"github.com/falcosecurity/driverkit/pkg/kernelrelease"
+	drivertype "github.com/falcosecurity/falcoctl/pkg/driver/type"
 	json "github.com/json-iterator/go"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
@@ -91,6 +92,9 @@ func autogenerateConfigs(opts Options) error {
 			continue
 		}
 
+		// Cannot fail since we are parsing the exact string
+		mBpfType, _ := drivertype.Parse(drivertype.TypeModernBpf)
+
 		// A goroutine for each distro
 		errGrp.Go(func() error {
 			for _, kernelEntry := range kernelEntries {
@@ -100,6 +104,20 @@ func autogenerateConfigs(opts Options) error {
 				if !opts.KernelVersionFilter(kernelEntry.KernelVersion) {
 					continue
 				}
+				if opts.SkipModernBpfSupported {
+					// Load kernelrelease and architecture
+					kr := kernelrelease.FromString(kernelEntry.KernelRelease)
+					kr.Architecture = opts.Architecture
+					kr.KernelVersion = kernelEntry.KernelVersion
+					if mBpfType.Supported(kr) {
+						slog.Debug("skipping generation because modern-bpf driver is supported",
+							"target", kernelEntry.Target,
+							"kernelrelease", kernelEntry.KernelRelease,
+							"kernelversion", kernelEntry.KernelVersion)
+						continue
+					}
+				}
+
 				if pvtErr := dumpConfig(opts, kernelEntry); pvtErr != nil {
 					return pvtErr
 				}

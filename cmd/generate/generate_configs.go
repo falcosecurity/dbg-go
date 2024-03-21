@@ -35,13 +35,16 @@ Also, in non-automatic mode, kernelurls will be retrieved using driverkit librar
 	}
 	flags := cmd.Flags()
 	flags.Bool("auto", false, "automatically generate configs from kernel-crawler output")
+	flags.Bool("skip-modernbpf-supported", false,
+		"do not generate configs for kernels where modern bpf driver is supported. Only used in auto mode.")
 	return cmd
 }
 
 func executeConfigs(_ *cobra.Command, _ []string) error {
 	options := generate.Options{
-		Options: root.LoadRootOptions(),
-		Auto:    viper.GetBool("auto"),
+		Options:                root.LoadRootOptions(),
+		Auto:                   viper.GetBool("auto"),
+		SkipModernBpfSupported: viper.GetBool("skip-modernbpf-supported"),
 	}
 	return generate.Run(options)
 }

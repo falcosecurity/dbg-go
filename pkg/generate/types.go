@@ -20,5 +20,6 @@ import (
 
 type Options struct {
 	root.Options
-	Auto bool
+	Auto                   bool
+	SkipModernBpfSupported bool
 }
