@@ -16,17 +16,11 @@ package stats
 
 import (
 	"github.com/falcosecurity/dbg-go/pkg/root"
-	"io"
 	"os"
 	"strconv"
 
 	"github.com/olekukonko/tablewriter"
 )
-
-// Used by tests!
-// We cannot simply use table = tablewriter.NewWriter(log.Default().Writer())
-// as that would completely break tablewriter output.
-var testOutputWriter io.Writer
 
 func Run(opts Options, statter Statter) error {
 	root.Printer.Logger.Info(statter.Info())
@@ -35,12 +29,7 @@ func Run(opts Options, statter Statter) error {
 		return err
 	}
 
-	var table *tablewriter.Table
-	if testOutputWriter != nil {
-		table = tablewriter.NewWriter(testOutputWriter)
-	} else {
-		table = tablewriter.NewWriter(os.Stdout)
-	}
+	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Version", "Modules", "Probes"})
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")

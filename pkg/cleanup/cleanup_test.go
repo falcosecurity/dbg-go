@@ -16,6 +16,7 @@ package cleanup
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"os"
 	"strings"
@@ -175,7 +176,9 @@ func TestCleanupFiltered(t *testing.T) {
 			lines := 0
 			testutils.RunTestParsingLogs(t, func() error {
 				return Run(test.opts, NewFileCleaner())
-			}, &messageJSON, func() bool {
+			}, func(line []byte) bool {
+				err = json.Unmarshal(line, &messageJSON)
+				assert.NoError(t, err)
 				if messageJSON.Path == "" {
 					return true // skip and go on
 				}

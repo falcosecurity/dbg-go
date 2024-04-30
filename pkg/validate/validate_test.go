@@ -15,6 +15,7 @@ limitations under the License.
 package validate
 
 import (
+	"encoding/json"
 	"os"
 	"strings"
 	"testing"
@@ -455,8 +456,9 @@ func TestValidateConfigFiltered(t *testing.T) {
 				func() error {
 					return Run(test.opts)
 				},
-				&messageJSON,
-				func() bool {
+				func(line []byte) bool {
+					err = json.Unmarshal(line, &messageJSON)
+					assert.NoError(t, err)
 					if messageJSON.Config == "" {
 						return true // go on
 					}
