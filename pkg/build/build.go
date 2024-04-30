@@ -16,7 +16,6 @@ package build
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"sync"
@@ -34,7 +33,7 @@ import (
 var testClient *s3utils.Client
 
 func Run(opts Options) error {
-	slog.Info("building drivers")
+	root.Printer.Logger.Info("building drivers")
 	var (
 		client *s3utils.Client
 		err    error
@@ -84,7 +83,8 @@ func Run(opts Options) error {
 func buildConfig(client *s3utils.Client, opts Options,
 	publishCh chan<- publishVal, redirectErrorsF *os.File,
 	driverVersion, configPath string) error {
-	logger := slog.With("config", configPath)
+
+	args := root.Printer.Logger.Args("config", configPath)
 	configData, err := os.ReadFile(configPath)
 	if err != nil {
 		return err
@@ -95,7 +95,10 @@ func buildConfig(client *s3utils.Client, opts Options,
 		return errors.WithMessagef(err, "config: %s", configPath)
 	}
 
-	ro := cmd.NewRootOptions()
+	ro, err := cmd.NewRootOptions()
+	if err != nil {
+		return err
+	}
 
 	ro.Architecture = opts.Architecture.String()
 	ro.DriverVersion = driverVersion
@@ -123,19 +126,19 @@ func buildConfig(client *s3utils.Client, opts Options,
 		if ro.Output.Module != "" {
 			moduleName := filepath.Base(ro.Output.Module)
 			if client.HeadDriver(opts.Options, driverVersion, moduleName) {
-				logger.Info("output module already exists inside S3 bucket - skipping")
+				root.Printer.Logger.Info("output module already exists inside S3 bucket - skipping", args)
 				ro.Output.Module = "" // disable module build
 			}
 		}
 		if ro.Output.Probe != "" {
 			probeName := filepath.Base(ro.Output.Probe)
 			if client.HeadDriver(opts.Options, driverVersion, probeName) {
-				logger.Info("output probe already exists inside S3 bucket - skipping")
+				root.Printer.Logger.Info("output probe already exists inside S3 bucket - skipping", args)
 				ro.Output.Probe = "" // disable probe build
 			}
 		}
 		if ro.Output.Module == "" && ro.Output.Probe == "" {
-			logger.Info("drivers already available on S3 bucket, skipping build")
+			root.Printer.Logger.Info("drivers already available on S3 bucket, skipping build", args)
 			return nil // nothing to do
 		}
 	}
@@ -143,14 +146,14 @@ func buildConfig(client *s3utils.Client, opts Options,
 	// Ensure output folder exist; don't check for error, it will fail at next step anyway.
 	_ = os.MkdirAll(filepath.Dir(driverkitYaml.Output.Module), 0700)
 
-	err = driverbuilder.NewDockerBuildProcessor(1000, "").Start(ro.ToBuild())
+	err = driverbuilder.NewDockerBuildProcessor(1000, "").Start(ro.ToBuild(root.Printer))
 	if err != nil {
 		if redirectErrorsF != nil {
 			logLine := fmt.Sprintf("config: %s | error: %s\n", configPath, err.Error())
 			_, _ = redirectErrorsF.WriteString(logLine)
 		}
 		if opts.IgnoreErrors {
-			logger.Error(err.Error())
+			root.Printer.Logger.Error(err.Error(), args)
 			return nil // do not break the configs loop, just try the next one
 		}
 		return err
@@ -170,17 +173,25 @@ func publishLoop(publishCh <-chan publishVal, opts root.Options, client *s3utils
 		if val.out.Module != "" {
 			err := client.PutDriver(opts, val.driverVersion, val.out.Module)
 			if err != nil {
-				slog.Warn("failed to upload module", "path", val.out.Module, "err", err.Error())
+				root.Printer.Logger.Warn("failed to upload module",
+					root.Printer.Logger.Args(
+						"path", val.out.Module,
+						"err", err.Error()))
 			} else {
-				slog.Info("published module", "path", val.out.Module)
+				root.Printer.Logger.Info("published module",
+					root.Printer.Logger.Args("path", val.out.Module))
 			}
 		}
 		if val.out.Probe != "" {
 			err := client.PutDriver(opts, val.driverVersion, val.out.Probe)
 			if err != nil {
-				slog.Warn("failed to upload probe", "path", val.out.Probe, "err", err.Error())
+				root.Printer.Logger.Warn("failed to upload probe",
+					root.Printer.Logger.Args(
+						"path", val.out.Probe,
+						"err", err.Error()))
 			} else {
-				slog.Info("published probe", "path", val.out.Probe)
+				root.Printer.Logger.Info("published probe",
+					root.Printer.Logger.Args("path", val.out.Probe))
 			}
 		}
 	}

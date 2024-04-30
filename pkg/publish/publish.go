@@ -15,8 +15,6 @@ limitations under the License.
 package publish
 
 import (
-	"log/slog"
-
 	"github.com/falcosecurity/dbg-go/pkg/root"
 	s3utils "github.com/falcosecurity/dbg-go/pkg/utils/s3"
 )
@@ -25,7 +23,7 @@ import (
 var testClient *s3utils.Client
 
 func Run(opts Options) error {
-	slog.Info("publishing drivers")
+	root.Printer.Logger.Info("publishing drivers")
 	var (
 		client *s3utils.Client
 		err    error

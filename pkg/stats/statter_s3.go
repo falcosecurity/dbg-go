@@ -15,7 +15,6 @@ limitations under the License.
 package stats
 
 import (
-	"log/slog"
 	"strings"
 
 	"github.com/falcosecurity/dbg-go/pkg/root"
@@ -39,10 +38,8 @@ func (f *s3Statter) Info() string {
 }
 
 func (s *s3Statter) GetDriverStats(opts root.Options) (driverStatsByDriverVersion, error) {
-	slog.SetDefault(slog.With("bucket", s3utils.S3Bucket))
-
 	driverStatsByVersion := make(driverStatsByDriverVersion)
-	err := s.LoopFiltered(opts, "computing stats", "key", func(driverVersion, key string) error {
+	err := s.LoopFiltered(opts, "computing stats for S3 bucket "+s3utils.S3Bucket, "key", func(driverVersion, key string) error {
 		dStats := driverStatsByVersion[driverVersion]
 		if strings.HasSuffix(key, ".ko") {
 			dStats.NumModules++

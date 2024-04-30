@@ -15,10 +15,10 @@ limitations under the License.
 package cleanup
 
 import (
-	"log/slog"
+	"github.com/falcosecurity/dbg-go/pkg/root"
 )
 
 func Run(opts Options, cleaner Cleaner) error {
-	slog.Info(cleaner.Info())
+	root.Printer.Logger.Info(cleaner.Info())
 	return cleaner.Cleanup(opts)
 }

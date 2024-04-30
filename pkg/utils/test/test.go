@@ -21,8 +21,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"io"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -42,8 +40,8 @@ import (
 
 func RunTestParsingLogs(t *testing.T, runTest func() error, parsedMsg interface{}, parsingCB func() bool) {
 	var buf bytes.Buffer
-	logger := slog.New(slog.NewJSONHandler(io.Writer(&buf), nil))
-	slog.SetDefault(logger)
+
+	root.Printer = root.Printer.WithWriter(&buf)
 
 	err := runTest()
 	assert.NoError(t, err)

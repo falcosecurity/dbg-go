@@ -15,13 +15,12 @@ limitations under the License.
 package main
 
 import (
-	"log/slog"
-
 	"github.com/falcosecurity/dbg-go/cmd"
+	"github.com/falcosecurity/dbg-go/pkg/root"
 )
 
 func main() {
 	if err := cmd.Execute(); err != nil {
-		slog.With("err", err).Error("error executing dbg-go")
+		root.Printer.Logger.Error("error executing dbg-go", root.Printer.Logger.Args("err", err))
 	}
 }

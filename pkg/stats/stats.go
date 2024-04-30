@@ -15,8 +15,8 @@ limitations under the License.
 package stats
 
 import (
+	"github.com/falcosecurity/dbg-go/pkg/root"
 	"io"
-	"log/slog"
 	"os"
 	"strconv"
 
@@ -29,7 +29,7 @@ import (
 var testOutputWriter io.Writer
 
 func Run(opts Options, statter Statter) error {
-	slog.Info(statter.Info())
+	root.Printer.Logger.Info(statter.Info())
 	driverStatsByVersion, err := statter.GetDriverStats(opts.Options)
 	if err != nil {
 		return err
