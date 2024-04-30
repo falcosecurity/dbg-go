@@ -15,10 +15,7 @@ limitations under the License.
 package stats
 
 import (
-	"log"
 	"os"
-	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/falcosecurity/dbg-go/pkg/root"
@@ -218,58 +215,12 @@ func TestStats(t *testing.T) {
 		},
 	}
 
-	// capture output!
-
+	statter := NewFileStatter()
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			// Use logged output to ensure we fetched correct stats
-			type MessageJSON struct {
-				Message string `json:"msg"`
-			}
-			var messageJSON MessageJSON
-			outputStats := driverStats{}
-			startParsing := false
-			parsingIdx := 0
-			testutils.RunTestParsingLogs(t,
-				func() error {
-					testOutputWriter = log.Default().Writer()
-					return Run(test.opts, NewFileStatter())
-				},
-				&messageJSON,
-				func() bool {
-					messageJSON.Message = strings.ReplaceAll(messageJSON.Message, " ", "")
-					// Example lines:
-					//{"time":"2023-08-29T11:38:35.692782942+02:00","level":"INFO","msg":"1.0.0+driver"}
-					//{"time":"2023-08-29T11:38:35.692784013+02:00","level":"INFO","msg":""}
-					//{"time":"2023-08-29T11:38:35.692784775+02:00","level":"INFO","msg":"|"}
-					//{"time":"2023-08-29T11:38:35.692785487+02:00","level":"INFO","msg":""}
-					//{"time":"2023-08-29T11:38:35.69279484+02:00","level":"INFO","msg":"4"}
-					//{"time":"2023-08-29T11:38:35.692796064+02:00","level":"INFO","msg":""}
-					//{"time":"2023-08-29T11:38:35.692797001+02:00","level":"INFO","msg":"|"}
-					//{"time":"2023-08-29T11:38:35.692797848+02:00","level":"INFO","msg":""}
-					//{"time":"2023-08-29T11:38:35.69280042+02:00","level":"INFO","msg":"3"}
-					if startParsing {
-						parsingIdx++
-						if parsingIdx%4 == 0 {
-							n, err := strconv.ParseInt(messageJSON.Message, 10, 64)
-							assert.NoError(t, err)
-							switch parsingIdx / 4 {
-							case 1:
-								outputStats.NumModules = n
-							case 2:
-								outputStats.NumProbes = n
-							}
-						}
-					}
-					if messageJSON.Message == "1.0.0+driver" {
-						startParsing = true
-					} else if parsingIdx == 8 {
-						// parsed both numbers
-						return false // break out
-					}
-					return true // continue
-				})
-			assert.Equal(t, test.expectedStats, outputStats)
+			driverStatsByVersion, err := statter.GetDriverStats(test.opts.Options)
+			assert.NoError(t, err)
+			assert.Equal(t, test.expectedStats, driverStatsByVersion["1.0.0+driver"])
 		})
 	}
 }

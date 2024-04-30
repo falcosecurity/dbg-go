@@ -32,25 +32,30 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/falcosecurity/dbg-go/pkg/root"
 	s3utils "github.com/falcosecurity/dbg-go/pkg/utils/s3"
+	"github.com/falcosecurity/falcoctl/pkg/output"
 	"github.com/johannesboyne/gofakes3"
 	"github.com/johannesboyne/gofakes3/backend/s3mem"
-	json "github.com/json-iterator/go"
+	"github.com/pterm/pterm"
 	"github.com/stretchr/testify/assert"
 )
 
-func RunTestParsingLogs(t *testing.T, runTest func() error, parsedMsg interface{}, parsingCB func() bool) {
+func RunTestParsingLogs(t *testing.T, runTest func() error, parsingCB func([]byte) bool) {
 	var buf bytes.Buffer
 
-	root.Printer = root.Printer.WithWriter(&buf)
+	// disable styling for tests and set json format
+	printer := root.Printer
+	root.Printer = output.NewPrinter(pterm.LogLevelInfo, pterm.LogFormatterJSON, &buf)
+	defer func() {
+		// reset default printer
+		root.Printer = printer
+	}()
 
 	err := runTest()
 	assert.NoError(t, err)
 
 	scanner := bufio.NewScanner(&buf)
 	for scanner.Scan() {
-		err = json.Unmarshal(scanner.Bytes(), parsedMsg)
-		assert.NoError(t, err)
-		if parsingCB() == false {
+		if parsingCB(scanner.Bytes()) == false {
 			break
 		}
 	}
