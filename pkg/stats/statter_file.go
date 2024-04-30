@@ -15,7 +15,6 @@ limitations under the License.
 package stats
 
 import (
-	"log/slog"
 	"os"
 
 	"github.com/falcosecurity/dbg-go/pkg/root"
@@ -58,7 +57,8 @@ func getConfigStats(dStats *driverStats, configPath string) error {
 		return errors.WithMessagef(err, "config: %s", configPath)
 	}
 
-	slog.Debug("fetching stats", "parsedConfig", driverkitYaml)
+	root.Printer.Logger.Debug("fetching stats",
+		root.Printer.Logger.Args("parsedConfig", driverkitYaml))
 
 	if driverkitYaml.Output.Probe != "" {
 		dStats.NumProbes++

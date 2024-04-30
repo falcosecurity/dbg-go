@@ -24,7 +24,6 @@ import (
 	json "github.com/json-iterator/go"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"slices"
@@ -36,7 +35,7 @@ var (
 )
 
 func Run(opts Options) error {
-	slog.Info("generating config files")
+	root.Printer.Logger.Info("generating config files")
 	if opts.Auto {
 		return autogenerateConfigs(opts)
 	} else if opts.IsSet() {
@@ -48,7 +47,8 @@ func Run(opts Options) error {
 // This is the only function where opts.Distro gets overridden using KernelCrawler namings
 func autogenerateConfigs(opts Options) error {
 	url := fmt.Sprintf(urlArchFmt, opts.Architecture.ToNonDeb())
-	slog.Debug("downloading json data", "url", url)
+	root.Printer.Logger.Debug("downloading json data",
+		root.Printer.Logger.Args("url", url))
 
 	// Fetch kernel list json
 	var (
@@ -66,7 +66,7 @@ func autogenerateConfigs(opts Options) error {
 		}
 	}
 
-	slog.Debug("fetched json")
+	root.Printer.Logger.Debug("fetched json")
 	if testCacheData {
 		testJsonData = jsonData
 	}
@@ -78,7 +78,7 @@ func autogenerateConfigs(opts Options) error {
 	if err != nil {
 		return err
 	}
-	slog.Debug("unmarshaled json")
+	root.Printer.Logger.Debug("unmarshalled json")
 	var errGrp errgroup.Group
 
 	for distro, f := range fullJson {
@@ -155,7 +155,7 @@ func generateSingleConfig(opts Options) error {
 		if errors.As(err, &unsupportedTargetError) {
 			return unsupportedTargetError
 		}
-		slog.Warn(err.Error())
+		root.Printer.Logger.Warn(err.Error())
 	}
 	driverkitYaml := validate.DriverkitYaml{
 		KernelVersion: opts.KernelVersion,
@@ -167,12 +167,13 @@ func generateSingleConfig(opts Options) error {
 }
 
 func dumpConfig(opts Options, dkYaml validate.DriverkitYaml) error {
-	slog.Info("generating",
-		"target", dkYaml.Target,
-		"kernelrelease", dkYaml.KernelRelease,
-		"kernelversion", dkYaml.KernelVersion)
+	root.Printer.Logger.Info("generating",
+		root.Printer.Logger.Args(
+			"target", dkYaml.Target,
+			"kernelrelease", dkYaml.KernelRelease,
+			"kernelversion", dkYaml.KernelVersion))
 	if opts.DryRun {
-		slog.Info("skipping because of dry-run.")
+		root.Printer.Logger.Info("skipping because of dry-run.")
 		return nil
 	}
 

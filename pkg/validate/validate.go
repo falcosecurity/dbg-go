@@ -16,7 +16,6 @@ package validate
 
 import (
 	"encoding/base64"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,7 +27,7 @@ import (
 )
 
 func Run(opts Options) error {
-	slog.Info("validate config files")
+	root.Printer.Logger.Info("validate config files")
 	looper := root.NewFsLooper(root.BuildConfigPath)
 	return looper.LoopFiltered(opts.Options, "validating", "config", func(driverVersion, configPath string) error {
 		return validateConfig(configPath, opts, driverVersion)
@@ -51,11 +50,12 @@ func validateConfig(configPath string, opts Options, driverVersion string) error
 		return errors.WithMessagef(err, "config: %s", configPath)
 	}
 
-	slog.Info("validating",
-		"config", configPath,
-		"target", driverkitYaml.Target,
-		"kernelrelease", driverkitYaml.KernelRelease,
-		"kernelversion", driverkitYaml.KernelVersion)
+	root.Printer.Logger.Info("validating",
+		root.Printer.Logger.Args(
+			"config", configPath,
+			"target", driverkitYaml.Target,
+			"kernelrelease", driverkitYaml.KernelRelease,
+			"kernelversion", driverkitYaml.KernelVersion))
 
 	// Check that filename is ok
 	expectedFilename := driverkitYaml.ToConfigName()
@@ -88,7 +88,8 @@ func validateConfig(configPath string, opts Options, driverVersion string) error
 
 		if !kr.SupportsProbe() {
 			// Not an error, just throw a warning
-			slog.Warn("output probe set on an unsupported kernel release", "kernelrelease", driverkitYaml.KernelRelease)
+			root.Printer.Logger.Warn("output probe set on an unsupported kernel release",
+				root.Printer.Logger.Args("kernelrelease", driverkitYaml.KernelRelease))
 		}
 	}
 
@@ -105,7 +106,8 @@ func validateConfig(configPath string, opts Options, driverVersion string) error
 
 		if !kr.SupportsModule() {
 			// Not an error, just throw a warning
-			slog.Warn("output module set on an unsupported kernel release", "kernelrelease", driverkitYaml.KernelRelease)
+			root.Printer.Logger.Warn("output module set on an unsupported kernel release",
+				root.Printer.Logger.Args("kernelrelease", driverkitYaml.KernelRelease))
 		}
 	}
 

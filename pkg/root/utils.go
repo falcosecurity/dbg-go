@@ -16,7 +16,6 @@ package root
 
 import (
 	"fmt"
-	"log/slog"
 	"path/filepath"
 )
 
@@ -29,9 +28,10 @@ func (f *FsLooper) LoopFiltered(opts Options, message, tag string, worker RowWor
 			return err
 		}
 		for _, file := range files {
-			slog.Info(message, tag, file)
+			Printer.Logger.Info(message,
+				Printer.Logger.Args(tag, file))
 			if opts.DryRun {
-				slog.Info("skipping because of dry-run.")
+				Printer.Logger.Info("skipping because of dry-run.")
 				return nil
 			}
 			err = worker(driverVersion, file)

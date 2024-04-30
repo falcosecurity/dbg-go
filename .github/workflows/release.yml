@@ -24,9 +24,9 @@ jobs:
         run: git fetch --prune --force --tags
 
       - name: Setup Go
-        uses: actions/setup-go@84cbf8094393cdc5fe1fe1671ff2647332956b1a #v3.2.1
+        uses: actions/setup-go@v4
         with:
-          go-version: '1.21'
+          go-version-file: 'go.mod'
 
       - uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b9192b8f19 #v3.1.2
 

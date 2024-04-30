@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -53,7 +52,8 @@ func (cl *Client) LoopFiltered(opts root.Options,
 			}
 		})
 		for p.HasMorePages() {
-			slog.Debug("fetched a page of objects", "prefix", prefix)
+			root.Printer.Logger.Debug("fetched a page of objects",
+				root.Printer.Logger.Args("prefix", prefix))
 			page, err := p.NextPage(context.TODO())
 			if err != nil {
 				return err
@@ -66,7 +66,8 @@ func (cl *Client) LoopFiltered(opts root.Options,
 				key := filepath.Base(*object.Key)
 				matches := s3DriverNameRegex.FindStringSubmatch(key)
 				if len(matches) == 0 {
-					slog.Warn("skipping key, malformed", "key", key)
+					root.Printer.Logger.Warn("skipping key, malformed",
+						root.Printer.Logger.Args("key", key))
 					continue
 				}
 				for i, name := range s3DriverNameRegex.SubexpNames() {
@@ -87,9 +88,10 @@ func (cl *Client) LoopFiltered(opts root.Options,
 						}
 					}
 				}
-				slog.Info(message, tag, key)
+				root.Printer.Logger.Info(message,
+					root.Printer.Logger.Args(tag, key))
 				if opts.DryRun {
-					slog.Info("skipping because of dry-run.")
+					root.Printer.Logger.Info("skipping because of dry-run.")
 					return nil
 				}
 				err = keyProcessor(driverVersion, filepath.Join(prefix, key))

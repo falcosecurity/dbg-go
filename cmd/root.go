@@ -16,8 +16,9 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"log/slog"
+	"github.com/falcosecurity/falcoctl/pkg/options"
+	"github.com/falcosecurity/falcoctl/pkg/output"
+	"github.com/pterm/pterm"
 	"os"
 	"runtime"
 	"strings"
@@ -29,7 +30,8 @@ import (
 )
 
 var (
-	rootCmd = &cobra.Command{
+	logLevel = options.NewLogLevel()
+	rootCmd  = &cobra.Command{
 		Use:           "dbg-go",
 		Short:         "A command line helper tool used by falcosecurity test-infra dbg.",
 		SilenceErrors: true,
@@ -49,7 +51,8 @@ var (
 					return err
 				}
 			}
-			return initLogger(cmd.Name())
+			root.Printer = output.NewPrinter(logLevel.ToPtermLogLevel(), pterm.LogFormatterColorful, os.Stdout)
+			return nil
 		},
 	}
 )
@@ -78,12 +81,12 @@ func loadDriverVersions() error {
 func init() {
 	cwd, err := os.Getwd()
 	if err != nil {
-		log.Fatal(err)
+		root.Printer.Logger.Fatal("failed to get working dir.", pterm.DefaultLogger.Args("err", err))
 	}
 
 	flags := rootCmd.PersistentFlags()
 	flags.Bool("dry-run", false, "enable dry-run mode.")
-	flags.StringP("log-level", "l", slog.LevelInfo.String(), "set log verbosity.")
+	flags.VarP(logLevel, "log-level", "l", "set log verbosity "+logLevel.Allowed())
 	flags.String("repo-root", cwd, "test-infra repository root path.")
 	flags.StringP("architecture", "a", runtime.GOARCH, `architecture to run against. Supported: `+kernelrelease.SupportedArchs.String())
 	flags.StringSlice("driver-version", nil, "driver versions to run against.")
@@ -97,28 +100,16 @@ func init() {
 Supported: [`+strings.Join(root.SupportedDistroSlice, ",")+"].")
 
 	// Custom completions
-	rootCmd.RegisterFlagCompletionFunc("target-distro", func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	_ = rootCmd.RegisterFlagCompletionFunc("target-distro", func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return root.SupportedDistroSlice, cobra.ShellCompDirectiveDefault
 	})
-	rootCmd.RegisterFlagCompletionFunc("architecture", func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	_ = rootCmd.RegisterFlagCompletionFunc("architecture", func(c *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return kernelrelease.SupportedArchs.Strings(), cobra.ShellCompDirectiveDefault
 	})
 
 	// Subcommands
 	rootCmd.AddCommand(configsCmd)
 	rootCmd.AddCommand(s3Cmd)
-}
-
-func initLogger(subcmd string) error {
-	var programLevel = new(slog.LevelVar) // Info by default
-	h := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: programLevel})
-
-	// Set as default a logger with "cmd" attribute
-	slog.SetDefault(slog.New(h).With("cmd", subcmd))
-
-	// Set log level
-	logLevel := viper.GetString("log-level")
-	return programLevel.UnmarshalText([]byte(logLevel))
 }
 
 func Execute() error {

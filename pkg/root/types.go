@@ -16,7 +16,6 @@ package root
 
 import (
 	"fmt"
-	"log/slog"
 	"regexp"
 
 	"github.com/falcosecurity/driverkit/pkg/driverbuilder/builder"
@@ -106,6 +105,7 @@ func LoadRootOptions() Options {
 			KernelVersion: viper.GetString("target-kernelversion"),
 		},
 	}
-	slog.Debug("loaded root options", "opts", opts)
+	Printer.Logger.Debug("loaded root options",
+		Printer.Logger.Args("opts", opts))
 	return opts
 }
