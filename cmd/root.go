@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/falcosecurity/falcoctl/pkg/options"
 	"github.com/falcosecurity/falcoctl/pkg/output"
 	"github.com/pterm/pterm"
 	"os"
@@ -30,7 +29,7 @@ import (
 )
 
 var (
-	logLevel = options.NewLogLevel()
+	logLevel = output.NewLogLevel()
 	rootCmd  = &cobra.Command{
 		Use:           "dbg-go",
 		Short:         "A command line helper tool used by falcosecurity test-infra dbg.",
