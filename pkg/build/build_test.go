@@ -54,8 +54,8 @@ func TestBuild(t *testing.T) {
 					DriverName:    "falco",
 					RepoRoot:      "./test",
 					Target: root.Target{
-						Distro:        "centos",
-						KernelRelease: "4.18.0-552.el8.x86_64",
+						Distro:        "arch",
+						KernelRelease: "6.0.5.arch1-1",
 						KernelVersion: "1",
 					},
 				},
@@ -64,15 +64,15 @@ func TestBuild(t *testing.T) {
 				IgnoreErrors: false,
 			},
 			expectedLocalObjects: []string{
-				"falco_centos_4.18.0-552.el8.x86_64_1.ko",
-				"falco_centos_4.18.0-552.el8.x86_64_1.o",
+				"falco_arch_6.0.5.arch1-1_1.ko",
+				"falco_arch_6.0.5.arch1-1_1.o",
 			},
 			expectedBucketObjects: []string{
-				"falco_centos_4.18.0-552.el8.x86_64_1.ko",
-				"falco_centos_4.18.0-552.el8.x86_64_1.o",
+				"falco_arch_6.0.5.arch1-1_1.ko",
+				"falco_arch_6.0.5.arch1-1_1.o",
 			},
 			shouldCreate: true,
-			name:         "build 5.0.1+driver centos 4.18.0-552.el8.x86_64",
+			name:         "build 5.0.1+driver arch 6.0.5.arch1-1",
 		},
 		{
 			opts: Options{
@@ -82,8 +82,8 @@ func TestBuild(t *testing.T) {
 					DriverName:    "falco",
 					RepoRoot:      "./test",
 					Target: root.Target{
-						Distro:        "centos",
-						KernelRelease: "4.18.0-553.6.1.el8.x86_64",
+						Distro:        "arch",
+						KernelRelease: "6.0.6.arch1-1",
 						KernelVersion: "1",
 					},
 				},
@@ -92,17 +92,17 @@ func TestBuild(t *testing.T) {
 				IgnoreErrors: false,
 			},
 			expectedLocalObjects: []string{
-				"falco_centos_4.18.0-553.6.1.el8.x86_64_1.ko",
-				"falco_centos_4.18.0-553.6.1.el8.x86_64_1.o",
-				"falco_centos_4.18.0-552.el8.x86_64_1.ko",
-				"falco_centos_4.18.0-552.el8.x86_64_1.o",
+				"falco_arch_6.0.5.arch1-1_1.ko",
+				"falco_arch_6.0.5.arch1-1_1.o",
+				"falco_arch_6.0.6.arch1-1_1.ko",
+				"falco_arch_6.0.6.arch1-1_1.o",
 			},
 			expectedBucketObjects: []string{
-				"falco_centos_4.18.0-552.el8.x86_64_1.ko",
-				"falco_centos_4.18.0-552.el8.x86_64_1.o",
+				"falco_arch_6.0.5.arch1-1_1.ko",
+				"falco_arch_6.0.5.arch1-1_1.o",
 			},
 			shouldCreate: false, // since it is not publishing
-			name:         "build 5.0.1+driver centos 4.18.0-553.6.1.el8.x86_64",
+			name:         "build 5.0.1+driver arch 6.0.6.arch1-1",
 		},
 		{
 			opts: Options{
@@ -112,8 +112,8 @@ func TestBuild(t *testing.T) {
 					DriverName:    "falco",
 					RepoRoot:      "./test",
 					Target: root.Target{
-						Distro:        "centos",
-						KernelRelease: "4.18.0-552.el8.x86_64", // try to rebuild same object.
+						Distro:        "arch",
+						KernelRelease: "6.0.5.arch1-1", // try to rebuild same object.
 						KernelVersion: "1",
 					},
 				},
@@ -122,17 +122,17 @@ func TestBuild(t *testing.T) {
 				IgnoreErrors: false,
 			},
 			expectedLocalObjects: []string{
-				"falco_centos_4.18.0-553.6.1.el8.x86_64_1.ko",
-				"falco_centos_4.18.0-553.6.1.el8.x86_64_1.o",
-				"falco_centos_4.18.0-552.el8.x86_64_1.ko",
-				"falco_centos_4.18.0-552.el8.x86_64_1.o",
+				"falco_arch_6.0.5.arch1-1_1.ko",
+				"falco_arch_6.0.5.arch1-1_1.o",
+				"falco_arch_6.0.6.arch1-1_1.ko",
+				"falco_arch_6.0.6.arch1-1_1.o",
 			},
 			expectedBucketObjects: []string{
-				"falco_centos_4.18.0-552.el8.x86_64_1.ko",
-				"falco_centos_4.18.0-552.el8.x86_64_1.o",
+				"falco_arch_6.0.5.arch1-1_1.ko",
+				"falco_arch_6.0.5.arch1-1_1.o",
 			},
 			shouldCreate: false, // since objects are already present, nothing should be created
-			name:         "rebuild 5.0.1+driver centos 4.18.0-552.el8.x86_64",
+			name:         "rebuild 5.0.1+driver arch 6.0.5.arch1-1",
 		},
 		{
 			opts: Options{
@@ -142,8 +142,8 @@ func TestBuild(t *testing.T) {
 					DriverName:    "falco",
 					RepoRoot:      "./test",
 					Target: root.Target{
-						Distro:        "centos",
-						KernelRelease: "4.18.0-552.el8.x86_64", // try to rebuild same object.
+						Distro:        "arch",
+						KernelRelease: "6.0.5.arch1-1", // try to rebuild same object.
 						KernelVersion: "1",
 					},
 				},
@@ -152,17 +152,17 @@ func TestBuild(t *testing.T) {
 				IgnoreErrors: false,
 			},
 			expectedLocalObjects: []string{
-				"falco_centos_4.18.0-553.6.1.el8.x86_64_1.ko",
-				"falco_centos_4.18.0-553.6.1.el8.x86_64_1.o",
-				"falco_centos_4.18.0-552.el8.x86_64_1.ko",
-				"falco_centos_4.18.0-552.el8.x86_64_1.o",
+				"falco_arch_6.0.5.arch1-1_1.ko",
+				"falco_arch_6.0.5.arch1-1_1.o",
+				"falco_arch_6.0.6.arch1-1_1.ko",
+				"falco_arch_6.0.6.arch1-1_1.o",
 			},
 			expectedBucketObjects: []string{
-				"falco_centos_4.18.0-552.el8.x86_64_1.ko",
-				"falco_centos_4.18.0-552.el8.x86_64_1.o",
+				"falco_arch_6.0.5.arch1-1_1.ko",
+				"falco_arch_6.0.5.arch1-1_1.o",
 			},
 			shouldCreate: true,
-			name:         "rebuild and publish 5.0.1+driver centos 4.18.0-552.el8.x86_64",
+			name:         "rebuild and publish 5.0.1+driver arch 6.0.5.arch1-1",
 		},
 	}
 
