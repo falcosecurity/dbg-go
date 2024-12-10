@@ -28,9 +28,9 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-      - uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b9192b8f19 #v3.1.2
+      - uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da #v3.7.0
 
-      - uses: anchore/sbom-action/download-syft@448520c4f19577ffce70a8317e619089054687e3 #v0.13.4
+      - uses: anchore/sbom-action/download-syft@55dc4ee22412511ee8c3142cbea40418e6cec693 #v0.17.8
 
       - uses: docker/login-action@v2
         with:
