@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3.5.0
+        uses: actions/checkout@cbb722410c2e876e24abbe8de2cc27693e501dcb # v3.5.0
         with:
           ref: "${{ github.event.pull_request.head.sha }}"
           repository: ${{github.event.pull_request.head.repo.full_name}}
