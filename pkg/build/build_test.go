@@ -55,7 +55,7 @@ func TestBuild(t *testing.T) {
 					RepoRoot:      "./test",
 					Target: root.Target{
 						Distro:        "arch",
-						KernelRelease: "6.0.5.arch1-1",
+						KernelRelease: "6.0.5.arch1",
 						KernelVersion: "1",
 					},
 				},
@@ -64,15 +64,15 @@ func TestBuild(t *testing.T) {
 				IgnoreErrors: false,
 			},
 			expectedLocalObjects: []string{
-				"falco_arch_6.0.5.arch1-1_1.ko",
-				"falco_arch_6.0.5.arch1-1_1.o",
+				"falco_arch_6.0.5.arch1_1.ko",
+				"falco_arch_6.0.5.arch1_1.o",
 			},
 			expectedBucketObjects: []string{
-				"falco_arch_6.0.5.arch1-1_1.ko",
-				"falco_arch_6.0.5.arch1-1_1.o",
+				"falco_arch_6.0.5.arch1_1.ko",
+				"falco_arch_6.0.5.arch1_1.o",
 			},
 			shouldCreate: true,
-			name:         "build 5.0.1+driver arch 6.0.5.arch1-1",
+			name:         "build 5.0.1+driver arch 6.0.5.arch1",
 		},
 		{
 			opts: Options{
@@ -83,7 +83,7 @@ func TestBuild(t *testing.T) {
 					RepoRoot:      "./test",
 					Target: root.Target{
 						Distro:        "arch",
-						KernelRelease: "6.0.6.arch1-1",
+						KernelRelease: "6.0.6.arch1",
 						KernelVersion: "1",
 					},
 				},
@@ -92,17 +92,17 @@ func TestBuild(t *testing.T) {
 				IgnoreErrors: false,
 			},
 			expectedLocalObjects: []string{
-				"falco_arch_6.0.5.arch1-1_1.ko",
-				"falco_arch_6.0.5.arch1-1_1.o",
-				"falco_arch_6.0.6.arch1-1_1.ko",
-				"falco_arch_6.0.6.arch1-1_1.o",
+				"falco_arch_6.0.5.arch1_1.ko",
+				"falco_arch_6.0.5.arch1_1.o",
+				"falco_arch_6.0.6.arch1_1.ko",
+				"falco_arch_6.0.6.arch1_1.o",
 			},
 			expectedBucketObjects: []string{
-				"falco_arch_6.0.5.arch1-1_1.ko",
-				"falco_arch_6.0.5.arch1-1_1.o",
+				"falco_arch_6.0.5.arch1_1.ko",
+				"falco_arch_6.0.5.arch1_1.o",
 			},
 			shouldCreate: false, // since it is not publishing
-			name:         "build 5.0.1+driver arch 6.0.6.arch1-1",
+			name:         "build 5.0.1+driver arch 6.0.6.arch1",
 		},
 		{
 			opts: Options{
@@ -113,7 +113,7 @@ func TestBuild(t *testing.T) {
 					RepoRoot:      "./test",
 					Target: root.Target{
 						Distro:        "arch",
-						KernelRelease: "6.0.5.arch1-1", // try to rebuild same object.
+						KernelRelease: "6.0.5.arch1", // try to rebuild same object.
 						KernelVersion: "1",
 					},
 				},
@@ -122,17 +122,17 @@ func TestBuild(t *testing.T) {
 				IgnoreErrors: false,
 			},
 			expectedLocalObjects: []string{
-				"falco_arch_6.0.5.arch1-1_1.ko",
-				"falco_arch_6.0.5.arch1-1_1.o",
-				"falco_arch_6.0.6.arch1-1_1.ko",
-				"falco_arch_6.0.6.arch1-1_1.o",
+				"falco_arch_6.0.5.arch1_1.ko",
+				"falco_arch_6.0.5.arch1_1.o",
+				"falco_arch_6.0.6.arch1_1.ko",
+				"falco_arch_6.0.6.arch1_1.o",
 			},
 			expectedBucketObjects: []string{
-				"falco_arch_6.0.5.arch1-1_1.ko",
-				"falco_arch_6.0.5.arch1-1_1.o",
+				"falco_arch_6.0.5.arch1_1.ko",
+				"falco_arch_6.0.5.arch1_1.o",
 			},
 			shouldCreate: false, // since objects are already present, nothing should be created
-			name:         "rebuild 5.0.1+driver arch 6.0.5.arch1-1",
+			name:         "rebuild 5.0.1+driver arch 6.0.5.arch1",
 		},
 		{
 			opts: Options{
@@ -143,7 +143,7 @@ func TestBuild(t *testing.T) {
 					RepoRoot:      "./test",
 					Target: root.Target{
 						Distro:        "arch",
-						KernelRelease: "6.0.5.arch1-1", // try to rebuild same object.
+						KernelRelease: "6.0.5.arch1", // try to rebuild same object.
 						KernelVersion: "1",
 					},
 				},
@@ -152,17 +152,17 @@ func TestBuild(t *testing.T) {
 				IgnoreErrors: false,
 			},
 			expectedLocalObjects: []string{
-				"falco_arch_6.0.5.arch1-1_1.ko",
-				"falco_arch_6.0.5.arch1-1_1.o",
-				"falco_arch_6.0.6.arch1-1_1.ko",
-				"falco_arch_6.0.6.arch1-1_1.o",
+				"falco_arch_6.0.5.arch1_1.ko",
+				"falco_arch_6.0.5.arch1_1.o",
+				"falco_arch_6.0.6.arch1_1.ko",
+				"falco_arch_6.0.6.arch1_1.o",
 			},
 			expectedBucketObjects: []string{
-				"falco_arch_6.0.5.arch1-1_1.ko",
-				"falco_arch_6.0.5.arch1-1_1.o",
+				"falco_arch_6.0.5.arch1_1.ko",
+				"falco_arch_6.0.5.arch1_1.o",
 			},
 			shouldCreate: true,
-			name:         "rebuild and publish 5.0.1+driver arch 6.0.5.arch1-1",
+			name:         "rebuild and publish 5.0.1+driver arch 6.0.5.arch1",
 		},
 	}
 
