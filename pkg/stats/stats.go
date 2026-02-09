@@ -16,6 +16,8 @@ package stats
 
 import (
 	"github.com/falcosecurity/dbg-go/pkg/root"
+	"github.com/olekukonko/tablewriter/tw"
+
 	"os"
 	"strconv"
 
@@ -29,29 +31,33 @@ func Run(opts Options, statter Statter) error {
 		return err
 	}
 
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Version", "Modules", "Probes"})
-	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
-	table.SetCenterSeparator("|")
+	table := tablewriter.NewTable(os.Stdout,
+		tablewriter.WithRendition(tw.Rendition{
+			Symbols: tw.NewSymbols(tw.StyleMarkdown),
+			Borders: tw.Border{Left: tw.On, Right: tw.On, Top: tw.Off, Bottom: tw.Off}, // Markdown needs left/right borders
+		}),
+		tablewriter.WithHeaderAlignment(tw.AlignCenter), // Center align headers
+		tablewriter.WithRowAlignment(tw.AlignLeft),      // Common for Markdown
+		tablewriter.WithHeaderAutoWrap(tw.WrapNone),
+		tablewriter.WithRowAutoWrap(tw.WrapNone),
+		tablewriter.WithHeader([]string{"Version", "Modules"}),
+	)
 
 	totalDriverStats := driverStats{}
 
-	data := make([]string, 3)
+	data := make([]string, 2)
 	// Keep keys sorted
 	// (looping directly on the map {key,value} tuples gives wrong sorting sometimes).
 	for _, key := range opts.DriverVersion {
 		stat := driverStatsByVersion[key]
 		data[0] = key
 		data[1] = strconv.FormatInt(stat.NumModules, 10)
-		data[2] = strconv.FormatInt(stat.NumProbes, 10)
 		table.Append(data)
 
 		totalDriverStats.NumModules += stat.NumModules
-		totalDriverStats.NumProbes += stat.NumProbes
 	}
 	data[0] = "TOTALS"
 	data[1] = strconv.FormatInt(totalDriverStats.NumModules, 10)
-	data[2] = strconv.FormatInt(totalDriverStats.NumProbes, 10)
 	table.Append(data)
 	table.Render() // Send output
 

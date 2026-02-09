@@ -110,16 +110,12 @@ func buildConfig(client *s3utils.Client, opts Options,
 	ro.KernelConfigData = driverkitYaml.KernelConfigData
 	ro.KernelUrls = driverkitYaml.KernelUrls
 
-	// If Module or Probe are not absolute paths, assume they are relative to the repo-root/driverkit folder.
+	// If Module is not an absolute path, assume it is relative to the repo-root/driverkit folder.
 	if !filepath.IsAbs(driverkitYaml.Output.Module) {
 		driverkitYaml.Output.Module = filepath.Join(opts.RepoRoot, "driverkit", driverkitYaml.Output.Module)
 	}
-	if !filepath.IsAbs(driverkitYaml.Output.Probe) {
-		driverkitYaml.Output.Probe = filepath.Join(opts.RepoRoot, "driverkit", driverkitYaml.Output.Probe)
-	}
 	ro.Output = cmd.OutputOptions{
 		Module: driverkitYaml.Output.Module,
-		Probe:  driverkitYaml.Output.Probe,
 	}
 
 	if opts.SkipExisting {
@@ -130,14 +126,7 @@ func buildConfig(client *s3utils.Client, opts Options,
 				ro.Output.Module = "" // disable module build
 			}
 		}
-		if ro.Output.Probe != "" {
-			probeName := filepath.Base(ro.Output.Probe)
-			if client.HeadDriver(opts.Options, driverVersion, probeName) {
-				root.Printer.Logger.Info("output probe already exists inside S3 bucket - skipping", args)
-				ro.Output.Probe = "" // disable probe build
-			}
-		}
-		if ro.Output.Module == "" && ro.Output.Probe == "" {
+		if ro.Output.Module == "" {
 			root.Printer.Logger.Info("drivers already available on S3 bucket, skipping build", args)
 			return nil // nothing to do
 		}
@@ -170,29 +159,18 @@ func buildConfig(client *s3utils.Client, opts Options,
 
 func publishLoop(publishCh <-chan publishVal, opts root.Options, client *s3utils.Client) {
 	for val := range publishCh {
-		if val.out.Module != "" {
-			err := client.PutDriver(opts, val.driverVersion, val.out.Module)
-			if err != nil {
-				root.Printer.Logger.Warn("failed to upload module",
-					root.Printer.Logger.Args(
-						"path", val.out.Module,
-						"err", err.Error()))
-			} else {
-				root.Printer.Logger.Info("published module",
-					root.Printer.Logger.Args("path", val.out.Module))
-			}
+		if val.out.Module == "" {
+			continue
 		}
-		if val.out.Probe != "" {
-			err := client.PutDriver(opts, val.driverVersion, val.out.Probe)
-			if err != nil {
-				root.Printer.Logger.Warn("failed to upload probe",
-					root.Printer.Logger.Args(
-						"path", val.out.Probe,
-						"err", err.Error()))
-			} else {
-				root.Printer.Logger.Info("published probe",
-					root.Printer.Logger.Args("path", val.out.Probe))
-			}
+
+		if err := client.PutDriver(opts, val.driverVersion, val.out.Module); err != nil {
+			root.Printer.Logger.Warn("failed to upload module",
+				root.Printer.Logger.Args(
+					"path", val.out.Module,
+					"err", err.Error()))
+		} else {
+			root.Printer.Logger.Info("published module",
+				root.Printer.Logger.Args("path", val.out.Module))
 		}
 	}
 }
