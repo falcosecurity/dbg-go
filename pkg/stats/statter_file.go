@@ -60,9 +60,6 @@ func getConfigStats(dStats *driverStats, configPath string) error {
 	root.Printer.Logger.Debug("fetching stats",
 		root.Printer.Logger.Args("parsedConfig", driverkitYaml))
 
-	if driverkitYaml.Output.Probe != "" {
-		dStats.NumProbes++
-	}
 	if driverkitYaml.Output.Module != "" {
 		dStats.NumModules++
 	}

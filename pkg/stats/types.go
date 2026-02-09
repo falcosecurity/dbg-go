@@ -23,7 +23,6 @@ type Options struct {
 }
 
 type driverStats struct {
-	NumProbes  int64
 	NumModules int64
 }
 

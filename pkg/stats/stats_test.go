@@ -28,8 +28,6 @@ import (
 
 type DkConfigNamed struct {
 	validate.DriverkitYaml
-	hasProbe  bool
-	hasModule bool
 }
 
 func TestStats(t *testing.T) {
@@ -47,8 +45,6 @@ func TestStats(t *testing.T) {
 				Architecture:     "amd64",
 				KernelConfigData: "aaaa", // just to avoid failing validation
 			},
-			hasProbe:  true,
-			hasModule: true,
 		},
 		{
 			DriverkitYaml: validate.DriverkitYaml{
@@ -58,8 +54,6 @@ func TestStats(t *testing.T) {
 				Architecture:     "amd64",
 				KernelConfigData: "aaaa", // just to avoid failing validation
 			},
-			hasProbe:  true,
-			hasModule: true,
 		},
 		{
 			DriverkitYaml: validate.DriverkitYaml{
@@ -69,7 +63,6 @@ func TestStats(t *testing.T) {
 				Architecture:     "amd64",
 				KernelConfigData: "aaaa", // just to avoid failing validation
 			},
-			hasModule: true,
 		},
 		{
 			DriverkitYaml: validate.DriverkitYaml{
@@ -79,8 +72,6 @@ func TestStats(t *testing.T) {
 				Architecture:     "amd64",
 				KernelConfigData: "aaaa", // just to avoid failing validation
 			},
-			hasProbe:  true,
-			hasModule: true,
 		},
 	}
 
@@ -100,13 +91,6 @@ func TestStats(t *testing.T) {
 				DriverName:   "falco",
 				Architecture: kernelrelease.Architecture(dkConf.Architecture),
 			})
-		// Remove when test requires it
-		if !dkConf.hasModule {
-			dkConf.DriverkitYaml.Output.Module = ""
-		}
-		if !dkConf.hasProbe {
-			dkConf.DriverkitYaml.Output.Probe = ""
-		}
 		enc := yaml.NewEncoder(file)
 		err = enc.Encode(dkConf.DriverkitYaml)
 		_ = file.Close()
@@ -125,7 +109,6 @@ func TestStats(t *testing.T) {
 				DriverName:    "falco",
 			}},
 			expectedStats: driverStats{
-				NumProbes:  3,
 				NumModules: 4,
 			},
 		},
@@ -137,7 +120,6 @@ func TestStats(t *testing.T) {
 				DriverName:    "falco",
 			}},
 			expectedStats: driverStats{
-				NumProbes:  0,
 				NumModules: 0,
 			},
 		},
@@ -149,7 +131,6 @@ func TestStats(t *testing.T) {
 				DriverName:    "falco",
 			}},
 			expectedStats: driverStats{
-				NumProbes:  0,
 				NumModules: 0,
 			},
 		},
@@ -164,7 +145,6 @@ func TestStats(t *testing.T) {
 				},
 			}},
 			expectedStats: driverStats{
-				NumProbes:  2,
 				NumModules: 2,
 			},
 		},
@@ -179,7 +159,6 @@ func TestStats(t *testing.T) {
 				},
 			}},
 			expectedStats: driverStats{
-				NumProbes:  2,
 				NumModules: 2,
 			},
 		},
@@ -194,7 +173,6 @@ func TestStats(t *testing.T) {
 				},
 			}},
 			expectedStats: driverStats{
-				NumProbes:  1,
 				NumModules: 1,
 			},
 		},
@@ -209,7 +187,6 @@ func TestStats(t *testing.T) {
 				},
 			}},
 			expectedStats: driverStats{
-				NumProbes:  3,
 				NumModules: 3,
 			},
 		},
@@ -228,12 +205,9 @@ func TestStats(t *testing.T) {
 func TestStatsS3(t *testing.T) {
 	keysToBeCreated := []string{
 		"driver/1.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
-		"driver/1.0.0+driver/x86_64/falco_amazonlinux2022_5.10.96-90.460.amzn2022.x86_64_1.o",
-		"driver/1.0.0+driver/x86_64/falco_debian_6.3.11-1-amd64_1.o",
 		"driver/1.0.0+driver/x86_64/falco_debian_6.3.11-1-amd64_1.ko",
 		"driver/2.0.0+driver/x86_64/falco_almalinux_5.14.0-284.11.1.el9_2.x86_64_1.ko",
 		"driver/2.0.0+driver/aarch64/falco_almalinux_4.18.0-477.10.1.el8_8.aarch64_1.ko",
-		"driver/2.0.0+driver/aarch64/falco_bottlerocket_5.10.165_1_1.13.1-aws.o",
 	}
 	client := testutils.S3CreateTestBucket(t, keysToBeCreated)
 	statter := s3Statter{Client: client}
@@ -250,11 +224,9 @@ func TestStatsS3(t *testing.T) {
 			}},
 			expectedStats: driverStatsByDriverVersion{
 				"1.0.0+driver": {
-					NumProbes:  2,
 					NumModules: 2,
 				},
 				"2.0.0+driver": {
-					NumProbes:  0,
 					NumModules: 1,
 				},
 			},
@@ -267,7 +239,6 @@ func TestStatsS3(t *testing.T) {
 			}},
 			expectedStats: driverStatsByDriverVersion{
 				"2.0.0+driver": {
-					NumProbes:  1,
 					NumModules: 1,
 				},
 			},
@@ -280,7 +251,6 @@ func TestStatsS3(t *testing.T) {
 			}},
 			expectedStats: driverStatsByDriverVersion{
 				"2.0.0+driver": {
-					NumProbes:  0,
 					NumModules: 1,
 				},
 			},
@@ -296,11 +266,9 @@ func TestStatsS3(t *testing.T) {
 			}},
 			expectedStats: driverStatsByDriverVersion{
 				"1.0.0+driver": {
-					NumProbes:  0,
 					NumModules: 1,
 				},
 				"2.0.0+driver": {
-					NumProbes:  0,
 					NumModules: 1,
 				},
 			},
@@ -316,11 +284,9 @@ func TestStatsS3(t *testing.T) {
 			}},
 			expectedStats: driverStatsByDriverVersion{
 				"1.0.0+driver": {
-					NumProbes:  0,
 					NumModules: 1,
 				},
 				"2.0.0+driver": {
-					NumProbes:  0,
 					NumModules: 1,
 				},
 			},
@@ -336,11 +302,9 @@ func TestStatsS3(t *testing.T) {
 			}},
 			expectedStats: driverStatsByDriverVersion{
 				"1.0.0+driver": {
-					NumProbes:  1,
 					NumModules: 1,
 				},
 				"2.0.0+driver": {
-					NumProbes:  0,
 					NumModules: 1,
 				},
 			},

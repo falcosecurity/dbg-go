@@ -43,8 +43,6 @@ func (s *s3Statter) GetDriverStats(opts root.Options) (driverStatsByDriverVersio
 		dStats := driverStatsByVersion[driverVersion]
 		if strings.HasSuffix(key, ".ko") {
 			dStats.NumModules++
-		} else if strings.HasSuffix(key, ".o") {
-			dStats.NumProbes++
 		}
 		driverStatsByVersion[driverVersion] = dStats
 		return nil

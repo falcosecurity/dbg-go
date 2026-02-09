@@ -75,24 +75,6 @@ func validateConfig(configPath string, opts Options, driverVersion string) error
 	kr := kernelrelease.FromString(driverkitYaml.KernelRelease)
 	kr.Architecture = opts.Architecture
 
-	// Check output probe if present
-	if driverkitYaml.Output.Probe != "" {
-		outputProbeFilename := filepath.Base(driverkitYaml.Output.Probe)
-		if outputProbeFilename != outputPathFilename+".o" {
-			return &WrongOutputProbeNameErr{outputProbeFilename, outputPathFilename}
-		}
-
-		if !strings.Contains(driverkitYaml.Output.Probe, opts.Architecture.ToNonDeb()) {
-			return &WrongOutputProbeArchErr{driverkitYaml.Output.Probe, opts.Architecture.ToNonDeb()}
-		}
-
-		if !kr.SupportsProbe() {
-			// Not an error, just throw a warning
-			root.Printer.Logger.Warn("output probe set on an unsupported kernel release",
-				root.Printer.Logger.Args("kernelrelease", driverkitYaml.KernelRelease))
-		}
-	}
-
 	// Check output driver if present
 	if driverkitYaml.Output.Module != "" {
 		outputModuleFilename := filepath.Base(driverkitYaml.Output.Module)

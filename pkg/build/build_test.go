@@ -65,11 +65,9 @@ func TestBuild(t *testing.T) {
 			},
 			expectedLocalObjects: []string{
 				"falco_arch_6.0.5.arch1_1.ko",
-				"falco_arch_6.0.5.arch1_1.o",
 			},
 			expectedBucketObjects: []string{
 				"falco_arch_6.0.5.arch1_1.ko",
-				"falco_arch_6.0.5.arch1_1.o",
 			},
 			shouldCreate: true,
 			name:         "build 5.0.1+driver arch 6.0.5.arch1",
@@ -93,13 +91,10 @@ func TestBuild(t *testing.T) {
 			},
 			expectedLocalObjects: []string{
 				"falco_arch_6.0.5.arch1_1.ko",
-				"falco_arch_6.0.5.arch1_1.o",
 				"falco_arch_6.0.6.arch1_1.ko",
-				"falco_arch_6.0.6.arch1_1.o",
 			},
 			expectedBucketObjects: []string{
 				"falco_arch_6.0.5.arch1_1.ko",
-				"falco_arch_6.0.5.arch1_1.o",
 			},
 			shouldCreate: false, // since it is not publishing
 			name:         "build 5.0.1+driver arch 6.0.6.arch1",
@@ -123,13 +118,10 @@ func TestBuild(t *testing.T) {
 			},
 			expectedLocalObjects: []string{
 				"falco_arch_6.0.5.arch1_1.ko",
-				"falco_arch_6.0.5.arch1_1.o",
 				"falco_arch_6.0.6.arch1_1.ko",
-				"falco_arch_6.0.6.arch1_1.o",
 			},
 			expectedBucketObjects: []string{
 				"falco_arch_6.0.5.arch1_1.ko",
-				"falco_arch_6.0.5.arch1_1.o",
 			},
 			shouldCreate: false, // since objects are already present, nothing should be created
 			name:         "rebuild 5.0.1+driver arch 6.0.5.arch1",
@@ -153,13 +145,10 @@ func TestBuild(t *testing.T) {
 			},
 			expectedLocalObjects: []string{
 				"falco_arch_6.0.5.arch1_1.ko",
-				"falco_arch_6.0.5.arch1_1.o",
 				"falco_arch_6.0.6.arch1_1.ko",
-				"falco_arch_6.0.6.arch1_1.o",
 			},
 			expectedBucketObjects: []string{
 				"falco_arch_6.0.5.arch1_1.ko",
-				"falco_arch_6.0.5.arch1_1.o",
 			},
 			shouldCreate: true,
 			name:         "rebuild and publish 5.0.1+driver arch 6.0.5.arch1",

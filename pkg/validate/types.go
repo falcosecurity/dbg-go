@@ -29,7 +29,6 @@ type Options struct {
 
 type DriverkitYamlOutputs struct {
 	Module string `yaml:"module"`
-	Probe  string `yaml:"probe"`
 }
 
 // DriverkitYaml is the driverkit config schema
@@ -63,8 +62,5 @@ func (dy *DriverkitYaml) FillOutputs(driverVersion string, opts root.Options) {
 	kr.Architecture = opts.Architecture
 	if kr.SupportsModule() {
 		dy.Output.Module = configOutputPath + ".ko"
-	}
-	if kr.SupportsProbe() {
-		dy.Output.Probe = configOutputPath + ".o"
 	}
 }
